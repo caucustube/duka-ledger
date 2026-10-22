@@ -43,7 +43,7 @@ header h1{flex:1;min-width:0;margin:0;font-weight:800;font-size:1.25rem;white-sp
 .gear{width:42px;height:42px;border-radius:14px;border:0;background:var(--surface);display:grid;place-items:center;color:var(--muted)}
 .gear svg{width:20px;height:20px}
 
-main{padding-block:6px 180px}
+main{padding-block:6px 250px}
 .vh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 14px}
 .vh h2{flex:1;margin:0;font-weight:800;font-size:1.65rem;letter-spacing:-.01em}
 
@@ -81,8 +81,24 @@ main{padding-block:6px 180px}
 
 #cartbar{position:fixed;left:0;right:0;bottom:calc(70px + env(safe-area-inset-bottom,0px));z-index:25}
 #cartbar .col{padding-bottom:8px}
-#cartbar button{width:100%;border:0;border-radius:18px;background:var(--olive);color:#1D2216;display:flex;align-items:center;gap:10px;padding:15px 18px;font-weight:800;font-size:1.05rem;box-shadow:0 10px 24px -14px rgba(39,43,34,.6)}
+#cartbar .finish{width:100%;border:0;border-radius:18px;background:var(--olive);color:#1D2216;display:flex;align-items:center;gap:10px;padding:15px 18px;font-weight:800;font-size:1.05rem;box-shadow:0 10px 24px -14px rgba(39,43,34,.6)}
 #cartbar .amt{margin-left:auto}
+.cstrip{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}
+.cstrip::-webkit-scrollbar{display:none}
+.dayh{margin:6px 0 -6px;font-weight:800;font-size:.9rem;color:var(--muted)}
+.slist{padding:0 12px}
+.srow{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:10px;width:100%;border:0;background:none;text-align:left;padding:11px 0;border-bottom:1px solid var(--line);font-size:.92rem}
+.slist .srow:last-child{border-bottom:0}
+.srow .st{color:var(--muted);font-weight:700;font-size:.82rem}
+.srow .si{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srow .sp{font-size:.72rem;font-weight:800;border-radius:6px;padding:2px 6px;background:var(--bg);color:var(--muted)}
+.srow .sp.deni{background:var(--warn-soft);color:var(--warn)}
+.srow .sa{font-weight:800;text-align:right;min-width:64px}
+.cchip{display:inline-flex;align-items:center;gap:4px;flex:none;background:var(--surface);border-radius:999px;padding:3px 3px 3px 12px;font-weight:700;font-size:.85rem;white-space:nowrap;box-shadow:0 2px 8px -4px rgba(39,43,34,.35)}
+.cchip button{width:32px;height:32px;border:0;border-radius:50%;background:var(--bad-soft);color:var(--bad);font-size:1.1rem;font-weight:800;line-height:1}
+.tile.soldout{opacity:.5}
+.prow.soldout .pl b{color:var(--muted)}
+.step button:disabled{opacity:.35}
 
 /* tabs */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:26;background:var(--surface);padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -1px 0 var(--line)}
@@ -140,6 +156,9 @@ nav.tabs .ic{width:56px;height:30px;border-radius:15px;display:grid;place-items:
 .big .v{font-weight:800;font-size:2.3rem;line-height:1.1;margin:2px 0;overflow-wrap:anywhere}
 .big .s{color:var(--muted);font-size:.9rem}
 .up{color:var(--olive-deep);font-weight:800}.down{color:var(--bad);font-weight:800}
+.split2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.split2 span{display:block;color:var(--muted);font-weight:700;font-size:.85rem}
+.split2 b{font-weight:800;font-size:1.2rem}
 .pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .pair>div{background:var(--surface);border-radius:18px;padding:14px 16px;min-width:0}
 .pair .l{color:var(--muted);font-weight:700;font-size:.85rem}
@@ -183,10 +202,10 @@ nav.tabs .ic{width:56px;height:30px;border-radius:15px;display:grid;place-items:
 .sg{border:0;border-radius:999px;background:var(--olive-soft);color:var(--olive-deep);padding:8px 14px;font-weight:600;min-height:38px}
 .sg b{font-weight:800}
 
-.choice{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.choice label{background:var(--surface);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:2px;cursor:pointer;box-shadow:inset 0 0 0 2px transparent}
-.choice label b{font-weight:800}
-.choice label small{color:var(--muted);font-size:.8rem}
+.choice{display:grid;grid-template-columns:1fr;gap:6px}
+.choice label{background:var(--surface);border-radius:12px;padding:9px 12px;display:flex;flex-direction:column;gap:0;cursor:pointer;box-shadow:inset 0 0 0 2px transparent;line-height:1.3}
+.choice label b{font-weight:800;font-size:.95rem}
+.choice label small{color:var(--muted);font-size:.75rem}
 .choice label:has(input:checked){box-shadow:inset 0 0 0 2px var(--olive);background:var(--olive-soft)}
 .choice input{position:absolute;opacity:0;pointer-events:none}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
@@ -199,7 +218,8 @@ nav.tabs .ic{width:56px;height:30px;border-radius:15px;display:grid;place-items:
 .size .x{background:var(--bg);margin-top:23px}
 .size .wt{grid-column:1/-1}
 .size .sugg{grid-column:1/-1}
-#pf.ready .bulk-only,#pf.bulk .ready-only{display:none}
+#pf.ready .bulk-only,#pf.bulk .ready-only,#pf.single .sizes-only,#pf:not(.single) .single-only{display:none}
+.calc.bad{background:var(--bad-soft);color:var(--bad)}
 @media (max-width:440px){.size{grid-template-columns:1fr 1fr auto}.size .lab{grid-column:1/3}.size .x{grid-column:3;grid-row:1}}
 
 .line{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
@@ -225,7 +245,7 @@ nav.tabs .ic{width:56px;height:30px;border-radius:15px;display:grid;place-items:
 .pay button:active{background:var(--olive);}
 .pay .on{background:var(--olive);color:#1D2216}
 
-#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--ink);color:#fff;border-radius:16px;padding:10px 10px 10px 16px;display:flex;align-items:center;gap:12px;width:min(92vw,440px)}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(205px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--ink);color:#fff;border-radius:16px;padding:10px 10px 10px 16px;display:flex;align-items:center;gap:12px;width:min(92vw,440px)}
 #toast span{flex:1}
 #toast button{border:0;border-radius:10px;background:var(--olive);color:#1D2216;font-weight:800;padding:8px 14px}
 </style>
@@ -252,7 +272,7 @@ nav.tabs .ic{width:56px;height:30px;border-radius:15px;display:grid;place-items:
 
 <main class="gut"><div class="col" id="view"></div></main>
 
-<div id="cartbar" class="gut" hidden><div class="col"><button data-act="cart"><span id="cb-n"></span><span class="amt" id="cb-t"></span></button></div></div>
+<div id="cartbar" class="gut" hidden><div class="col"><div class="cstrip" id="cb-strip"></div><button class="finish" data-act="cart"><span id="cb-n"></span><span class="amt" id="cb-t"></span></button></div></div>
 <div id="toast" role="status" aria-live="polite" hidden></div>
 
 <nav class="tabs gut" aria-label="Screens"><div class="col">
@@ -282,7 +302,7 @@ const CATALOG=[
   ['Bottled water','ready','',['500 ml','1 L']],['Soda','ready','',['300 ml','500 ml']],['Biscuits','ready','',['Packet']],
   ['Petroleum jelly','ready','',['Small','Large']],['Diapers','ready','',['1 piece','Pack']],['Tomatoes','ready','',['1 piece','Heap']],
   ['Onions','ready','',['1 piece','Heap']],['Spices','ready','',['Sachet']],['Cooking fat','ready','',['100 g','250 g','500 g']],
-  ['Spaghetti','ready','',['400 g']],['Airtime','ready','',['KSh 20','KSh 50','KSh 100']]
+  ['Spaghetti','ready','',['400 g']],['Airtime','ready','',['Ksh 20','Ksh 50','Ksh 100']]
 ];
 /* Units a bulk product can be measured in. Anything else is typed under "Other". */
 const UNITS=[['kg','Kilograms'],['L','Litres'],['pcs','Pieces'],['m','Metres']];
@@ -299,7 +319,7 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid=()=>Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-5);
 const r3=n=>Math.round(n*1000)/1000;
-const ksh=n=>'KSh '+Math.round(n||0).toLocaleString('en-KE');
+const ksh=n=>'Ksh '+Math.round(n||0).toLocaleString('en-KE');
 const nf=(n,d=2)=>(Math.round((n||0)*10**d)/10**d).toLocaleString('en-KE',{maximumFractionDigits:d});
 const toNum=v=>{const s=String(v??'').replace(',','.').trim(); if(s==='') return NaN; const n=Number(s); return isFinite(n)?n:NaN;};
 const sod=t=>{const d=new Date(t);d.setHours(0,0,0,0);return d.getTime();};
@@ -467,6 +487,8 @@ function render(){
   cartBar();
 }
 function empty(h,p,btn,act){return `<div class="empty"><h3>${esc(h)}</h3><p>${esc(p)}</p>${btn?`<button class="btn primary" data-act="${act}">${esc(btn)}</button>`:''}</div>`;}
+const fullName=(it,p)=>p&&p.label?it.name+' '+p.label:it.name;
+const plab=p=>p.label||'Each';
 const matches=(name,q)=>{const n=name.toLowerCase(); return n.includes(q)||n.split(/[\s(]+/).some(w=>w.startsWith(q));};
 
 /* ---------- sell ---------- */
@@ -482,6 +504,13 @@ function salesScore(){
 function pickedCounts(){const m=new Map(); cart.forEach(c=>{if(c.k!=='pack') return; const p=pack(c.packId); if(p) m.set(p.itemId,(m.get(p.itemId)||0)+c.qty);}); return m;}
 const cartQty=pid=>(cart.find(c=>c.k==='pack'&&c.packId===pid)||{qty:0}).qty;
 function cartAdd(pid,d){
+  if(d>0){
+    const p=pack(pid), it=p&&item(p.itemId); if(!it) return false;
+    if(p.stock<=0){
+      toast(it.mode==='bulk'?`No ${p.label} packed yet. Repack ${it.name} in Stock first.`:`${fullName(it,p)} is out of stock. Record a delivery in Stock.`); return false;
+    }
+    if(cartQty(pid)+d>p.stock){toast(`Only ${p.stock} ${fullName(it,p)} in stock.`); return false;}
+  }
   const i=cart.findIndex(c=>c.k==='pack'&&c.packId===pid);
   if(i<0){ if(d>0) cart.push({k:'pack',packId:pid,qty:d}); }
   else { cart[i].qty+=d; if(cart[i].qty<=0) cart.splice(i,1); }
@@ -508,20 +537,21 @@ function drawTiles(){
 function tileHTML(it,n){
   const ps=packsOf(it.id), pr=ps.map(p=>p.price), lo=Math.min(...pr), hi=Math.max(...pr);
   const out=ps.every(p=>p.stock<=0), one=ps.length===1, few=!out&&one&&ps[0].stock<=3;
-  return `<button class="tile${n?' picked':''}" data-act="pick" data-id="${it.id}" aria-label="${esc(it.name)}${n?', '+n+' in this sale':''}">
+  return `<button class="tile${n?' picked':''}${out?' soldout':''}" data-act="pick" data-id="${it.id}" aria-label="${esc(it.name)}${out?', sold out':''}${n?', '+n+' in this sale':''}">
     <span class="t-name">${esc(it.name)}</span>
     <span class="t-sub">${one?esc(ps[0].label):ps.length+' sizes'}</span>
     <span class="t-price">${lo===hi?ksh(lo):ksh(lo)+'–'+Math.round(hi).toLocaleString('en-KE')}</span>
-    ${out?'<span class="t-flag out">Out</span>':few?`<span class="t-flag">${ps[0].stock} left</span>`:''}
+    ${out?'<span class="t-flag out">Sold out</span>':few?`<span class="t-flag">${ps[0].stock} left</span>`:''}
     ${n?`<span class="t-n">${n}</span>`:''}</button>`;
 }
 /* products with several sizes open this list */
 function openPicker(id){const it=item(id); openSheet('picker',it.name,pickerHTML(id)); sheet.dataset.item=id;}
 function pickerHTML(id){
   return `<div class="panel">${packsOf(id).map(p=>{const n=cartQty(p.id);
-    return `<div class="prow"><div class="pl"><b>${esc(p.label)}</b><small>${ksh(p.price)} · ${p.stock<=0?'<span class="down">out of stock</span>':p.stock+' left'}</small></div>
-      ${n?`<div class="step"><button data-act="pk" data-d="-1" data-id="${p.id}" aria-label="One less ${esc(p.label)}">−</button><span>${n}</span><button data-act="pk" data-d="1" data-id="${p.id}" aria-label="One more ${esc(p.label)}">+</button></div>`
-         :`<button class="btn soft addb" data-act="pk" data-d="1" data-id="${p.id}">Add</button>`}</div>`;}).join('')}</div>
+    const out=p.stock<=0;
+    return `<div class="prow${out?' soldout':''}"><div class="pl"><b>${esc(plab(p))}</b><small>${ksh(p.price)} · ${out?'<span class="down">sold out</span>':p.stock+' left'}</small></div>
+      ${n?`<div class="step"><button data-act="pk" data-d="-1" data-id="${p.id}" aria-label="One less ${esc(plab(p))}">−</button><span>${n}</span><button data-act="pk" data-d="1" data-id="${p.id}" aria-label="One more ${esc(plab(p))}" ${n>=p.stock?'disabled':''}>+</button></div>`
+         :out?'<span class="muted" style="font-size:.88rem">Sold out</span>':`<button class="btn soft addb" data-act="pk" data-d="1" data-id="${p.id}">Add</button>`}</div>`;}).join('')}</div>
     <button class="btn primary wide" data-act="close">Done</button>`;
 }
 
@@ -560,7 +590,7 @@ function drawCards(){
     return `<button class="card" data-act="item" data-id="${it.id}">
       <div class="c-top"><span class="av">${esc(initials(it.name))}</span><span class="c-name"><b>${esc(it.name)}</b><small>${it.mode==='bulk'?'Needs repackaging · '+esc(uName(it.unit)):'Ready to sell'}</small></span>${s2==='out'?'<span class="flag out">Out</span>':s2==='low'?'<span class="flag">Low</span>':''}</div>
       ${meter}
-      <div class="szs">${ps.map(p=>`<span class="sz ${p.stock<=0?'out':''}"><span>${esc(p.label)}</span><b>${p.stock}</b></span>`).join('')}</div>
+      <div class="szs">${ps.map(p=>`<span class="sz ${p.stock<=0?'out':''}"><span>${esc(p.label||'In stock')}</span><b>${p.stock}</b></span>`).join('')}</div>
       <div class="c-foot"><span>Worth ${ksh(itemWorth(it))}</span><span class="chev">›</span></div>
     </button>`;}).join('')+`</div>`+
     (list.length>shown.length?`<button class="btn line wide more" data-act="more" data-w="stock">Show more <span class="muted">(${list.length-shown.length} more)</span></button>`:'');
@@ -585,7 +615,14 @@ function vReport(){
   const pTo=period==='today'?now-DAY:from, prev=S.sales.filter(s=>s.ts>=from-days*DAY&&s.ts<pTo).reduce((a,s)=>a+s.total,0);
   const dl=prev>0?Math.round((rev-prev)/prev*100):null;
   const cmp=period==='today'?'than this time yesterday':period==='week'?'than the week before':'than the month before';
-  h+=`<div class="big"><div class="l">Money in</div><div class="v">${ksh(rev)}</div><div class="s">${dl===null?(period==='today'?'Today so far':'This period'):`<span class="${dl>=0?'up':'down'}">${Math.abs(dl)}% ${dl>=0?'more':'less'}</span> ${cmp}`}</div></div>
+  /* money actually received: cash and M-Pesa from sales, plus debts paid back */
+  const got=(a,b)=>{const r={cash:0,mpesa:0,back:0}; S.sales.forEach(x=>{if(x.ts>=a&&x.ts<b&&(x.pay==='cash'||x.pay==='mpesa'))r[x.pay]+=x.total;});
+    S.payments.forEach(p=>{if(p.ts>=a&&p.ts<b){r[p.method==='mpesa'?'mpesa':'cash']+=p.amount; r.back+=p.amount;}}); r.total=r.cash+r.mpesa; return r;};
+  const gNow=got(from,Infinity), gPrev=got(from-days*DAY,pTo), onDebt=ss.filter(x=>x.pay==='deni').reduce((a,x)=>a+x.total,0);
+  const dg=gPrev.total>0?Math.round((gNow.total-gPrev.total)/gPrev.total*100):null;
+  h+=`<div class="big"><div class="l">Money in</div><div class="v">${ksh(gNow.total)}</div><div class="s">${dg===null?(period==='today'?'Today so far':'This period'):`<span class="${dg>=0?'up':'down'}">${Math.abs(dg)}% ${dg>=0?'more':'less'}</span> ${cmp}`}</div>
+    <div class="split2"><div><span>Cash</span><b>${ksh(gNow.cash)}</b></div><div><span>M-Pesa</span><b>${ksh(gNow.mpesa)}</b></div></div>
+    ${gNow.back||onDebt?`<div class="s" style="margin-top:8px">${gNow.back?`Includes ${ksh(gNow.back)} of debts paid back.`:''}${gNow.back&&onDebt?' ':''}${onDebt?`${ksh(onDebt)} more was sold on debt.`:''}</div>`:''}</div>
     <div class="pair"><div><div class="l">Profit</div><div class="v">${ksh(prof)}</div></div><div><div class="l">Customers</div><div class="v">${ss.length}</div></div></div>`;
   const bp={cash:0,mpesa:0,deni:0}; ss.forEach(s=>bp[s.pay]+=s.total);
   h+=`<p class="sec">Paid by</p><div class="panel"><div class="kv"><span>Cash</span><span>${ksh(bp.cash)}</span></div><div class="kv"><span>M-Pesa</span><span>${ksh(bp.mpesa)}</span></div><div class="kv"><span>Debt</span><span>${ksh(bp.deni)}</span></div></div>`;
@@ -624,7 +661,7 @@ function lowList(){
     packsOf(it.id).forEach(p=>{
       if(!sold[p.id]&&p.stock>0) return;
       const d=sold[p.id]?p.stock/(sold[p.id]/7):0;
-      if(p.stock<=0||d<2) rows.push({itemId:it.id,name:it.name+' '+p.label,text:p.stock<=0?'Out':p.stock+' left',out:p.stock<=0,d});
+      if(p.stock<=0||d<2) rows.push({itemId:it.id,name:fullName(it,p),text:p.stock<=0?'Out':p.stock+' left',out:p.stock<=0,d});
     });
   });
   return rows.sort((a,b)=>a.d-b.d);
@@ -637,11 +674,16 @@ function cartBar(){
   $('#cartbar').hidden=!(n&&tab==='sell');
   $('#cb-n').textContent=n+(n===1?' item':' items')+' · Finish sale';
   $('#cb-t').textContent=ksh(cartTotal());
+  $('#cb-strip').innerHTML=cart.map((c,i)=>{
+    const p=c.k==='pack'?pack(c.packId):null, it=item(p?p.itemId:c.itemId); if(!it) return '';
+    const nm=fullName(it,p);
+    return `<span class="cchip"><span>${esc(nm)}${c.k==='pack'&&c.qty>1?' ×'+c.qty:''}</span><button data-act="del" data-i="${i}" aria-label="Remove ${esc(nm)}">×</button></span>`;
+  }).join('');
 }
 function cartHTML(){
   const lines=cart.map((c,i)=>{
     if(c.k==='pack'){const p=pack(c.packId),it=p&&item(p.itemId); if(!it) return '';
-      return `<div class="line"><div><b>${esc(it.name)} ${esc(p.label)}</b><small>${ksh(p.price)} each</small><button class="linkbtn" data-act="del" data-i="${i}">Remove</button></div><div class="step"><button data-act="dec" data-i="${i}" aria-label="One less">−</button><span>${c.qty}</span><button data-act="inc" data-i="${i}" aria-label="One more">+</button></div><span class="amt">${ksh(p.price*c.qty)}</span></div>`;}
+      return `<div class="line"><div><b>${esc(fullName(it,p))}</b><small>${ksh(p.price)} each</small><button class="linkbtn" data-act="del" data-i="${i}">Remove</button></div><div class="step"><button data-act="dec" data-i="${i}" aria-label="One less">−</button><span>${c.qty}</span><button data-act="inc" data-i="${i}" aria-label="One more">+</button></div><span class="amt">${ksh(p.price*c.qty)}</span></div>`;}
     const it=item(c.itemId);
     return `<div class="line"><div><b>${esc(it?.name||'')}, loose</b><small>About ${qty(c.units,it?.unit)}</small></div><div class="step"><button data-act="del" data-i="${i}" aria-label="Remove">×</button></div><span class="amt">${ksh(c.amount)}</span></div>`;
   }).join('');
@@ -656,11 +698,11 @@ function cartHTML(){
     <button class="btn line wide" data-act="clear">Empty this sale</button>`;
 }
 function openCart(){openSheet('cart','This sale',cartHTML(),b=>suggest(b.querySelector('#deni-name'),customers));}
-function refreshCart(){if(!cart.length){closeSheet();render();return;} const b=sheetBody(); if(b){b.innerHTML=cartHTML(); suggest(b.querySelector('#deni-name'),customers);} render();}
+function refreshCart(){if(!cart.length){closeSheet();render();return;} const b=sheetBody(); if(b&&sheetKind==='cart'){b.innerHTML=cartHTML(); suggest(b.querySelector('#deni-name'),customers);} render();}
 function applySale(s,sign){s.lines.forEach(l=>{if(l.k==='pack'){const p=pack(l.packId); if(p)p.stock+=sign*l.qty;}else{const it=item(l.itemId); if(it)it.bulk=r3(it.bulk+sign*l.units);}});}
 function sell(pay,customer){
   const lines=cart.map(c=>{
-    if(c.k==='pack'){const p=pack(c.packId),it=item(p.itemId);return {k:'pack',packId:p.id,itemId:it.id,name:it.name+' '+p.label,qty:c.qty,units:r3(p.size*c.qty),price:p.price*c.qty,cost:(p.cost||0)*c.qty};}
+    if(c.k==='pack'){const p=pack(c.packId),it=item(p.itemId);return {k:'pack',packId:p.id,itemId:it.id,name:fullName(it,p),qty:c.qty,units:r3(p.size*c.qty),price:p.price*c.qty,cost:(p.cost||0)*c.qty};}
     const it=item(c.itemId);return {k:'loose',itemId:it.id,name:it.name+' (loose)',qty:1,units:c.units,price:c.amount,cost:(it.cost||0)*c.units};
   });
   const s={id:uid(),ts:Date.now(),lines,total:lines.reduce((a,l)=>a+l.price,0),cost:lines.reduce((a,l)=>a+l.cost,0),pay,customer:customer||''};
@@ -684,47 +726,72 @@ const sheetBody=()=>sheet&&sheet.querySelector('.sb');
 /* item details */
 function openItem(id){
   const it=item(id); if(!it) return;
-  const moves=[...S.deliveries.filter(d=>d.itemId===id).map(d=>({ts:d.ts,t:`Delivery: ${d.packId?(d.qty+' × '+(pack(d.packId)?.label||'')):qty(d.qty,it.unit)}`,a:ksh(d.paid)})),
+  const moves=[...S.deliveries.filter(d=>d.itemId===id).map(d=>({ts:d.ts,t:`Delivery: ${d.packId?(d.qty+(pack(d.packId)?.label?' × '+pack(d.packId).label:'')):qty(d.qty,it.unit)}`,a:ksh(d.paid)})),
     ...S.repacks.filter(r=>r.itemId===id).map(r=>({ts:r.ts,t:`Repacked ${qty(r.used,it.unit)}`,a:r.loss>0?`lost ${qty(r.loss,it.unit)}`:'no loss'}))].sort((a,b)=>b.ts-a.ts).slice(0,5);
   openSheet('item',it.name,`
     <div class="panel">
       ${it.mode==='bulk'?`<div class="kv"><span>Bulk, not yet packed</span><span>${qty(it.bulk,it.unit)}</span></div>`:''}
-      ${packsOf(id).map(p=>`<div class="kv"><span>${esc(p.label)} <span style="color:var(--muted);font-weight:600">at ${ksh(p.price)}</span></span><span class="${p.stock<=0?'down':''}">${p.stock} on shelf</span></div>`).join('')}
+      ${packsOf(id).map(p=>`<div class="kv"><span>${esc(plab(p))} <span style="color:var(--muted);font-weight:600">at ${ksh(p.price)}</span></span><span class="${p.stock<=0?'down':''}">${p.stock} on shelf</span></div>`).join('')}
     </div>
     <div class="btns"><button class="btn primary" data-act="delivery" data-id="${id}">Delivery</button>${it.mode==='bulk'?`<button class="btn soft" data-act="repack" data-id="${id}">Repack</button>`:''}<button class="btn soft" data-act="product" data-id="${id}">Edit</button></div>
     ${moves.length?`<p class="hint" style="font-weight:700">Recent</p><div class="panel">${moves.map(m=>`<div class="kv"><span>${esc(m.t)} <span style="color:var(--muted);font-weight:600">· ${day(m.ts)}</span></span><span>${esc(m.a)}</span></div>`).join('')}</div>`:''}`);
 }
 
 /* add / edit product */
-function sizeRow(p,mode,unit){p=p||{};
+/* form modes: 'single' = one item, one price; 'sizes' = ready to sell in different sizes; 'bulk' = needs repackaging */
+function sizeRow(p,kind,unit,isNew){p=p||{};
   return `<div class="size" data-pid="${p.id||''}">
-    <label class="fld lab"><span>Size</span><input class="s-label" value="${esc(p.label||'')}" placeholder="${mode==='ready'?'e.g. Packet':'Type, e.g. quarter'}" autocomplete="off"></label>
-    <label class="fld"><span>Price</span><input class="s-price" type="number" inputmode="decimal" min="0" step="any" value="${p.price??''}" placeholder="KSh"></label>
-    <label class="fld"><span>On shelf</span><input class="s-stock" type="number" inputmode="numeric" step="1" value="${p.stock??''}" placeholder="0"></label>
+    <label class="fld lab"><span>Size</span><input class="s-label" value="${esc(p.label||'')}" placeholder="${kind==='ready'?'e.g. 500 ml':'Type, e.g. quarter'}" autocomplete="off"></label>
+    <label class="fld"><span>Selling price</span><input class="s-price" type="number" inputmode="decimal" min="0" step="any" value="${p.price??''}" placeholder="Ksh"></label>
+    <label class="fld"><span class="s-stock-l">${kind==='bulk'&&isNew?'Already packed':'On shelf'}</span><input class="s-stock" type="number" inputmode="numeric" min="0" step="1" value="${p.stock??''}" placeholder="0"></label>
     <button type="button" class="x" data-act="size-del" aria-label="Remove size">×</button>
     <label class="fld wt bulk-only" hidden><span>How many <span class="u">${esc(uName(unit||'kg'))}</span> is this size?</span><input class="s-size" type="number" inputmode="decimal" min="0" step="any" value="${p.size??''}" placeholder="e.g. 0.25"></label>
-    <label class="fld wt ready-only"><span>Bought at, each (optional)</span><input class="s-cost" type="number" inputmode="decimal" min="0" step="any" value="${p.cost?Math.round(p.cost*100)/100:''}" placeholder="KSh"></label>
+    <label class="fld wt ready-only"><span>Bought at, each (to work out profit)</span><input class="s-cost" type="number" inputmode="decimal" min="0" step="any" value="${p.cost?Math.round(p.cost*100)/100:''}" placeholder="Ksh"></label>
   </div>`;
 }
+/* the last time this bulk product was bought: amount and total price */
+function lastBuy(it){
+  const d=S.deliveries.filter(x=>x.itemId===it.id&&!x.packId).sort((a,b)=>b.ts-a.ts)[0];
+  if(d) return {q:d.qty,paid:d.paid};
+  return it.ref&&it.cost?{q:it.ref,paid:Math.round(it.cost*it.ref)}:{q:'',paid:''};
+}
 function openProduct(id){
-  const it=id?item(id):null, mode=it?it.mode:'bulk', unit=it&&it.unit!=='pc'?it.unit:'kg';
-  const known=UNITS.some(u=>u[0]===unit);
-  openSheet('product',it?'Edit '+it.name:'Add a product',`<form id="pf" class="sb ${mode}" data-unit="${it?esc(unit):''}" novalidate>
+  const it=id?item(id):null, unit=it&&it.unit!=='pc'?it.unit:'kg';
+  const ps=it?packsOf(it.id):[];
+  const mode=!it?'bulk':it.mode==='bulk'?'bulk':(ps.length===1&&!ps[0].label?'single':'sizes');
+  const known=UNITS.some(u=>u[0]===unit), lb=it&&it.mode==='bulk'?lastBuy(it):null;
+  const single=mode==='single'?ps[0]:null;
+  openSheet('product',it?'Edit '+it.name:'Add a product',`<form id="pf" class="sb ${mode} ${mode==='bulk'?'':'ready'}" data-unit="${it?esc(unit):''}" data-new="${it?'':'1'}" novalidate>
     <label class="fld"><span>Product name</span><input id="pf-name" value="${esc(it?.name||'')}" placeholder="Start typing, e.g. su…" autocomplete="off"></label>
-    ${it?'':`<fieldset class="fld"><legend>How do you sell it?</legend><div class="choice">
-      <label><input type="radio" name="pf-mode" value="bulk" checked><b>Needs repackaging</b><small>Comes in bulk. I divide it into smaller packs.</small></label>
-      <label><input type="radio" name="pf-mode" value="ready"><b>Ready to sell</b><small>Sold as it comes: bread, milk, soap…</small></label></div></fieldset>`}
+    ${!it?`<fieldset class="fld"><legend>How do you sell it?</legend><div class="choice">
+      <label><input type="radio" name="pf-mode" value="single"><b>One item, one price</b><small>Like a bar of soap or a loaf of bread</small></label>
+      <label><input type="radio" name="pf-mode" value="sizes"><b>Different sizes</b><small>Like water in 500 ml and 1 L</small></label>
+      <label><input type="radio" name="pf-mode" value="bulk" checked><b>Needs repackaging</b><small>Like a 50 kg sack of sugar you pack into ¼ kg, ½ kg…</small></label></div></fieldset>`
+     :it.mode!=='bulk'?`<div class="chips" role="radiogroup" aria-label="Sizes"><label class="chip"><input type="radio" name="pf-mode" value="single" ${mode==='single'?'checked':''}>One price</label><label class="chip"><input type="radio" name="pf-mode" value="sizes" ${mode==='sizes'?'checked':''}>Different sizes</label></div>`:''}
     <div class="bulk-only sb">
       ${it?'':`<fieldset class="fld"><legend>The bulk is counted in</legend><div class="chips" role="radiogroup" aria-label="Unit">${UNITS.map(([v,l])=>`<label class="chip"><input type="radio" name="pf-unit" value="${v}" ${v===unit?'checked':''}>${l}</label>`).join('')}<label class="chip"><input type="radio" name="pf-unit" value="other" ${known?'':'checked'}>Other</label></div>
         <input id="pf-unit-other" class="other-in" placeholder="e.g. bundles, trays, cartons" autocomplete="off" value="${known?'':esc(unit)}" ${known?'hidden':''}></fieldset>`}
-      <div class="two">
-        <label class="fld"><span>Bulk stock now (<span class="u">${esc(uName(unit))}</span>)</span><input id="pf-bulk" type="number" inputmode="decimal" min="0" step="any" value="${it&&it.mode==='bulk'?String(r3(it.bulk)):''}" placeholder="0"></label>
-        <label class="fld"><span>Bought at, per <span class="u1">${esc(uOne(unit))}</span></span><input id="pf-cost" type="number" inputmode="decimal" min="0" step="any" value="${it&&it.cost?Math.round(it.cost*100)/100:''}" placeholder="KSh"></label>
-      </div>
+      ${it?`<label class="fld"><span>Bulk, not yet packed (<span class="u">${esc(uName(unit))}</span>)</span><input id="pf-bulk" type="number" inputmode="decimal" min="0" step="any" value="${String(r3(it.bulk))}" placeholder="0"></label>
+        <p class="hint" style="font-weight:700;margin-bottom:-6px">Buying price</p>
+        <div class="two">
+          <label class="fld"><span>Paid (Ksh)</span><input id="pf-paid" type="number" inputmode="decimal" min="0" step="any" value="${lb.paid}" placeholder="e.g. 7500"></label>
+          <label class="fld"><span>For how many <span class="u">${esc(uName(unit))}</span></span><input id="pf-for" type="number" inputmode="decimal" min="0" step="any" value="${lb.q}" placeholder="e.g. 50"></label>
+        </div>`
+      :`<div class="two">
+          <label class="fld"><span>How much did you buy? (<span class="u">${esc(uName(unit))}</span>)</span><input id="pf-for" type="number" inputmode="decimal" min="0" step="any" placeholder="e.g. 50"></label>
+          <label class="fld"><span>Price paid for all of it (Ksh)</span><input id="pf-paid" type="number" inputmode="decimal" min="0" step="any" placeholder="e.g. 7500"></label>
+        </div>`}
+      <p class="calc" id="pf-calc" hidden></p>
     </div>
-    <p class="hint" style="font-weight:700;margin-bottom:-6px">Sizes and prices</p>
-    <div class="sb" id="pf-sizes">${(it?packsOf(it.id):[{}]).map(p=>sizeRow(p,mode,unit)).join('')}</div>
-    <button type="button" class="btn line" data-act="size-add">+ Another size</button>
+    <div class="single-only two">
+      <label class="fld"><span>Selling price</span><input id="pf-s-price" type="number" inputmode="decimal" min="0" step="any" value="${single?single.price:''}" placeholder="Ksh"></label>
+      <label class="fld"><span>On shelf</span><input id="pf-s-stock" type="number" inputmode="numeric" min="0" step="1" value="${single?single.stock:''}" placeholder="0"></label>
+      <label class="fld" style="grid-column:1/-1"><span>Bought at, each (to work out profit)</span><input id="pf-s-cost" type="number" inputmode="decimal" min="0" step="any" value="${single&&single.cost?Math.round(single.cost*100)/100:''}" placeholder="Ksh"></label>
+    </div>
+    <p class="hint sizes-only" style="font-weight:700;margin-bottom:-6px">Sizes and prices</p>
+    <div class="sb sizes-only" id="pf-sizes">${(ps.length&&mode!=='single'?ps:[single?{price:single.price,stock:single.stock,cost:single.cost}:{}]).map(p=>sizeRow(p,mode==='bulk'?'bulk':'ready',unit,!it)).join('')}</div>
+    <button type="button" class="btn line sizes-only" data-act="size-add">+ Another size</button>
+    <p class="calc" id="pf-pack" hidden></p>
     <p class="err" id="pf-err" hidden></p>
     <button class="btn primary wide" type="submit">${it?'Save':'Add to my shop'}</button>
     ${it?`<button type="button" class="btn danger wide" data-act="product-del" data-id="${it.id}">Delete ${esc(it.name)}</button>`:''}
@@ -733,13 +800,15 @@ function openProduct(id){
     suggest(name,()=>it?[]:CATALOG.map(c=>c[0]).filter(n=>!byName(n)),pickCatalog);
     if(other){ suggest(other,()=>OTHER_UNITS); other.addEventListener('input',pfMode); }
     f.addEventListener('change',e=>{if(e.target.name==='pf-mode'||e.target.name==='pf-unit') pfMode();});
+    f.addEventListener('input',pfCheck);
     f.addEventListener('submit',e=>{e.preventDefault();pfSave(it);});
     f.querySelectorAll('.size').forEach(wireSize);
     pfMode();
     if(!it) setTimeout(()=>name.focus(),60);
   });
 }
-const pfModeVal=()=>{const f=$('#pf'); const r=f.querySelector('input[name="pf-mode"]:checked'); return r?r.value:(f.classList.contains('ready')?'ready':'bulk');};
+function pfModeVal(){const f=$('#pf'); const r=f.querySelector('input[name="pf-mode"]:checked'); return r?r.value:(f.classList.contains('bulk')?'bulk':f.classList.contains('single')?'single':'sizes');}
+const pfKind=()=>pfModeVal()==='bulk'?'bulk':'ready';
 function pfUnitVal(){
   const f=$('#pf'); if(f.dataset.unit) return f.dataset.unit;
   const r=f.querySelector('input[name="pf-unit"]:checked'); if(!r) return 'kg';
@@ -747,19 +816,41 @@ function pfUnitVal(){
   return f.querySelector('#pf-unit-other').value.trim().toLowerCase();
 }
 function pfMode(){
-  const f=$('#pf'); if(!f) return; const m=pfModeVal(); f.classList.toggle('bulk',m==='bulk'); f.classList.toggle('ready',m==='ready');
+  const f=$('#pf'); if(!f) return; const m=pfModeVal();
+  ['bulk','single','sizes','ready'].forEach(c=>f.classList.remove(c)); f.classList.add(m); if(m!=='bulk') f.classList.add('ready');
   const r=f.querySelector('input[name="pf-unit"]:checked'), other=f.querySelector('#pf-unit-other');
   if(other){ other.hidden=!(r&&r.value==='other'); }
   const u=pfUnitVal()||'units';
-  f.querySelectorAll('.u').forEach(x=>x.textContent=uName(u)); f.querySelectorAll('.u1').forEach(x=>x.textContent=uOne(u));
-  f.querySelectorAll('.s-label').forEach(i=>i.placeholder=m==='ready'?'e.g. Packet':'Type, e.g. '+(u==='kg'||u==='L'||u==='m'?'quarter':'1'));
+  f.querySelectorAll('.u').forEach(x=>x.textContent=uName(u));
+  f.querySelectorAll('.s-label').forEach(i=>i.placeholder=m!=='bulk'?'e.g. 500 ml':'Type, e.g. '+(u==='kg'||u==='L'||u==='m'?'quarter':'1'));
+  f.querySelectorAll('.s-stock-l').forEach(x=>x.textContent=m==='bulk'&&f.dataset.new?'Already packed':'On shelf');
   f.querySelectorAll('.size').forEach(r=>sizeCheck(r));
+  pfCheck();
+}
+/* live check: buying cost per unit, and packed sizes can't add up to more than was bought */
+function pfCheck(){
+  const f=$('#pf'); if(!f) return; const calc=f.querySelector('#pf-calc'), pk=f.querySelector('#pf-pack');
+  if(pfModeVal()!=='bulk'){calc.hidden=true; pk.hidden=true; return;}
+  const u=pfUnitVal()||'units', paid=toNum(f.querySelector('#pf-paid')?.value), amt=toNum(f.querySelector('#pf-for')?.value);
+  const rows=[...f.querySelectorAll('.size')].map(r=>({label:r.querySelector('.s-label').value.trim(),size:sizeIn(r.querySelector('.s-label').value,u)||toNum(r.querySelector('.s-size').value),n:toNum(r.querySelector('.s-stock').value)||0})).filter(r=>r.label&&r.size>0);
+  if(paid>0&&amt>0){
+    const per=paid/amt;
+    calc.innerHTML=`That is <b>${ksh(per)}</b> per ${esc(uOne(u))}.`+(rows.length?` Each pack costs you: ${rows.slice(0,4).map(r=>`${esc(tidySize(r.label,'bulk',u))} <b>${ksh(per*r.size)}</b>`).join(' · ')}`:'');
+    calc.hidden=false;
+  } else calc.hidden=true;
+  if(!f.dataset.new){pk.hidden=true; return;}
+  const packed=r3(rows.reduce((a,r)=>a+r.size*r.n,0));
+  if(!(packed>0)){pk.hidden=true; pk.classList.remove('bad'); return;}
+  pk.hidden=false;
+  if(!(amt>0)){pk.classList.add('bad'); pk.innerHTML=`You have packed ${qty(packed,u)}. Write how much you bought above, so the packs come out of it.`; return;}
+  if(packed>amt+1e-9){pk.classList.add('bad'); pk.innerHTML=`The packs add up to <b>${qty(packed,u)}</b>, more than the <b>${qty(amt,u)}</b> you bought. Lower the numbers.`; return;}
+  pk.classList.remove('bad'); pk.innerHTML=`Packed <b>${qty(packed,u)}</b> of ${qty(amt,u)}. <b>${qty(r3(amt-packed),u)}</b> stays in bulk.`;
 }
 function wireSize(r){
   const lab=r.querySelector('.s-label');
-  suggest(lab,raw=>sizeOptions(raw,pfModeVal(),pfUnitVal()||'units'),null,r.querySelector('.x'),true);
+  suggest(lab,raw=>sizeOptions(raw,pfKind(),pfUnitVal()||'units'),()=>{sizeCheck(r);pfCheck();},r.querySelector('.x'),true);
   lab.addEventListener('input',()=>sizeCheck(r));
-  lab.addEventListener('blur',()=>{const t=tidySize(lab.value,pfModeVal(),pfUnitVal()||'units'); if(t&&t!==lab.value){lab.value=t; sizeCheck(r);}});
+  lab.addEventListener('blur',()=>{const t=tidySize(lab.value,pfKind(),pfUnitVal()||'units'); if(t&&t!==lab.value){lab.value=t; sizeCheck(r); pfCheck();}});
   sizeCheck(r);
 }
 function sizeCheck(r){
@@ -769,38 +860,62 @@ function sizeCheck(r){
 function pickCatalog(n){
   const c=CATALOG.find(x=>x[0]===n); if(!c) return; const f=$('#pf');
   const rows=[...f.querySelectorAll('.size')]; const blankRows=rows.every(r=>!r.querySelector('.s-label').value&&!r.querySelector('.s-price').value);
-  const mr=f.querySelector(`input[name="pf-mode"][value="${c[1]}"]`); if(mr) mr.checked=true;
+  const mode=c[1]==='bulk'?'bulk':c[3].length===1?'single':'sizes';
+  const mr=f.querySelector(`input[name="pf-mode"][value="${mode}"]`); if(mr) mr.checked=true;
   if(c[2]){const ur=f.querySelector(`input[name="pf-unit"][value="${c[2]}"]`); if(ur) ur.checked=true;}
-  if(blankRows){const box=f.querySelector('#pf-sizes'); box.innerHTML=c[3].map(l=>sizeRow({label:l},c[1],c[2]||'kg')).join(''); box.querySelectorAll('.size').forEach(wireSize);}
+  if(blankRows&&mode!=='single'){const box=f.querySelector('#pf-sizes'); box.innerHTML=c[3].map(l=>sizeRow({label:l},mode==='bulk'?'bulk':'ready',c[2]||'kg',true)).join(''); box.querySelectorAll('.size').forEach(wireSize);}
   pfMode();
-  const next=c[1]==='bulk'?f.querySelector('#pf-bulk'):f.querySelector('.s-price'); if(next) setTimeout(()=>next.focus(),30);
+  const next=mode==='bulk'?f.querySelector('#pf-for'):mode==='single'?f.querySelector('#pf-s-price'):f.querySelector('.s-price'); if(next) setTimeout(()=>next.focus(),30);
 }
 function pfSave(it){
   const f=$('#pf'), err=f.querySelector('#pf-err'), fail=m=>{err.textContent=m;err.hidden=false;err.scrollIntoView({block:'nearest'});};
-  const name=f.querySelector('#pf-name').value.trim(), mode=it?it.mode:pfModeVal(), unit=it?it.unit:(mode==='bulk'?pfUnitVal():'pc');
+  const fm=pfModeVal(), mode=fm==='bulk'?'bulk':'ready', unit=it?it.unit:(mode==='bulk'?pfUnitVal():'pc');
+  const name=f.querySelector('#pf-name').value.trim();
   if(!name) return fail('Give the product a name.');
   const dup=byName(name); if(dup&&(!it||dup.id!==it.id)) return fail(`${name} is already in your shop.`);
   if(mode==='bulk'&&!unit) return fail('Write what the bulk is counted in, like bundles.');
-  const rows=[...f.querySelectorAll('.size')].map(r=>({pid:r.dataset.pid,label:tidySize(r.querySelector('.s-label').value,mode,unit),price:toNum(r.querySelector('.s-price').value),stock:toNum(r.querySelector('.s-stock').value),size:toNum(r.querySelector('.s-size').value),cost:toNum(r.querySelector('.s-cost').value)})).filter(r=>r.label||r.price>0||r.pid);
-  if(!rows.length) return fail('Add at least one size you sell, like ¼ kg or Packet.');
-  const seen=new Set();
-  for(const r of rows){
-    if(!r.label) return fail('Every size needs a name.');
-    if(seen.has(r.label.toLowerCase())) return fail(`${r.label} is listed twice.`); seen.add(r.label.toLowerCase());
-    if(!(r.price>0)) return fail(`Set a price for ${r.label}.`);
-    if(mode==='bulk'){ const v=sizeIn(r.label,unit); if(v) r.size=v; if(!(r.size>0)) return fail(`How many ${uName(unit)} is ${r.label}? Write it under the size.`); }
+  let rows;
+  if(fm==='single'){
+    const old=it?packsOf(it.id)[0]:null;
+    rows=[{pid:old?old.id:'',label:'',price:toNum(f.querySelector('#pf-s-price').value),stock:toNum(f.querySelector('#pf-s-stock').value),size:1,cost:toNum(f.querySelector('#pf-s-cost').value)}];
+    if(!(rows[0].price>0)) return fail('Set the selling price.');
+  } else {
+    rows=[...f.querySelectorAll('.size')].map(r=>({pid:r.dataset.pid,label:tidySize(r.querySelector('.s-label').value,mode,unit),price:toNum(r.querySelector('.s-price').value),stock:toNum(r.querySelector('.s-stock').value),size:toNum(r.querySelector('.s-size').value),cost:toNum(r.querySelector('.s-cost').value)})).filter(r=>r.label||r.price>0||r.pid);
+    if(!rows.length) return fail('Add at least one size you sell, like ¼ kg or 500 ml.');
+    const seen=new Set();
+    for(const r of rows){
+      if(!r.label) return fail('Every size needs a name, like ¼ kg or 500 ml.');
+      if(seen.has(r.label.toLowerCase())) return fail(`${r.label} is listed twice.`); seen.add(r.label.toLowerCase());
+      if(!(r.price>0)) return fail(`Set a selling price for ${r.label}.`);
+      if(mode==='bulk'){ const v=sizeIn(r.label,unit); if(v) r.size=v; if(!(r.size>0)) return fail(`How many ${uName(unit)} is ${r.label}? Write it under the size.`); }
+    }
   }
-  const bulk=toNum(f.querySelector('#pf-bulk').value), cost=toNum(f.querySelector('#pf-cost').value);
+  const paid=toNum(f.querySelector('#pf-paid')?.value), amt=toNum(f.querySelector('#pf-for')?.value);
+  let bulkNow=null, costNow=null;
+  if(mode==='bulk'){
+    if(paid>0&&!(amt>0)) return fail(`Write how many ${uName(unit)} the Ksh ${Math.round(paid).toLocaleString('en-KE')} paid for.`);
+    if(paid>0&&amt>0) costNow=paid/amt;
+    if(!it){
+      const packed=r3(rows.reduce((a,r)=>a+r.size*(r.stock>0?Math.floor(r.stock):0),0));
+      if(packed>0&&!(amt>0)) return fail('Write how much you bought, so the packs come out of it.');
+      if(packed>(amt||0)+1e-9) return fail(`The packs add up to ${qty(packed,unit)}, more than the ${qty(amt,unit)} you bought.`);
+      bulkNow=r3((amt||0)-packed);
+    } else {
+      const b=toNum(f.querySelector('#pf-bulk').value); if(b>=0) bulkNow=r3(b);
+    }
+  }
   let t=it;
-  if(!t){t={id:uid(),name,mode,unit,bulk:0,cost:0,added:Date.now()};S.items.push(t);if(mode==='bulk'&&bulk>0)t.ref=bulk;}
+  if(!t){t={id:uid(),name,mode,unit,bulk:0,cost:0,added:Date.now()};S.items.push(t);if(mode==='bulk'&&amt>0)t.ref=amt;}
   t.name=name;
-  if(mode==='bulk'){ if(bulk>=0) t.bulk=r3(bulk); if(cost>0) t.cost=cost; }
+  const costChanged=mode==='bulk'&&costNow!==null&&Math.abs(costNow-(t.cost||0))>1e-9;
+  if(mode==='bulk'){ if(bulkNow!==null) t.bulk=bulkNow; if(costNow!==null) t.cost=costNow; }
+  if(!it&&mode==='bulk'&&amt>0) S.deliveries.push({id:uid(),ts:Date.now(),itemId:t.id,packId:null,qty:amt,paid:paid>0?paid:0});
   const keep=new Set();
   rows.forEach(r=>{
     const size=mode==='bulk'?r.size:1; let p=r.pid&&pack(r.pid);
     if(!p){p={id:uid(),itemId:t.id,label:'',size,price:0,stock:0,cost:0};S.packs.push(p);}
     p.label=r.label; p.size=size; p.price=r.price; if(r.stock>=0) p.stock=Math.floor(r.stock);
-    if(mode==='bulk'){ if(t.cost>0&&(!p.cost||!r.pid)) p.cost=t.cost*size; } else if(r.cost>=0) p.cost=r.cost;
+    if(mode==='bulk'){ if(t.cost>0&&(costChanged||!p.cost||!r.pid)) p.cost=t.cost*size; } else if(r.cost>=0) p.cost=r.cost;
     keep.add(p.id);
   });
   S.packs=S.packs.filter(p=>p.itemId!==t.id||keep.has(p.id));
@@ -824,10 +939,10 @@ function dlDraw(){
   box.dataset.for=it?it.id:'';
   if(!it){box.innerHTML=name.trim()?`<p class="hint">${esc(name.trim())} is not in your shop yet.</p><button class="btn soft wide" data-act="product">+ Add it as a new product</button>`:''; return;}
   const ps=packsOf(it.id), bulk=it.mode==='bulk';
-  box.innerHTML=`${bulk?'':`<div class="chips" role="radiogroup" aria-label="Size">${ps.map((p,i)=>`<label class="chip"><input type="radio" name="dl-pack" value="${p.id}" ${i===0?'checked':''}>${esc(p.label)}</label>`).join('')}</div>`}
+  box.innerHTML=`${bulk?'':`<div class="chips" role="radiogroup" aria-label="Size">${ps.map((p,i)=>`<label class="chip"><input type="radio" name="dl-pack" value="${p.id}" ${i===0?'checked':''}>${esc(plab(p))}</label>`).join('')}</div>`}
     <div class="two">
       <label class="fld"><span>${bulk?`How much (${esc(uName(it.unit))})`:'How many'}</span><input id="dl-qty" type="number" inputmode="decimal" min="0" step="any" placeholder="${bulk?'e.g. 50':'e.g. 24'}"></label>
-      <label class="fld"><span>Total paid (KSh)</span><input id="dl-paid" type="number" inputmode="decimal" min="0" step="any" placeholder="e.g. 7500"></label>
+      <label class="fld"><span>Total paid (Ksh)</span><input id="dl-paid" type="number" inputmode="decimal" min="0" step="any" placeholder="e.g. 7500"></label>
     </div>
     <p class="calc" id="dl-calc">Fill both to see the buying price.</p>
     <p class="err" id="dl-err" hidden></p>
@@ -848,7 +963,7 @@ function dlSave(){
   if(it.mode==='bulk'){const h=Math.max(0,it.bulk); it.cost=h>0&&it.cost?(it.cost*h+paid)/(h+q):paid/q; it.bulk=r3(it.bulk+q);}
   else{p=pack(b.querySelector('input[name="dl-pack"]:checked').value); const h=Math.max(0,p.stock); p.cost=h>0&&p.cost?(p.cost*h+paid)/(h+q):paid/q; p.stock+=q;}
   S.deliveries.push({id:uid(),ts:Date.now(),itemId:it.id,packId:p?p.id:null,qty:q,paid});
-  closeSheet(); commit(); toast(`Added ${p?q+' × '+it.name+' '+p.label:qty(q,it.unit)+' of '+it.name}`);
+  closeSheet(); commit(); toast(`Added ${p?q+' × '+fullName(it,p):qty(q,it.unit)+' of '+it.name}`);
 }
 
 /* repack */
@@ -870,7 +985,9 @@ function rpRead(id){
 function rpCalc(id){
   const {b,it,used,packed}=rpRead(id), c=b.querySelector('#rp-calc'), btn=b.querySelector('#rp-save');
   if(!(packed>0)){c.textContent='Add the packs you made.';btn.disabled=true;return;}
-  if(!(used>0)){c.innerHTML=`Packed <b>${qty(packed,it.unit)}</b>. Write how much bulk you used to see any loss.`;btn.disabled=false;return;}
+  if(!(used>0)){ if(packed>it.bulk+1e-9){c.innerHTML=`<span class="err">The packs add up to ${qty(packed,it.unit)}, but you only have ${qty(it.bulk,it.unit)} of bulk.</span>`;btn.disabled=true;return;}
+    c.innerHTML=`Packed <b>${qty(packed,it.unit)}</b>. Write how much bulk you used to see any loss.`;btn.disabled=false;return;}
+  if(used>it.bulk+1e-9){c.innerHTML=`<span class="err">You only have ${qty(it.bulk,it.unit)} of bulk. Record the delivery first if more came in.</span>`;btn.disabled=true;return;}
   const loss=r3(used-packed);
   if(loss<0){c.innerHTML=`<span class="err">That is more than the bulk you used. Check the numbers.</span>`;btn.disabled=true;return;}
   c.innerHTML=`Packed <b>${qty(packed,it.unit)}</b> of ${qty(used,it.unit)}. ${loss>0?`Lost <b>${qty(loss,it.unit)}</b>${it.cost?`, about ${ksh(loss*it.cost)}`:''}.`:'Nothing lost.'}`+(used>it.bulk+1e-9?`<br><span class="wrn">That is more than the ${qty(it.bulk,it.unit)} of bulk on record. Record the delivery first if one came in.</span>`:'');
@@ -878,7 +995,7 @@ function rpCalc(id){
 }
 function rpSave(id){
   const {it,used,made,packed}=rpRead(id); if(!(packed>0)) return;
-  const u=used>0?used:packed, loss=r3(u-packed); if(loss<0) return;
+  const u=used>0?used:packed, loss=r3(u-packed); if(loss<0||u>it.bulk+1e-9) return;
   const cpu=(it.cost||0)*u/packed;
   made.filter(m=>m.n>0).forEach(({p,n})=>{const nc=cpu*p.size, h=Math.max(0,p.stock); p.cost=h>0&&p.cost?(p.cost*h+nc*n)/(h+n):nc; p.stock+=n;});
   it.bulk=r3(it.bulk-u);
@@ -890,7 +1007,7 @@ function rpSave(id){
 function openAddDebt(){
   openSheet('debt','Add debt',`
     <label class="fld"><span>Who owes you?</span><input id="db-name" autocomplete="off" placeholder="Type a name"></label>
-    <label class="fld"><span>Amount (KSh)</span><input id="db-amt" type="number" inputmode="numeric" min="1" placeholder="e.g. 200"></label>
+    <label class="fld"><span>Amount (Ksh)</span><input id="db-amt" type="number" inputmode="numeric" min="1" placeholder="e.g. 200"></label>
     <label class="fld"><span>What did they take? (optional)</span><input id="db-note" autocomplete="off" placeholder="e.g. sugar and bread"></label>
     <label class="fld"><span>Date</span><input id="db-date" type="date" value="${isoDay(Date.now())}" max="${isoDay(Date.now())}"></label>
     <div class="chips" style="margin-top:-6px"><button type="button" class="chip" data-act="db-day" data-d="0">Today</button><button type="button" class="chip" data-act="db-day" data-d="1">Yesterday</button><button type="button" class="chip" data-act="db-day" data-d="2">2 days ago</button></div>
@@ -903,7 +1020,7 @@ function openAddDebt(){
 function openPaid(c){
   const owed=Math.max(0,(balances()[c]||{owed:0}).owed), o=Math.round(owed);
   openSheet('paid','Settle debt',`<div class="big" style="margin-top:0"><div class="l">${esc(c)} owes</div><div class="v">${ksh(owed)}</div></div>
-    <label class="fld"><span>Amount paid (KSh)</span><input id="pd-amt" type="number" inputmode="numeric" min="1" value="${o}"></label>
+    <label class="fld"><span>Amount paid (Ksh)</span><input id="pd-amt" type="number" inputmode="numeric" min="1" value="${o}"></label>
     <div class="chips" style="margin-top:-6px"><button type="button" class="chip" data-act="pd-set" data-v="${o}">All of it</button>${o>=20?`<button type="button" class="chip" data-act="pd-set" data-v="${Math.round(o/2)}">Half</button>`:''}</div>
     <p class="hint" style="font-weight:700;margin-bottom:-6px">How did they pay?</p>
     <div class="pay pay2"><button data-act="paid-save" data-m="cash" data-c="${esc(c)}">Cash</button><button data-act="paid-save" data-m="mpesa" data-c="${esc(c)}">M-Pesa</button></div>
@@ -921,9 +1038,20 @@ function openPerson(c){
 
 /* recent sales and returns */
 const payName=p=>p==='mpesa'?'M-Pesa':p==='deni'?'Debt':'Cash';
-function openSales(){
-  const list=S.sales.slice().sort((a,b)=>b.ts-a.ts).slice(0,40);
-  openSheet('sales','Recent sales',list.length?`<p class="hint">Tap a sale to return an item or cancel it.</p><div class="panel">${list.map(x=>`<button class="row" data-act="sale" data-id="${x.id}"><span class="main"><b>${ksh(x.total)} <span style="font-weight:600;color:var(--muted)">· ${payName(x.pay)}${x.pay==='deni'?', '+esc(x.customer):''}</span></b><small>${esc(x.lines.map(l=>(l.qty>1?l.qty+' × ':'')+l.name).join(', '))}</small><small>${day(x.ts)} ${new Date(x.ts).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}${x.returns&&x.returns.length?' · had a return':''}</small></span><span class="chev">›</span></button>`).join('')}</div>`:'<p class="hint">No sales yet.</p>');
+function openSales(n){
+  n=n||25;
+  const all=S.sales.slice().sort((a,b)=>b.ts-a.ts), list=all.slice(0,n);
+  if(!list.length){openSheet('sales','Recent sales','<p class="hint">No sales yet.</p>');return;}
+  let h='<p class="hint sm" style="margin:0">Tap a sale to return an item or cancel it.</p>', last='';
+  list.forEach(x=>{
+    const d=day(x.ts); if(d!==last){ if(last) h+='</div>'; h+=`<p class="dayh">${esc(cap(d))}</p><div class="panel slist">`; last=d; }
+    const items=x.lines.map(l=>(l.qty>1?l.qty+'× ':'')+l.name).join(', ');
+    h+=`<button class="srow" data-act="sale" data-id="${x.id}"><span class="st">${new Date(x.ts).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</span><span class="si">${esc(items)}</span><span class="sp ${x.pay}">${x.pay==='deni'?'Debt':payName(x.pay)}</span><span class="sa">${ksh(x.total)}</span></button>`;
+  });
+  h+='</div>';
+  if(all.length>list.length) h+=`<button class="btn line wide" data-act="sales-more" data-n="${n+25}">Show more <span class="muted">(${all.length-list.length} more)</span></button>`;
+  openSheet('sales','Recent sales',h);
+  if(n>25){const sh=sheet.querySelector('.sheet'); sh.scrollTop=sh.scrollHeight;}
 }
 function openSale(id){
   const x=S.sales.find(z=>z.id===id); if(!x){openSales();return;}
@@ -981,6 +1109,7 @@ document.addEventListener('click',e=>{
     case 'tab': tab=a.dataset.tab; closeSheet(); render(); scrollTo(0,0); break;
     case 'period': period=a.dataset.p; render(); break;
     case 'sales': openSales(); break;
+    case 'sales-more': openSales(+a.dataset.n); break;
     case 'sale': openSale(a.dataset.id); break;
     case 'ret': returnOne(a.dataset.id,+a.dataset.i); break;
     case 'sale-cancel': arm(a,'sc'+a.dataset.id,'Tap again to cancel this sale',()=>cancelSale(a.dataset.id)); break;
@@ -989,7 +1118,7 @@ document.addEventListener('click',e=>{
     case 'pk': {cartAdd(a.dataset.id,+a.dataset.d); const id=sheet&&sheet.dataset.item; if(id) b.innerHTML=pickerHTML(id); drawTiles(); cartBar(); break;}
     case 'more': if(a.dataset.w==='stock'){stockN+=PAGE;drawCards();} else {showN+=PAGE;drawTiles();} break;
     case 'cart': openCart(); break;
-    case 'inc': cart[+a.dataset.i].qty++; refreshCart(); break;
+    case 'inc': {const c=cart[+a.dataset.i]; if(c.k==='pack') cartAdd(c.packId,1); refreshCart(); break;}
     case 'dec': {const c=cart[+a.dataset.i]; if(--c.qty<=0) cart.splice(+a.dataset.i,1); refreshCart(); break;}
     case 'del': cart.splice(+a.dataset.i,1); refreshCart(); break;
     case 'clear': cart=[]; closeSheet(); render(); break;
@@ -999,8 +1128,8 @@ document.addEventListener('click',e=>{
     case 'undo': undo(); break;
     case 'item': openItem(a.dataset.id); break;
     case 'product': {const pre=sheetKind==='delivery'&&!a.dataset.id?b.querySelector('#dl-name').value.trim():(tab==='sell'&&!a.dataset.id&&!sheet?findQ.trim():''); openProduct(a.dataset.id); if(pre){const n=$('#pf-name'); n.value=pre; const c=CATALOG.find(x=>x[0].toLowerCase()===pre.toLowerCase()); if(c){n.value=c[0];pickCatalog(c[0]);}} break;}
-    case 'size-add': {const box=$('#pf-sizes'); box.insertAdjacentHTML('beforeend',sizeRow({},pfModeVal(),pfUnitVal())); wireSize(box.lastElementChild); box.lastElementChild.querySelector('.s-label').focus(); break;}
-    case 'size-del': {const rows=document.querySelectorAll('#pf-sizes .size'); if(rows.length>1) a.closest('.size').remove(); else {a.closest('.size').querySelectorAll('input').forEach(i=>i.value='');} break;}
+    case 'size-add': {const box=$('#pf-sizes'); box.insertAdjacentHTML('beforeend',sizeRow({},pfKind(),pfUnitVal(),!!$('#pf').dataset.new)); wireSize(box.lastElementChild); box.lastElementChild.querySelector('.s-label').focus(); break;}
+    case 'size-del': {const rows=document.querySelectorAll('#pf-sizes .size'); if(rows.length>1) a.closest('.size').remove(); else {a.closest('.size').querySelectorAll('input').forEach(i=>i.value='');} pfCheck(); break;}
     case 'product-del': arm(a,'pd','Tap again to delete. Past sales stay.',()=>{const id=a.dataset.id, n=item(id).name; S.items=S.items.filter(i=>i.id!==id); S.packs=S.packs.filter(p=>p.itemId!==id); cart=cart.filter(c=>c.k==='pack'?pack(c.packId):item(c.itemId)); closeSheet(); commit(); toast(`Deleted ${n}`);}); break;
     case 'delivery': openDelivery(a.dataset.id); break;
     case 'delivery-save': dlSave(); break;
