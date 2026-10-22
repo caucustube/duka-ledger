@@ -63,20 +63,19 @@ main{padding-block:6px 180px}
 .find{display:flex;gap:8px;margin-bottom:14px}
 .find input{flex:1;min-width:0;border:0;border-radius:14px;background:var(--surface);padding:12px 14px;min-height:48px}
 .find input:focus{outline:2px solid var(--olive)}
-.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
-.tile{position:relative;border:0;border-radius:18px;background:var(--sand);text-align:left;padding:14px 14px 12px;min-height:116px;display:flex;flex-direction:column;transition:transform .08s ease,background .08s}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.tile{position:relative;border:0;border-radius:18px;background:var(--sand);text-align:left;padding:14px 14px 12px;min-height:112px;display:flex;flex-direction:column;gap:2px;transition:transform .08s ease,background .08s}
+.tile.picked{box-shadow:inset 0 0 0 2.5px var(--olive)}
 .tile:active{transform:scale(.96);background:var(--sand-press)}
-.t-name{font-size:.85rem;font-weight:700;color:var(--muted);padding-right:44px}
-.t-size{font-size:1.65rem;font-weight:800;line-height:1.1;letter-spacing:-.01em}
-.t-price{margin-top:auto;font-weight:700}
-.tw{position:relative;display:flex}
-.tw .tile{flex:1}
-.tw.picked .tile{box-shadow:inset 0 0 0 2.5px var(--olive)}
-.t-flag{position:absolute;top:12px;right:12px;font-size:.75rem;font-weight:700;color:var(--warn)}
+.t-name{font-size:1.12rem;font-weight:800;line-height:1.2;padding-right:34px;overflow-wrap:anywhere}
+.t-sub{font-size:.85rem;font-weight:600;color:var(--muted)}
+.t-price{margin-top:auto;padding-top:8px;font-weight:700;padding-right:48px}
+.t-flag{position:absolute;bottom:12px;right:12px;font-size:.75rem;font-weight:700;color:var(--warn)}
 .t-flag.out{color:var(--bad)}
-.pick{position:absolute;right:8px;bottom:8px;display:flex;align-items:center;gap:6px}
-.pick .minus{width:38px;height:38px;border-radius:50%;border:0;background:var(--surface);font-size:1.35rem;font-weight:800;line-height:1;color:var(--ink);display:grid;place-items:center;box-shadow:0 1px 0 var(--line)}
-.pick .n{min-width:34px;height:34px;padding:0 8px;border-radius:17px;background:var(--olive-deep);color:#fff;font-weight:800;display:grid;place-items:center}
+.t-n{position:absolute;top:10px;right:10px;min-width:30px;height:30px;padding:0 8px;border-radius:15px;background:var(--olive-deep);color:#fff;font-weight:800;display:grid;place-items:center;font-size:.92rem}
+.hint.sm{font-size:.82rem;margin:-6px 0 10px}
+.muted{color:var(--muted);font-weight:600}
+.more{margin-top:12px}
 .linkbtn{border:0;background:none;padding:2px 0;color:var(--bad);font-weight:700;font-size:.82rem;text-decoration:underline;text-underline-offset:3px}
 .nomatch{color:var(--muted);text-align:center;padding:24px 0}
 
@@ -205,7 +204,7 @@ nav.tabs .ic{width:56px;height:30px;border-radius:15px;display:grid;place-items:
 
 .line{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
 .line small{display:block;color:var(--muted);font-size:.82rem}
-.step{display:flex;align-items:center;gap:4px}
+.step{display:flex;align-items:center;gap:10px}
 .step button{width:40px;height:40px;border-radius:12px;border:0;background:var(--surface);font-size:1.2rem;font-weight:800}
 .step span,.step input{min-width:30px;text-align:center;font-weight:800}
 .step input{width:62px;height:40px;border:0;border-radius:12px;background:var(--surface)}
@@ -213,6 +212,15 @@ nav.tabs .ic{width:56px;height:30px;border-radius:15px;display:grid;place-items:
 .total{display:flex;justify-content:space-between;align-items:baseline;font-weight:800;font-size:1.1rem}
 .total b{font-size:1.8rem}
 .pay{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pay.pay2{grid-template-columns:1fr 1fr}
+.prow{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.prow:last-child{border-bottom:0}
+.prow .pl{flex:1;min-width:0}
+.prow .pl b{display:block;font-size:1.2rem;font-weight:800}
+.prow .pl small{color:var(--muted);font-size:.88rem}
+.prow .addb{min-width:84px}
+.other-in{margin-top:8px;border:0;background:var(--surface);border-radius:12px;padding:12px 14px;min-height:48px;width:100%}
+.other-in:focus{outline:2px solid var(--olive)}
 .pay button{border:0;border-radius:16px;background:var(--surface);min-height:64px;font-weight:800;font-size:1.05rem}
 .pay button:active{background:var(--olive);}
 .pay .on{background:var(--olive);color:#1D2216}
@@ -259,27 +267,32 @@ nav.tabs .ic{width:56px;height:30px;border-radius:15px;display:grid;place-items:
 "use strict";
 const KEY='duka-ledger.v2', DAY=86400000;
 
-/* Common duka products. Picking one fills in how it arrives and the usual sizes. */
+/* Common duka products. Picking one fills in how it is sold and the usual sizes. */
 const CATALOG=[
   ['Sugar','bulk','kg',['¼ kg','½ kg','1 kg']],['Rice','bulk','kg',['½ kg','1 kg']],['Beans','bulk','kg',['½ kg','1 kg']],
   ['Green grams (ndengu)','bulk','kg',['½ kg','1 kg']],['Maize (mahindi)','bulk','kg',['1 kg','2 kg']],['Lentils (kamande)','bulk','kg',['½ kg','1 kg']],
   ['Cooking oil','bulk','L',['¼ L','½ L','1 L']],['Paraffin','bulk','L',['¼ L','½ L','1 L']],
+  ['Sweets','bulk','pcs',['1 piece','5 pieces']],['Chewing gum','bulk','pcs',['1 piece','5 pieces']],['Cigarettes','bulk','pcs',['1 piece','10 pieces']],
+  ['Eggs','bulk','pcs',['1 piece','30 pieces']],['Mandazi','bulk','pcs',['1 piece','5 pieces']],
   ['Unga (maize flour)','ready','',['1 kg','2 kg']],['Wheat flour','ready','',['1 kg','2 kg']],['Salt','ready','',['500 g','1 kg']],
-  ['Bread','ready','',['400 g','800 g']],['Milk','ready','',['250 ml','500 ml']],['Eggs','ready','',['1 egg','Tray']],
+  ['Bread','ready','',['400 g','800 g']],['Milk','ready','',['250 ml','500 ml']],
   ['Tea leaves','ready','',['50 g','100 g','250 g']],['Margarine','ready','',['100 g','250 g','500 g']],['Bar soap','ready','',['Piece','Full bar']],
   ['Washing powder','ready','',['Sachet','500 g','1 kg']],['Toothpaste','ready','',['Small','Large']],['Tissue paper','ready','',['1 roll']],
   ['Sanitary pads','ready','',['Pack']],['Matches','ready','',['Box']],['Candles','ready','',['1 candle']],['Batteries','ready','',['Pair']],
   ['Bottled water','ready','',['500 ml','1 L']],['Soda','ready','',['300 ml','500 ml']],['Biscuits','ready','',['Packet']],
-  ['Sweets','ready','',['1 sweet']],['Chewing gum','ready','',['1 piece']],['Petroleum jelly','ready','',['Small','Large']],
-  ['Diapers','ready','',['1 piece','Pack']],['Tomatoes','ready','',['1 piece','Heap']],['Onions','ready','',['1 piece','Heap']],
-  ['Spices','ready','',['Sachet']],['Cooking fat','ready','',['100 g','250 g','500 g']],['Spaghetti','ready','',['400 g']],
-  ['Mandazi','ready','',['1 piece']],['Airtime','ready','',['KSh 20','KSh 50','KSh 100']]
+  ['Petroleum jelly','ready','',['Small','Large']],['Diapers','ready','',['1 piece','Pack']],['Tomatoes','ready','',['1 piece','Heap']],
+  ['Onions','ready','',['1 piece','Heap']],['Spices','ready','',['Sachet']],['Cooking fat','ready','',['100 g','250 g','500 g']],
+  ['Spaghetti','ready','',['400 g']],['Airtime','ready','',['KSh 20','KSh 50','KSh 100']]
 ];
-const SIZES={kg:['¼ kg','½ kg','1 kg','2 kg','5 kg'],L:['100 ml','¼ L','½ L','1 L','5 L'],
-  ready:['Piece','Packet','Sachet','Box','Bar','Tray','Roll','Pack','Heap','250 ml','500 ml','1 L','100 g','250 g','500 g','1 kg','2 kg']};
+/* Units a bulk product can be measured in. Anything else is typed under "Other". */
+const UNITS=[['kg','Kilograms'],['L','Litres'],['pcs','Pieces'],['m','Metres']];
+const OTHER_UNITS=['bundles','trays','packets','boxes','rolls','bales','cartons','dozens','sachets','bars'];
+const SIZES={kg:['¼ kg','½ kg','¾ kg','1 kg','2 kg','5 kg'],L:['¼ L','½ L','¾ L','1 L','2 L','5 L'],pcs:['1 piece','2 pieces','5 pieces','10 pieces'],m:['½ m','1 m','2 m','5 m'],
+  ready:['Piece','Packet','Sachet','Box','Bar','Tray','Roll','Pack','Heap','Bottle','Tin','250 ml','500 ml','1 L','100 g','250 g','500 g','1 kg','2 kg']};
+const PAGE=30;
 
-let stockFilter='all';
-let S, storageOk=true, tab='sell', period='today', cart=[], findQ='', lastSale=null, toastT=null, sheet=null, sheetKind='', armed=null, installEvt=null, looseSel=null;
+let stockFilter='all', stockQ='', stockN=PAGE, showN=PAGE;
+let S, storageOk=true, tab='sell', period='today', cart=[], findQ='', lastSale=null, toastT=null, sheet=null, sheetKind='', armed=null, installEvt=null;
 
 /* ---------- helpers ---------- */
 const $=s=>document.querySelector(s);
@@ -290,26 +303,107 @@ const ksh=n=>'KSh '+Math.round(n||0).toLocaleString('en-KE');
 const nf=(n,d=2)=>(Math.round((n||0)*10**d)/10**d).toLocaleString('en-KE',{maximumFractionDigits:d});
 const toNum=v=>{const s=String(v??'').replace(',','.').trim(); if(s==='') return NaN; const n=Number(s); return isFinite(n)?n:NaN;};
 const sod=t=>{const d=new Date(t);d.setHours(0,0,0,0);return d.getTime();};
-const item=id=>S.items.find(i=>i.id===id);
-const pack=id=>S.packs.find(p=>p.id===id);
-const packsOf=id=>S.packs.filter(p=>p.itemId===id);
-const byName=n=>S.items.find(i=>i.name.toLowerCase()===String(n).trim().toLowerCase());
+/* Lookups go through an index that rebuilds itself whenever products or sizes are added or removed. */
+let _ix=null;
+function ix(){
+  if(!_ix||_ix.items!==S.items||_ix.packs!==S.packs||_ix.ni!==S.items.length||_ix.np!==S.packs.length){
+    const it=new Map(), pk=new Map(), pid=new Map(), nm=new Map();
+    S.items.forEach(i=>{it.set(i.id,i); nm.set(i.name.toLowerCase(),i);});
+    S.packs.forEach(p=>{pid.set(p.id,p); let a=pk.get(p.itemId); if(!a){a=[];pk.set(p.itemId,a);} a.push(p);});
+    _ix={items:S.items,packs:S.packs,ni:S.items.length,np:S.packs.length,it,pk,pid,nm};
+  }
+  return _ix;
+}
+const item=id=>ix().it.get(id);
+const pack=id=>ix().pid.get(id);
+const packsOf=id=>ix().pk.get(id)||[];
+const byName=n=>ix().nm.get(String(n).trim().toLowerCase());
+
+/* unit names: uName for amounts ("3 pieces"), uOne for "per piece" */
+const uName=u=>u==='pcs'?'pieces':u;
+const uOne=u=>u==='pcs'?'piece':(u&&u.length>3&&u.endsWith('s')?u.slice(0,-1):u);
 function qty(q,unit){
   if(unit==='pc'||!unit) return nf(q,0);
   const a=Math.abs(q);
-  if(a>0&&a<1) return nf(q*1000,0)+(unit==='kg'?' g':' ml');
-  return nf(q,2)+' '+unit;
+  if(unit==='kg'||unit==='L'){ if(a>0&&a<1) return nf(q*1000,0)+(unit==='kg'?' g':' ml'); return nf(q,2)+' '+unit; }
+  if(unit==='m'){ if(a>0&&a<1) return nf(q*100,0)+' cm'; return nf(q,2)+' m'; }
+  if(unit==='pcs') return nf(q,2)+(a===1?' piece':' pieces');
+  return nf(q,2)+' '+(a===1?uOne(unit):unit);
 }
 function day(t){
   const d=sod(t), td=sod(Date.now());
   if(d===td) return 'today'; if(d===td-DAY) return 'yesterday';
   return new Date(t).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
 }
-function parseSize(label){
-  const t=String(label).toLowerCase().replace(/\s+/g,'').replace('litres','l').replace('litre','l').replace('lt','l');
-  const fr={'¼':.25,'½':.5,'¾':.75,'1/4':.25,'1/2':.5,'3/4':.75};
-  const m=t.match(/^(¼|½|¾|1\/4|1\/2|3\/4|\d+(?:\.\d+)?)(kg|g|l|ml)$/); if(!m) return null;
-  let v=fr[m[1]]??parseFloat(m[1]); if(m[2]==='g'||m[2]==='ml') v/=1000; return v>0?v:null;
+
+/* ---------- sizes: read what people type and write it the same way every time ---------- */
+const FR={'¼':.25,'½':.5,'¾':.75,'1/4':.25,'1/2':.5,'3/4':.75,'quarter':.25,'robo':.25,'half':.5,'nusu':.5,'three quarters':.75,'three quarter':.75};
+const UW={kg:'kg',kgs:'kg',kilo:'kg',kilos:'kg',kilogram:'kg',kilograms:'kg',g:'g',gm:'g',gms:'g',gram:'g',grams:'g',gr:'g',
+  l:'L',lt:'L',lts:'L',ltr:'L',ltrs:'L',litre:'L',litres:'L',liter:'L',liters:'L',lita:'L',ml:'ml',mls:'ml',
+  m:'m',mt:'m',metre:'m',metres:'m',meter:'m',meters:'m',cm:'cm',pc:'pcs',pcs:'pcs',piece:'pcs',pieces:'pcs'};
+function parseQty(t){
+  t=String(t||'').toLowerCase().trim().replace(/,/g,'.').replace(/\s+/g,' ').replace(/\.$/,'');
+  const m=t.match(/^(three quarters?|quarter|robo|half|nusu|¼|½|¾|[13]\/[24]|\d+(?:\.\d+)?|\.\d+)\s*(?:of\s*(?:a\s*)?)?([a-z]+)?$/);
+  if(!m) return null;
+  const n=FR[m[1]]??parseFloat(m[1]); if(!(n>0)) return null;
+  if(!m[2]) return {n,u:null};
+  return {n,u:UW[m[2]]||m[2]};
+}
+/* amount of the product's own unit that a size label stands for, or null */
+function sizeIn(label,unit){
+  const q=parseQty(label); if(!q) return null;
+  if(!q.u) return (unit==='kg'||unit==='L')&&q.n>=50?q.n/1000:q.n;  /* "250" in a kg product means 250 g */
+  if(unit==='kg') return q.u==='kg'?q.n:q.u==='g'?q.n/1000:null;
+  if(unit==='L') return q.u==='L'?q.n:q.u==='ml'?q.n/1000:null;
+  if(unit==='m') return q.u==='m'?q.n:q.u==='cm'?q.n/100:null;
+  if(unit==='pcs') return q.u==='pcs'?q.n:null;
+  const stem=uOne(unit).slice(0,4); return q.u.startsWith(stem)?q.n:null;
+}
+const FRS={0.25:'¼',0.5:'½',0.75:'¾'};
+/* the app's standard way of writing a size */
+function canon(v,unit){
+  const r=Math.round(v*1000)/1000;
+  if(unit==='kg'||unit==='L'||unit==='m'){
+    if(FRS[r]) return FRS[r]+' '+unit;
+    if(r<1) return Math.round(r*(unit==='m'?100:1000))+(unit==='kg'?' g':unit==='L'?' ml':' cm');
+    return nf(r,2).replace(/,/g,'')+' '+unit;
+  }
+  if(unit==='pcs') return r===1?'1 piece':nf(r,2).replace(/,/g,'')+' pieces';
+  return r===1?'1 '+uOne(unit):nf(r,2).replace(/,/g,'')+' '+unit;
+}
+const cap=x=>x?x.charAt(0).toUpperCase()+x.slice(1):x;
+/* ready-to-sell sizes keep the unit people chose; only the writing is tidied */
+function tidyReady(label){
+  const t=String(label||'').trim().replace(/\s+/g,' '); if(!t) return t;
+  const q=parseQty(t);
+  if(q&&q.u&&['kg','g','L','ml','m','cm','pcs'].includes(q.u)){
+    const r=Math.round(q.n*1000)/1000, f=(['kg','L','m'].includes(q.u)&&FRS[r])?FRS[r]:nf(r,2).replace(/,/g,'');
+    if(q.u==='pcs') return r===1?'1 piece':f+' pieces';
+    return f+' '+q.u;
+  }
+  return cap(t);
+}
+function tidySize(label,mode,unit){
+  if(mode==='bulk'){const v=sizeIn(label,unit); if(v) return canon(v,unit);}
+  return tidyReady(label);
+}
+/* suggestions while typing a size */
+function sizeOptions(raw,mode,unit){
+  const q=raw.trim().toLowerCase(), out=[]; const add=x=>{if(x&&!out.includes(x))out.push(x);};
+  if(!q) return out;
+  const pq=parseQty(q);
+  if(mode==='bulk'){
+    if(pq&&!pq.u&&(unit==='kg'||unit==='L')){ if(pq.n>=50){add(canon(pq.n/1000,unit));} else {add(canon(pq.n,unit)); if(pq.n>=10) add(canon(pq.n/1000,unit));} }
+    else { const v=sizeIn(q,unit); if(v) add(canon(v,unit)); }
+    [['quarter',.25],['robo',.25],['half',.5],['nusu',.5],['three',.75]].forEach(([w,v])=>{if(w.startsWith(q)&&q.length>=1&&!/^\d/.test(q)) add(canon(v,unit));});
+    (SIZES[unit]||[1,2,5,10].map(n=>canon(n,unit))).filter(x=>x.toLowerCase().startsWith(q)).forEach(add);
+  } else {
+    if(pq&&!pq.u){ add(tidyReady(pq.n+' g')); add(tidyReady(pq.n+' ml')); if(pq.n<=5) add(tidyReady(pq.n+' kg')),add(tidyReady(pq.n+' L')); }
+    else if(pq) add(tidyReady(q));
+    SIZES.ready.filter(x=>x.toLowerCase().startsWith(q)).forEach(add);
+    SIZES.ready.filter(x=>!x.toLowerCase().startsWith(q)&&x.toLowerCase().includes(q)).forEach(add);
+  }
+  return out;
 }
 function isoDay(t){const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function tsFromIso(v){
@@ -330,15 +424,19 @@ function commit(){save();render();}
 
 /* ---------- suggestions ---------- */
 function hl(x,q){const i=x.toLowerCase().indexOf(q); return i<0?esc(x):esc(x.slice(0,i))+'<b>'+esc(x.slice(i,i+q.length))+'</b>'+esc(x.slice(i+q.length));}
-function suggest(input,source,onPick,after){
+function suggest(input,source,onPick,after,smart){
   const box=document.createElement('div'); box.className='sugg'; box.hidden=true;
   (after||input).insertAdjacentElement('afterend',box);
   const show=()=>{
-    const q=input.value.trim().toLowerCase(); if(!q){box.hidden=true;return;}
-    const list=[...new Set(source())];
-    const a=list.filter(x=>x.toLowerCase().startsWith(q));
-    const b=list.filter(x=>!a.includes(x)&&x.toLowerCase().split(/[\s(]+/).some(w=>w.startsWith(q)));
-    const res=[...a,...b].filter(x=>x.toLowerCase()!==q).slice(0,6);
+    const raw=input.value.trim(), q=raw.toLowerCase(); if(!q){box.hidden=true;return;}
+    let res;
+    if(smart) res=source(raw).filter(x=>x!==raw).slice(0,6);
+    else {
+      const list=[...new Set(source())];
+      const a=list.filter(x=>x.toLowerCase().startsWith(q));
+      const b=list.filter(x=>!a.includes(x)&&x.toLowerCase().split(/[\s(]+/).some(w=>w.startsWith(q)));
+      res=[...a,...b].filter(x=>x.toLowerCase()!==q).slice(0,6);
+    }
     box.innerHTML=res.map(x=>`<button type="button" class="sg" data-v="${esc(x)}">${hl(x,q)}</button>`).join('');
     box.hidden=!res.length;
   };
@@ -364,83 +462,118 @@ function render(){
   $('#offline').hidden=navigator.onLine;
   document.querySelectorAll('nav.tabs [data-tab]').forEach(b=>{b.classList.toggle('on',b.dataset.tab===tab);b.setAttribute('aria-current',b.dataset.tab===tab?'page':'false');});
   $('#view').innerHTML=tab==='sell'?vSell():tab==='stock'?vStock():tab==='deni'?vDeni():vReport();
-  if(tab==='sell'){const f=$('#find'); if(f){f.addEventListener('input',()=>{findQ=f.value;filterTiles();}); filterTiles();}}
+  if(tab==='sell'){const f=$('#find'); if(f) f.addEventListener('input',()=>{findQ=f.value;showN=PAGE;drawTiles();}); drawTiles();}
+  if(tab==='stock'){const f=$('#sfind'); if(f) f.addEventListener('input',()=>{stockQ=f.value;stockN=PAGE;drawCards();}); drawCards();}
   cartBar();
 }
 function empty(h,p,btn,act){return `<div class="empty"><h3>${esc(h)}</h3><p>${esc(p)}</p>${btn?`<button class="btn primary" data-act="${act}">${esc(btn)}</button>`:''}</div>`;}
+const matches=(name,q)=>{const n=name.toLowerCase(); return n.includes(q)||n.split(/[\s(]+/).some(w=>w.startsWith(q));};
 
+/* ---------- sell ---------- */
+/* How often each product sold in the last 30 days. Sales in the last 7 days count double. */
+function salesScore(){
+  const now=Date.now(), from=now-30*DAY, wk=now-7*DAY, sc=new Map();
+  for(const s of S.sales){
+    if(s.ts<from) continue; const w=s.ts>=wk?2:1, seen=new Set();
+    for(const l of s.lines){ if(seen.has(l.itemId)) continue; seen.add(l.itemId); sc.set(l.itemId,(sc.get(l.itemId)||0)+w); }
+  }
+  return sc;
+}
+function pickedCounts(){const m=new Map(); cart.forEach(c=>{if(c.k!=='pack') return; const p=pack(c.packId); if(p) m.set(p.itemId,(m.get(p.itemId)||0)+c.qty);}); return m;}
+const cartQty=pid=>(cart.find(c=>c.k==='pack'&&c.packId===pid)||{qty:0}).qty;
+function cartAdd(pid,d){
+  const i=cart.findIndex(c=>c.k==='pack'&&c.packId===pid);
+  if(i<0){ if(d>0) cart.push({k:'pack',packId:pid,qty:d}); }
+  else { cart[i].qty+=d; if(cart[i].qty<=0) cart.splice(i,1); }
+  buzz();
+}
 function vSell(){
   if(!S.packs.length) return `<div class="vh"><h2>Sell</h2></div>`+empty('Your shop is empty','Add the things you sell, one at a time. Start with something you sell every day, like sugar.','+ Add a product','product');
-  const inCart={}; cart.forEach(c=>{if(c.k==='pack')inCart[c.packId]=(inCart[c.packId]||0)+c.qty;});
-  const loose=S.items.some(i=>i.mode==='bulk'&&i.loose>0);
-  let t='';
-  S.items.forEach(it=>packsOf(it.id).forEach(p=>{
-    const n=inCart[p.id]||0;
-    t+=tileHTML(p,it,n);
-  }));
   return `<div class="vh"><h2>Sell</h2>${S.sales.length?'<button class="btn line" data-act="sales">Recent sales</button>':''}</div>
-    <div class="find"><input id="find" type="search" placeholder="Find an item" value="${esc(findQ)}" autocomplete="off" aria-label="Find an item">${loose?'<button class="btn soft" data-act="loose">By amount</button>':''}</div>
-    <div class="tiles" id="tiles">${t}</div><p class="nomatch" id="nomatch" hidden>Nothing matches. Add it in Stock.</p>`;
+    <div class="find"><input id="find" type="search" placeholder="Search ${S.items.length} products" value="${esc(findQ)}" autocomplete="off" aria-label="Search products"></div>
+    <div id="tiles-wrap"></div>`;
 }
-function tileHTML(p,it,n){
-  return `<div class="tw${n?' picked':''}" data-tw="${p.id}" data-k="${esc((it.name+' '+p.label).toLowerCase())}">
-    <button class="tile" data-act="add" data-id="${p.id}" aria-label="Add ${esc(it.name+' '+p.label)}"><span class="t-name">${esc(it.name)}</span><span class="t-size">${esc(p.label)}</span><span class="t-price">${ksh(p.price)}</span>
-    ${p.stock<=0?'<span class="t-flag out">Out</span>':p.stock<=3?`<span class="t-flag">${p.stock} left</span>`:''}</button>
-    ${n?`<div class="pick"><button class="minus" data-act="minus" data-id="${p.id}" aria-label="One less ${esc(it.name+' '+p.label)}">−</button><span class="n" aria-label="${n} picked">${n}</span></div>`:''}</div>`;
+function drawTiles(){
+  const wrap=$('#tiles-wrap'); if(!wrap) return;
+  const q=findQ.trim().toLowerCase(), sc=salesScore(), picked=pickedCounts();
+  let list=S.items.filter(i=>packsOf(i.id).length);
+  if(q) list=list.filter(i=>matches(i.name,q));
+  const starts=i=>q&&i.name.toLowerCase().startsWith(q)?1:0;
+  list.sort((a,b)=>starts(b)-starts(a)||(sc.get(b.id)||0)-(sc.get(a.id)||0)||a.name.localeCompare(b.name));
+  if(!list.length){wrap.innerHTML=`<p class="nomatch">Nothing matches “${esc(findQ.trim())}”.<br><button class="btn soft" data-act="product" style="margin-top:10px">+ Add it as a product</button></p>`;return;}
+  const shown=list.slice(0,showN);
+  wrap.innerHTML=`${!q&&sc.size?'<p class="hint sm">Your best sellers are first</p>':''}<div class="tiles">${shown.map(i=>tileHTML(i,picked.get(i.id)||0)).join('')}</div>`+
+    (list.length>shown.length?`<button class="btn line wide more" data-act="more" data-w="sell">Show more <span class="muted">(${list.length-shown.length} more)</span></button>`:'');
 }
-function redrawTile(id){
-  const w=document.querySelector(`[data-tw="${id}"]`), p=pack(id); if(!w||!p) return;
-  const c=cart.find(x=>x.k==='pack'&&x.packId===id), hid=w.hidden;
-  w.outerHTML=tileHTML(p,item(p.itemId),c?c.qty:0);
-  if(hid) document.querySelector(`[data-tw="${id}"]`).hidden=true;
+function tileHTML(it,n){
+  const ps=packsOf(it.id), pr=ps.map(p=>p.price), lo=Math.min(...pr), hi=Math.max(...pr);
+  const out=ps.every(p=>p.stock<=0), one=ps.length===1, few=!out&&one&&ps[0].stock<=3;
+  return `<button class="tile${n?' picked':''}" data-act="pick" data-id="${it.id}" aria-label="${esc(it.name)}${n?', '+n+' in this sale':''}">
+    <span class="t-name">${esc(it.name)}</span>
+    <span class="t-sub">${one?esc(ps[0].label):ps.length+' sizes'}</span>
+    <span class="t-price">${lo===hi?ksh(lo):ksh(lo)+'–'+Math.round(hi).toLocaleString('en-KE')}</span>
+    ${out?'<span class="t-flag out">Out</span>':few?`<span class="t-flag">${ps[0].stock} left</span>`:''}
+    ${n?`<span class="t-n">${n}</span>`:''}</button>`;
 }
-function filterTiles(){
-  const q=findQ.trim().toLowerCase(); let n=0;
-  document.querySelectorAll('#tiles .tw').forEach(t=>{const ok=!q||t.dataset.k.split(/\s+/).some(w=>w.startsWith(q))||t.dataset.k.includes(q); t.hidden=!ok; if(ok)n++;});
-  const nm=$('#nomatch'); if(nm) nm.hidden=n>0;
+/* products with several sizes open this list */
+function openPicker(id){const it=item(id); openSheet('picker',it.name,pickerHTML(id)); sheet.dataset.item=id;}
+function pickerHTML(id){
+  return `<div class="panel">${packsOf(id).map(p=>{const n=cartQty(p.id);
+    return `<div class="prow"><div class="pl"><b>${esc(p.label)}</b><small>${ksh(p.price)} · ${p.stock<=0?'<span class="down">out of stock</span>':p.stock+' left'}</small></div>
+      ${n?`<div class="step"><button data-act="pk" data-d="-1" data-id="${p.id}" aria-label="One less ${esc(p.label)}">−</button><span>${n}</span><button data-act="pk" data-d="1" data-id="${p.id}" aria-label="One more ${esc(p.label)}">+</button></div>`
+         :`<button class="btn soft addb" data-act="pk" data-d="1" data-id="${p.id}">Add</button>`}</div>`;}).join('')}</div>
+    <button class="btn primary wide" data-act="close">Done</button>`;
 }
 
-function itemState(it){
-  const ps=packsOf(it.id), low=lowList().filter(r=>r.itemId===it.id);
-  const allOut=ps.length&&ps.every(p=>p.stock<=0)&&!(it.mode==='bulk'&&it.bulk>0);
-  return allOut?'out':low.length?'low':'ok';
+/* ---------- stock ---------- */
+function stockStates(){
+  const low=new Set(lowList().map(r=>r.itemId)), st=new Map();
+  S.items.forEach(it=>{const ps=packsOf(it.id); const allOut=ps.length&&ps.every(p=>p.stock<=0)&&!(it.mode==='bulk'&&it.bulk>0); st.set(it.id,allOut?'out':low.has(it.id)?'low':'ok');});
+  return st;
 }
 const itemWorth=it=>(it.mode==='bulk'?Math.max(0,it.bulk)*(it.cost||0):0)+packsOf(it.id).reduce((a,p)=>a+Math.max(0,p.stock)*(p.cost||0),0);
 const initials=n=>{const w=n.replace(/\(.*?\)/g,'').trim().split(/\s+/);return (w.length>1?w[0][0]+w[1][0]:w[0].slice(0,2)).toUpperCase();};
 function vStock(){
   let h=`<div class="vh"><h2>Stock</h2>${S.items.length?'<button class="btn soft" data-act="delivery">Delivery</button>':''}<button class="btn primary" data-act="product">+ Add</button></div>`;
   if(!S.items.length) return h+empty('Nothing here yet','Add each product once with its sizes and prices. After that, record deliveries as they come in.','+ Add a product','product');
-  const st={}; S.items.forEach(it=>st[it.id]=itemState(it));
-  const nOut=S.items.filter(i=>st[i.id]==='out').length, nLow=S.items.filter(i=>st[i.id]==='low').length;
+  const st=stockStates(); let nOut=0,nLow=0; st.forEach(v=>{if(v==='out')nOut++;else if(v==='low')nLow++;});
   const worth=S.items.reduce((a,i)=>a+itemWorth(i),0);
-  h+=`<div class="stats"><div><span class="l">Products</span><b>${S.items.length}</b></div><div><span class="l">Stock worth</span><b>${ksh(worth)}</b></div><div><span class="l">Need attention</span><b class="${nOut+nLow?'wrn':''}">${nOut+nLow}</b></div></div>`;
-  if(nOut+nLow) h+=`<div class="seg" style="margin:12px 0 0" role="group" aria-label="Show">${[['all','All'],['low','Running low'],['out','Out']].map(([k,l])=>`<button data-act="sfilter" data-f="${k}" aria-pressed="${stockFilter===k}">${l}</button>`).join('')}</div>`;
-  const rank={out:0,low:1,ok:2};
-  const list=S.items.filter(i=>stockFilter==='all'||!(nOut+nLow)||st[i.id]===stockFilter).sort((a,b)=>rank[st[a.id]]-rank[st[b.id]]||a.name.localeCompare(b.name));
-  if(!list.length) return h+`<p class="nomatch">Nothing here.</p>`;
-  h+=`<div class="cards">`+list.map(it=>{
-    const s2=st[it.id], ps=packsOf(it.id);
+  h+=`<div class="stats"><div><span class="l">Products</span><b>${S.items.length.toLocaleString('en-KE')}</b></div><div><span class="l">Stock worth</span><b>${ksh(worth)}</b></div><div><span class="l">Need attention</span><b class="${nOut+nLow?'wrn':''}">${nOut+nLow}</b></div></div>`;
+  if(S.items.length>6) h+=`<div class="find" style="margin:12px 0 0"><input id="sfind" type="search" placeholder="Search stock" value="${esc(stockQ)}" autocomplete="off" aria-label="Search stock"></div>`;
+  if(nOut+nLow) h+=`<div class="seg" style="margin:12px 0 0" role="group" aria-label="Show">${[['all','All'],['low','Running low ('+nLow+')'],['out','Out ('+nOut+')']].map(([k,l])=>`<button data-act="sfilter" data-f="${k}" aria-pressed="${stockFilter===k}">${l}</button>`).join('')}</div>`;
+  return h+`<div id="cards-wrap"></div>`;
+}
+function drawCards(){
+  const wrap=$('#cards-wrap'); if(!wrap) return;
+  const st=stockStates(), q=stockQ.trim().toLowerCase(), rank={out:0,low:1,ok:2};
+  let list=S.items.filter(i=>(stockFilter==='all'||st.get(i.id)===stockFilter)&&(!q||matches(i.name,q)));
+  list.sort((a,b)=>rank[st.get(a.id)]-rank[st.get(b.id)]||a.name.localeCompare(b.name));
+  if(!list.length){wrap.innerHTML=`<p class="nomatch">Nothing here.</p>`;return;}
+  const shown=list.slice(0,stockN);
+  wrap.innerHTML=`<div class="cards">`+shown.map(it=>{
+    const s2=st.get(it.id), ps=packsOf(it.id);
     let meter='';
     if(it.mode==='bulk'){
-      const ref=Math.max(1,it.bulk,...S.deliveries.filter(d=>d.itemId===it.id&&!d.packId).map(d=>d.qty),it.ref||0), pct=Math.max(0,Math.min(100,it.bulk/ref*100));
-      meter=`<div class="sack"><div class="sack-top"><span>In the sack</span><b>${qty(it.bulk,it.unit)}</b></div><div class="meter"><i style="width:${pct.toFixed(0)}%" class="${it.bulk<=0?'out':s2==='low'?'low':''}"></i></div></div>`;
+      const ref=Math.max(1,it.bulk,it.ref||0,...S.deliveries.filter(d=>d.itemId===it.id&&!d.packId).map(d=>d.qty)), pct=Math.max(0,Math.min(100,it.bulk/ref*100));
+      meter=`<div class="sack"><div class="sack-top"><span>Bulk, not yet packed</span><b>${qty(it.bulk,it.unit)}</b></div><div class="meter"><i style="width:${pct.toFixed(0)}%" class="${it.bulk<=0?'out':s2==='low'?'low':''}"></i></div></div>`;
     }
     return `<button class="card" data-act="item" data-id="${it.id}">
-      <div class="c-top"><span class="av">${esc(initials(it.name))}</span><span class="c-name"><b>${esc(it.name)}</b><small>${it.mode==='bulk'?(it.unit==='L'?'Jerrycan · litres':'Sack · kg'):'Ready packed'}</small></span>${s2==='out'?'<span class="flag out">Out</span>':s2==='low'?'<span class="flag">Low</span>':''}</div>
+      <div class="c-top"><span class="av">${esc(initials(it.name))}</span><span class="c-name"><b>${esc(it.name)}</b><small>${it.mode==='bulk'?'Needs repackaging · '+esc(uName(it.unit)):'Ready to sell'}</small></span>${s2==='out'?'<span class="flag out">Out</span>':s2==='low'?'<span class="flag">Low</span>':''}</div>
       ${meter}
       <div class="szs">${ps.map(p=>`<span class="sz ${p.stock<=0?'out':''}"><span>${esc(p.label)}</span><b>${p.stock}</b></span>`).join('')}</div>
       <div class="c-foot"><span>Worth ${ksh(itemWorth(it))}</span><span class="chev">›</span></div>
-    </button>`;}).join('')+`</div>`;
-  return h;
+    </button>`;}).join('')+`</div>`+
+    (list.length>shown.length?`<button class="btn line wide more" data-act="more" data-w="stock">Show more <span class="muted">(${list.length-shown.length} more)</span></button>`:'');
 }
 
+/* ---------- debt ---------- */
 function vDeni(){
   const ent=Object.entries(balances()).filter(([,v])=>v.owed>0.5).sort((a,b)=>b[1].owed-a[1].owed);
   let h=`<div class="vh"><h2>Debt</h2><button class="btn primary" data-act="add-debt">+ Add debt</button></div>`;
   if(!ent.length) return h+empty('Nobody owes you','When someone takes goods on credit, choose Debt when you finish the sale, or tap + Add debt.','','');
   const tot=ent.reduce((a,[,v])=>a+v.owed,0);
   return h+`<div class="big" style="margin-top:0"><div class="l">Owed to you</div><div class="v">${ksh(tot)}</div><div class="s">${ent.length} ${ent.length===1?'person':'people'}</div></div>
-    <div class="panel" style="margin-top:12px">`+ent.map(([c,v])=>`<div class="row"><button class="main" style="border:0;background:none;text-align:left;padding:0" data-act="person" data-c="${esc(c)}"><b>${esc(c)}</b><small>Last ${day(v.last)}</small></button><span class="amt">${ksh(v.owed)}</span><button class="btn soft" data-act="paid" data-c="${esc(c)}">Paid</button></div>`).join('')+`</div>`;
+    <div class="panel" style="margin-top:12px">`+ent.map(([c,v])=>`<div class="row"><button class="main" style="border:0;background:none;text-align:left;padding:0" data-act="person" data-c="${esc(c)}"><b>${esc(c)}</b><small>${ksh(v.owed)} · last ${day(v.last)}</small></button><button class="btn primary" data-act="paid" data-c="${esc(c)}">Settle</button></div>`).join('')+`</div>`;
 }
 
 function vReport(){
@@ -456,6 +589,9 @@ function vReport(){
     <div class="pair"><div><div class="l">Profit</div><div class="v">${ksh(prof)}</div></div><div><div class="l">Customers</div><div class="v">${ss.length}</div></div></div>`;
   const bp={cash:0,mpesa:0,deni:0}; ss.forEach(s=>bp[s.pay]+=s.total);
   h+=`<p class="sec">Paid by</p><div class="panel"><div class="kv"><span>Cash</span><span>${ksh(bp.cash)}</span></div><div class="kv"><span>M-Pesa</span><span>${ksh(bp.mpesa)}</span></div><div class="kv"><span>Debt</span><span>${ksh(bp.deni)}</span></div></div>`;
+  const pays=S.payments.filter(p=>p.ts>=from);
+  if(pays.length){const pm={cash:0,mpesa:0,other:0}; pays.forEach(p=>pm[p.method==='cash'||p.method==='mpesa'?p.method:'other']+=p.amount);
+    h+=`<p class="sec">Debts paid back</p><div class="panel"><div class="kv"><span>Cash</span><span>${ksh(pm.cash)}</span></div><div class="kv"><span>M-Pesa</span><span>${ksh(pm.mpesa)}</span></div>${pm.other?`<div class="kv"><span>Not recorded</span><span>${ksh(pm.other)}</span></div>`:''}</div>`;}
   h+=`<p class="sec">Last 7 days</p><div class="chart">${chart()}</div>`;
   const top={}; ss.forEach(s=>s.lines.forEach(l=>{const t=top[l.name]=top[l.name]||{n:0,r:0};t.n+=l.qty;t.r+=l.price;}));
   const tl=Object.entries(top).sort((a,b)=>b[1].r-a[1].r).slice(0,5);
@@ -484,7 +620,7 @@ function lowList(){
   S.sales.filter(s=>s.ts>=from).forEach(s=>s.lines.forEach(l=>{if(l.k==='pack')sold[l.packId]=(sold[l.packId]||0)+l.qty;else out[l.itemId]=(out[l.itemId]||0)+l.units;}));
   S.repacks.filter(r=>r.ts>=from).forEach(r=>out[r.itemId]=(out[r.itemId]||0)+r.used);
   S.items.forEach(it=>{
-    if(it.mode==='bulk'&&out[it.id]){const d=it.bulk/(out[it.id]/7); if(d<3) rows.push({itemId:it.id,name:it.name+' (sack)',text:it.bulk<=0?'Empty':qty(it.bulk,it.unit)+' left',out:it.bulk<=0,d});}
+    if(it.mode==='bulk'&&out[it.id]){const d=it.bulk/(out[it.id]/7); if(d<3) rows.push({itemId:it.id,name:it.name+' (bulk)',text:it.bulk<=0?'Empty':qty(it.bulk,it.unit)+' left',out:it.bulk<=0,d});}
     packsOf(it.id).forEach(p=>{
       if(!sold[p.id]&&p.stock>0) return;
       const d=sold[p.id]?p.stock/(sold[p.id]/7):0;
@@ -545,25 +681,6 @@ function openSheet(kind,title,html,mount){
 function closeSheet(){if(sheet){sheet.remove();sheet=null;sheetKind='';} armed=null;}
 const sheetBody=()=>sheet&&sheet.querySelector('.sb');
 
-/* loose */
-function openLoose(){
-  const list=S.items.filter(i=>i.mode==='bulk'&&i.loose>0); if(!list.length) return;
-  if(!list.some(i=>i.id===looseSel)) looseSel=list[0].id;
-  const it=item(looseSel);
-  openSheet('loose','Sell by amount',`
-    <p class="hint">For "sugar ya 20 bob". Type the money and weigh what it shows.</p>
-    ${list.length>1?`<div class="chips">${list.map(i=>`<button class="chip" data-act="loose-pick" data-id="${i.id}" aria-pressed="${i.id===looseSel}">${esc(i.name)}</button>`).join('')}</div>`:''}
-    <div class="chips">${[10,20,30,50,100].map(a=>`<button class="chip" data-act="loose-amt" data-a="${a}">${a}</button>`).join('')}</div>
-    <label class="fld"><span>Amount paid (KSh)</span><input id="lo-amt" type="number" inputmode="numeric" min="1" placeholder="e.g. 20"></label>
-    <p class="calc" id="lo-calc">${esc(it.name)} is ${ksh(it.loose)} per ${it.unit}.</p>
-    <button class="btn primary wide" id="lo-add" data-act="loose-add" disabled>Add to sale</button>`,b=>{b.querySelector('#lo-amt').addEventListener('input',looseCalc);});
-}
-function looseCalc(){
-  const b=sheetBody(), it=item(looseSel), a=toNum(b.querySelector('#lo-amt').value);
-  b.querySelector('#lo-calc').innerHTML=a>0?`Weigh about <b>${qty(a/it.loose,it.unit)}</b> of ${esc(it.name.toLowerCase())}.`:`${esc(it.name)} is ${ksh(it.loose)} per ${it.unit}.`;
-  b.querySelector('#lo-add').disabled=!(a>0);
-}
-
 /* item details */
 function openItem(id){
   const it=item(id); if(!it) return;
@@ -571,7 +688,7 @@ function openItem(id){
     ...S.repacks.filter(r=>r.itemId===id).map(r=>({ts:r.ts,t:`Repacked ${qty(r.used,it.unit)}`,a:r.loss>0?`lost ${qty(r.loss,it.unit)}`:'no loss'}))].sort((a,b)=>b.ts-a.ts).slice(0,5);
   openSheet('item',it.name,`
     <div class="panel">
-      ${it.mode==='bulk'?`<div class="kv"><span>In the sack</span><span>${qty(it.bulk,it.unit)}</span></div>`:''}
+      ${it.mode==='bulk'?`<div class="kv"><span>Bulk, not yet packed</span><span>${qty(it.bulk,it.unit)}</span></div>`:''}
       ${packsOf(id).map(p=>`<div class="kv"><span>${esc(p.label)} <span style="color:var(--muted);font-weight:600">at ${ksh(p.price)}</span></span><span class="${p.stock<=0?'down':''}">${p.stock} on shelf</span></div>`).join('')}
     </div>
     <div class="btns"><button class="btn primary" data-act="delivery" data-id="${id}">Delivery</button>${it.mode==='bulk'?`<button class="btn soft" data-act="repack" data-id="${id}">Repack</button>`:''}<button class="btn soft" data-act="product" data-id="${id}">Edit</button></div>
@@ -581,28 +698,29 @@ function openItem(id){
 /* add / edit product */
 function sizeRow(p,mode,unit){p=p||{};
   return `<div class="size" data-pid="${p.id||''}">
-    <label class="fld lab"><span>Size</span><input class="s-label" value="${esc(p.label||'')}" placeholder="${mode==='ready'?'e.g. Packet':'e.g. ¼ kg'}" autocomplete="off"></label>
+    <label class="fld lab"><span>Size</span><input class="s-label" value="${esc(p.label||'')}" placeholder="${mode==='ready'?'e.g. Packet':'Type, e.g. quarter'}" autocomplete="off"></label>
     <label class="fld"><span>Price</span><input class="s-price" type="number" inputmode="decimal" min="0" step="any" value="${p.price??''}" placeholder="KSh"></label>
     <label class="fld"><span>On shelf</span><input class="s-stock" type="number" inputmode="numeric" step="1" value="${p.stock??''}" placeholder="0"></label>
     <button type="button" class="x" data-act="size-del" aria-label="Remove size">×</button>
-    <label class="fld wt bulk-only" hidden><span>How many ${unit||'kg'} is this size?</span><input class="s-size" type="number" inputmode="decimal" min="0" step="any" value="${p.size??''}" placeholder="e.g. 0.25"></label>
+    <label class="fld wt bulk-only" hidden><span>How many <span class="u">${esc(uName(unit||'kg'))}</span> is this size?</span><input class="s-size" type="number" inputmode="decimal" min="0" step="any" value="${p.size??''}" placeholder="e.g. 0.25"></label>
     <label class="fld wt ready-only"><span>Bought at, each (optional)</span><input class="s-cost" type="number" inputmode="decimal" min="0" step="any" value="${p.cost?Math.round(p.cost*100)/100:''}" placeholder="KSh"></label>
   </div>`;
 }
 function openProduct(id){
   const it=id?item(id):null, mode=it?it.mode:'bulk', unit=it&&it.unit!=='pc'?it.unit:'kg';
-  openSheet('product',it?'Edit '+it.name:'Add a product',`<form id="pf" class="sb ${mode}" novalidate>
+  const known=UNITS.some(u=>u[0]===unit);
+  openSheet('product',it?'Edit '+it.name:'Add a product',`<form id="pf" class="sb ${mode}" data-unit="${it?esc(unit):''}" novalidate>
     <label class="fld"><span>Product name</span><input id="pf-name" value="${esc(it?.name||'')}" placeholder="Start typing, e.g. su…" autocomplete="off"></label>
-    ${it?'':`<fieldset class="fld"><legend>How does it come?</legend><div class="choice">
-      <label><input type="radio" name="pf-mode" value="bulk" checked><b>In a sack or jerrycan</b><small>I weigh and pack it</small></label>
-      <label><input type="radio" name="pf-mode" value="ready"><b>Ready packed</b><small>Bread, milk, soap…</small></label></div></fieldset>`}
+    ${it?'':`<fieldset class="fld"><legend>How do you sell it?</legend><div class="choice">
+      <label><input type="radio" name="pf-mode" value="bulk" checked><b>Needs repackaging</b><small>Comes in bulk. I divide it into smaller packs.</small></label>
+      <label><input type="radio" name="pf-mode" value="ready"><b>Ready to sell</b><small>Sold as it comes: bread, milk, soap…</small></label></div></fieldset>`}
     <div class="bulk-only sb">
-      ${it?'':`<div class="chips" role="radiogroup" aria-label="Measured in"><label class="chip"><input type="radio" name="pf-unit" value="kg" ${unit==='kg'?'checked':''}>Kilograms</label><label class="chip"><input type="radio" name="pf-unit" value="L" ${unit==='L'?'checked':''}>Litres</label></div>`}
+      ${it?'':`<fieldset class="fld"><legend>The bulk is counted in</legend><div class="chips" role="radiogroup" aria-label="Unit">${UNITS.map(([v,l])=>`<label class="chip"><input type="radio" name="pf-unit" value="${v}" ${v===unit?'checked':''}>${l}</label>`).join('')}<label class="chip"><input type="radio" name="pf-unit" value="other" ${known?'':'checked'}>Other</label></div>
+        <input id="pf-unit-other" class="other-in" placeholder="e.g. bundles, trays, cartons" autocomplete="off" value="${known?'':esc(unit)}" ${known?'hidden':''}></fieldset>`}
       <div class="two">
-        <label class="fld"><span>In the sack now (<span class="u">${unit}</span>)</span><input id="pf-bulk" type="number" inputmode="decimal" min="0" step="any" value="${it&&it.mode==='bulk'?nf(it.bulk,3).replace(/,/g,''):''}" placeholder="0"></label>
-        <label class="fld"><span>Bought at, per <span class="u">${unit}</span></span><input id="pf-cost" type="number" inputmode="decimal" min="0" step="any" value="${it&&it.cost?Math.round(it.cost*100)/100:''}" placeholder="KSh"></label>
+        <label class="fld"><span>Bulk stock now (<span class="u">${esc(uName(unit))}</span>)</span><input id="pf-bulk" type="number" inputmode="decimal" min="0" step="any" value="${it&&it.mode==='bulk'?String(r3(it.bulk)):''}" placeholder="0"></label>
+        <label class="fld"><span>Bought at, per <span class="u1">${esc(uOne(unit))}</span></span><input id="pf-cost" type="number" inputmode="decimal" min="0" step="any" value="${it&&it.cost?Math.round(it.cost*100)/100:''}" placeholder="KSh"></label>
       </div>
-      <label class="fld"><span>Loose price per <span class="u">${unit}</span>, if you sell by money (optional)</span><input id="pf-loose" type="number" inputmode="decimal" min="0" step="any" value="${it?.loose||''}" placeholder="KSh"></label>
     </div>
     <p class="hint" style="font-weight:700;margin-bottom:-6px">Sizes and prices</p>
     <div class="sb" id="pf-sizes">${(it?packsOf(it.id):[{}]).map(p=>sizeRow(p,mode,unit)).join('')}</div>
@@ -611,29 +729,41 @@ function openProduct(id){
     <button class="btn primary wide" type="submit">${it?'Save':'Add to my shop'}</button>
     ${it?`<button type="button" class="btn danger wide" data-act="product-del" data-id="${it.id}">Delete ${esc(it.name)}</button>`:''}
   </form>`,b=>{
-    const f=b.querySelector('#pf'), name=f.querySelector('#pf-name');
+    const f=b.querySelector('#pf'), name=f.querySelector('#pf-name'), other=f.querySelector('#pf-unit-other');
     suggest(name,()=>it?[]:CATALOG.map(c=>c[0]).filter(n=>!byName(n)),pickCatalog);
+    if(other){ suggest(other,()=>OTHER_UNITS); other.addEventListener('input',pfMode); }
     f.addEventListener('change',e=>{if(e.target.name==='pf-mode'||e.target.name==='pf-unit') pfMode();});
     f.addEventListener('submit',e=>{e.preventDefault();pfSave(it);});
     f.querySelectorAll('.size').forEach(wireSize);
+    pfMode();
     if(!it) setTimeout(()=>name.focus(),60);
   });
 }
 const pfModeVal=()=>{const f=$('#pf'); const r=f.querySelector('input[name="pf-mode"]:checked'); return r?r.value:(f.classList.contains('ready')?'ready':'bulk');};
-const pfUnitVal=()=>{const f=$('#pf'); const r=f.querySelector('input[name="pf-unit"]:checked'); return r?r.value:(f.querySelector('.u')?.textContent||'kg');};
+function pfUnitVal(){
+  const f=$('#pf'); if(f.dataset.unit) return f.dataset.unit;
+  const r=f.querySelector('input[name="pf-unit"]:checked'); if(!r) return 'kg';
+  if(r.value!=='other') return r.value;
+  return f.querySelector('#pf-unit-other').value.trim().toLowerCase();
+}
 function pfMode(){
-  const f=$('#pf'), m=pfModeVal(); f.classList.toggle('bulk',m==='bulk'); f.classList.toggle('ready',m==='ready');
-  const u=f.querySelector('input[name="pf-unit"]:checked')?.value; if(u) f.querySelectorAll('.u').forEach(s=>s.textContent=u);
+  const f=$('#pf'); if(!f) return; const m=pfModeVal(); f.classList.toggle('bulk',m==='bulk'); f.classList.toggle('ready',m==='ready');
+  const r=f.querySelector('input[name="pf-unit"]:checked'), other=f.querySelector('#pf-unit-other');
+  if(other){ other.hidden=!(r&&r.value==='other'); }
+  const u=pfUnitVal()||'units';
+  f.querySelectorAll('.u').forEach(x=>x.textContent=uName(u)); f.querySelectorAll('.u1').forEach(x=>x.textContent=uOne(u));
+  f.querySelectorAll('.s-label').forEach(i=>i.placeholder=m==='ready'?'e.g. Packet':'Type, e.g. '+(u==='kg'||u==='L'||u==='m'?'quarter':'1'));
   f.querySelectorAll('.size').forEach(r=>sizeCheck(r));
 }
 function wireSize(r){
   const lab=r.querySelector('.s-label');
-  suggest(lab,()=>{const f=$('#pf'); if(pfModeVal()==='ready') return SIZES.ready; const u=f.querySelector('input[name="pf-unit"]:checked')?.value||(f.querySelector('.u')?.textContent)||'kg'; return SIZES[u]||SIZES.kg;},null,r.querySelector('.x'));
+  suggest(lab,raw=>sizeOptions(raw,pfModeVal(),pfUnitVal()||'units'),null,r.querySelector('.x'),true);
   lab.addEventListener('input',()=>sizeCheck(r));
+  lab.addEventListener('blur',()=>{const t=tidySize(lab.value,pfModeVal(),pfUnitVal()||'units'); if(t&&t!==lab.value){lab.value=t; sizeCheck(r);}});
   sizeCheck(r);
 }
 function sizeCheck(r){
-  const wt=r.querySelector('.wt.bulk-only'), lab=r.querySelector('.s-label').value.trim(), v=parseSize(lab);
+  const wt=r.querySelector('.wt.bulk-only'), lab=r.querySelector('.s-label').value.trim(), v=sizeIn(lab,pfUnitVal()||'units');
   if(v){r.querySelector('.s-size').value=v; wt.hidden=true;} else wt.hidden=!lab;
 }
 function pickCatalog(n){
@@ -650,18 +780,21 @@ function pfSave(it){
   const name=f.querySelector('#pf-name').value.trim(), mode=it?it.mode:pfModeVal(), unit=it?it.unit:(mode==='bulk'?pfUnitVal():'pc');
   if(!name) return fail('Give the product a name.');
   const dup=byName(name); if(dup&&(!it||dup.id!==it.id)) return fail(`${name} is already in your shop.`);
-  const rows=[...f.querySelectorAll('.size')].map(r=>({pid:r.dataset.pid,label:r.querySelector('.s-label').value.trim(),price:toNum(r.querySelector('.s-price').value),stock:toNum(r.querySelector('.s-stock').value),size:toNum(r.querySelector('.s-size').value),cost:toNum(r.querySelector('.s-cost').value)})).filter(r=>r.label||r.price>0||r.pid);
+  if(mode==='bulk'&&!unit) return fail('Write what the bulk is counted in, like bundles.');
+  const rows=[...f.querySelectorAll('.size')].map(r=>({pid:r.dataset.pid,label:tidySize(r.querySelector('.s-label').value,mode,unit),price:toNum(r.querySelector('.s-price').value),stock:toNum(r.querySelector('.s-stock').value),size:toNum(r.querySelector('.s-size').value),cost:toNum(r.querySelector('.s-cost').value)})).filter(r=>r.label||r.price>0||r.pid);
   if(!rows.length) return fail('Add at least one size you sell, like ¼ kg or Packet.');
+  const seen=new Set();
   for(const r of rows){
     if(!r.label) return fail('Every size needs a name.');
+    if(seen.has(r.label.toLowerCase())) return fail(`${r.label} is listed twice.`); seen.add(r.label.toLowerCase());
     if(!(r.price>0)) return fail(`Set a price for ${r.label}.`);
-    if(mode==='bulk'&&!(r.size>0)) return fail(`How many ${unit} is ${r.label}? Write it under the size.`);
+    if(mode==='bulk'){ const v=sizeIn(r.label,unit); if(v) r.size=v; if(!(r.size>0)) return fail(`How many ${uName(unit)} is ${r.label}? Write it under the size.`); }
   }
-  const bulk=toNum(f.querySelector('#pf-bulk').value), cost=toNum(f.querySelector('#pf-cost').value), loose=toNum(f.querySelector('#pf-loose').value);
+  const bulk=toNum(f.querySelector('#pf-bulk').value), cost=toNum(f.querySelector('#pf-cost').value);
   let t=it;
-  if(!t){t={id:uid(),name,mode,unit,bulk:0,cost:0,loose:0};S.items.push(t);if(mode==='bulk'&&bulk>0)t.ref=bulk;}
+  if(!t){t={id:uid(),name,mode,unit,bulk:0,cost:0,added:Date.now()};S.items.push(t);if(mode==='bulk'&&bulk>0)t.ref=bulk;}
   t.name=name;
-  if(mode==='bulk'){ if(bulk>=0) t.bulk=r3(bulk); if(cost>0) t.cost=cost; t.loose=loose>0?loose:0; }
+  if(mode==='bulk'){ if(bulk>=0) t.bulk=r3(bulk); if(cost>0) t.cost=cost; }
   const keep=new Set();
   rows.forEach(r=>{
     const size=mode==='bulk'?r.size:1; let p=r.pid&&pack(r.pid);
@@ -693,7 +826,7 @@ function dlDraw(){
   const ps=packsOf(it.id), bulk=it.mode==='bulk';
   box.innerHTML=`${bulk?'':`<div class="chips" role="radiogroup" aria-label="Size">${ps.map((p,i)=>`<label class="chip"><input type="radio" name="dl-pack" value="${p.id}" ${i===0?'checked':''}>${esc(p.label)}</label>`).join('')}</div>`}
     <div class="two">
-      <label class="fld"><span>${bulk?`How much (${it.unit})`:'How many'}</span><input id="dl-qty" type="number" inputmode="decimal" min="0" step="any" placeholder="${bulk?'e.g. 50':'e.g. 24'}"></label>
+      <label class="fld"><span>${bulk?`How much (${esc(uName(it.unit))})`:'How many'}</span><input id="dl-qty" type="number" inputmode="decimal" min="0" step="any" placeholder="${bulk?'e.g. 50':'e.g. 24'}"></label>
       <label class="fld"><span>Total paid (KSh)</span><input id="dl-paid" type="number" inputmode="decimal" min="0" step="any" placeholder="e.g. 7500"></label>
     </div>
     <p class="calc" id="dl-calc">Fill both to see the buying price.</p>
@@ -704,7 +837,7 @@ function dlDraw(){
 function dlCalc(){
   const b=sheetBody(), it=byName(b.querySelector('#dl-name').value); if(!it) return;
   const q=toNum(b.querySelector('#dl-qty').value), paid=toNum(b.querySelector('#dl-paid').value), p=it.mode==='bulk'?null:pack(b.querySelector('input[name="dl-pack"]:checked')?.value);
-  b.querySelector('#dl-calc').innerHTML=q>0&&paid>=0?(p?`<b>${ksh(paid/q)}</b> each. You sell at ${ksh(p.price)}, so you make <b>${ksh(p.price-paid/q)}</b> on each.`:`<b>${ksh(paid/q)}</b> per ${it.unit}.`):'Fill both to see the buying price.';
+  b.querySelector('#dl-calc').innerHTML=q>0&&paid>=0?(p?`<b>${ksh(paid/q)}</b> each. You sell at ${ksh(p.price)}, so you make <b>${ksh(p.price-paid/q)}</b> on each.`:`<b>${ksh(paid/q)}</b> per ${esc(uOne(it.unit))}.`):'Fill both to see the buying price.';
 }
 function dlSave(){
   const b=sheetBody(), it=byName(b.querySelector('#dl-name').value), q=toNum(b.querySelector('#dl-qty').value), paid=toNum(b.querySelector('#dl-paid').value), err=b.querySelector('#dl-err');
@@ -722,8 +855,8 @@ function dlSave(){
 function openRepack(id){
   const it=item(id), ps=packsOf(id);
   openSheet('repack','Repack '+it.name,`
-    <p class="hint">In the sack: <b>${qty(it.bulk,it.unit)}</b></p>
-    <label class="fld"><span>How much did you take out? (${it.unit})</span><input id="rp-used" type="number" inputmode="decimal" min="0" step="any" placeholder="e.g. 10"></label>
+    <p class="hint">Bulk, not yet packed: <b>${qty(it.bulk,it.unit)}</b></p>
+    <label class="fld"><span>How much bulk did you use? (${esc(uName(it.unit))})</span><input id="rp-used" type="number" inputmode="decimal" min="0" step="any" placeholder="e.g. 10"></label>
     <p class="hint" style="font-weight:700;margin-bottom:-6px">How many did you pack?</p>
     <div class="panel">${ps.map(p=>`<div class="line" style="grid-template-columns:1fr auto"><div><b>${esc(p.label)}</b><small>${p.stock} on shelf now</small></div><div class="step"><button type="button" data-act="rp" data-d="-1" data-id="${p.id}" aria-label="One less">−</button><input id="rp-${p.id}" type="number" inputmode="numeric" min="0" value="0" aria-label="${esc(p.label)} packed"><button type="button" data-act="rp" data-d="1" data-id="${p.id}" aria-label="One more">+</button></div></div>`).join('')}</div>
     <p class="calc" id="rp-calc"></p>
@@ -737,10 +870,10 @@ function rpRead(id){
 function rpCalc(id){
   const {b,it,used,packed}=rpRead(id), c=b.querySelector('#rp-calc'), btn=b.querySelector('#rp-save');
   if(!(packed>0)){c.textContent='Add the packs you made.';btn.disabled=true;return;}
-  if(!(used>0)){c.innerHTML=`Packed <b>${qty(packed,it.unit)}</b>. Write how much you took out to see any spillage.`;btn.disabled=false;return;}
+  if(!(used>0)){c.innerHTML=`Packed <b>${qty(packed,it.unit)}</b>. Write how much bulk you used to see any loss.`;btn.disabled=false;return;}
   const loss=r3(used-packed);
-  if(loss<0){c.innerHTML=`<span class="err">That is more than you took out. Check the numbers.</span>`;btn.disabled=true;return;}
-  c.innerHTML=`Packed <b>${qty(packed,it.unit)}</b> of ${qty(used,it.unit)}. ${loss>0?`Spilled <b>${qty(loss,it.unit)}</b>${it.cost?`, about ${ksh(loss*it.cost)}`:''}.`:'Nothing spilled.'}`+(used>it.bulk+1e-9?`<br><span class="wrn">That is more than the ${qty(it.bulk,it.unit)} in the sack. Record the delivery first if one came in.</span>`:'');
+  if(loss<0){c.innerHTML=`<span class="err">That is more than the bulk you used. Check the numbers.</span>`;btn.disabled=true;return;}
+  c.innerHTML=`Packed <b>${qty(packed,it.unit)}</b> of ${qty(used,it.unit)}. ${loss>0?`Lost <b>${qty(loss,it.unit)}</b>${it.cost?`, about ${ksh(loss*it.cost)}`:''}.`:'Nothing lost.'}`+(used>it.bulk+1e-9?`<br><span class="wrn">That is more than the ${qty(it.bulk,it.unit)} of bulk on record. Record the delivery first if one came in.</span>`:'');
   btn.disabled=false;
 }
 function rpSave(id){
@@ -768,20 +901,22 @@ function openAddDebt(){
     });
 }
 function openPaid(c){
-  const owed=(balances()[c]||{owed:0}).owed;
-  openSheet('paid',c+' paid',`<p class="hint">Owes ${ksh(owed)}</p>
-    <label class="fld"><span>Amount paid (KSh)</span><input id="pd-amt" type="number" inputmode="numeric" min="1" value="${Math.round(owed)}"></label>
-    <p class="err" id="pd-err" hidden>Enter the amount they paid.</p>
-    <button class="btn primary wide" data-act="paid-save" data-c="${esc(c)}">Save payment</button>`);
+  const owed=Math.max(0,(balances()[c]||{owed:0}).owed), o=Math.round(owed);
+  openSheet('paid','Settle debt',`<div class="big" style="margin-top:0"><div class="l">${esc(c)} owes</div><div class="v">${ksh(owed)}</div></div>
+    <label class="fld"><span>Amount paid (KSh)</span><input id="pd-amt" type="number" inputmode="numeric" min="1" value="${o}"></label>
+    <div class="chips" style="margin-top:-6px"><button type="button" class="chip" data-act="pd-set" data-v="${o}">All of it</button>${o>=20?`<button type="button" class="chip" data-act="pd-set" data-v="${Math.round(o/2)}">Half</button>`:''}</div>
+    <p class="hint" style="font-weight:700;margin-bottom:-6px">How did they pay?</p>
+    <div class="pay pay2"><button data-act="paid-save" data-m="cash" data-c="${esc(c)}">Cash</button><button data-act="paid-save" data-m="mpesa" data-c="${esc(c)}">M-Pesa</button></div>
+    <p class="err" id="pd-err" hidden></p>`);
 }
 function openPerson(c){
   const ev=[...S.sales.filter(s=>s.pay==='deni'&&s.customer===c).map(s=>({ts:s.ts,t:s.lines.map(l=>l.name).join(', '),a:s.total})),
     ...S.debts.filter(d=>d.customer===c).map(d=>({ts:d.ts,t:d.note||'Debt',a:d.amount})),
-    ...S.payments.filter(p=>p.customer===c).map(p=>({ts:p.ts,t:'Paid',a:-p.amount}))].sort((a,b)=>b.ts-a.ts);
+    ...S.payments.filter(p=>p.customer===c).map(p=>({ts:p.ts,t:'Paid'+(p.method?' by '+payName(p.method):''),a:-p.amount}))].sort((a,b)=>b.ts-a.ts);
   const owed=(balances()[c]||{owed:0}).owed;
   openSheet('person',c,`<div class="big" style="margin-top:0"><div class="l">Owes you</div><div class="v">${ksh(Math.max(0,owed))}</div></div>
     <div class="panel">${ev.map(e=>`<div class="kv"><span>${esc(e.t)} <span style="color:var(--muted);font-weight:600">· ${day(e.ts)}</span></span><span class="${e.a<0?'up':''}">${e.a<0?'−':'+'}${ksh(Math.abs(e.a))}</span></div>`).join('')}</div>
-    ${owed>0.5?`<button class="btn primary wide" data-act="paid" data-c="${esc(c)}">They paid</button>`:''}`);
+    ${owed>0.5?`<button class="btn primary wide" data-act="paid" data-c="${esc(c)}">Settle debt</button>`:''}`);
 }
 
 /* recent sales and returns */
@@ -850,8 +985,9 @@ document.addEventListener('click',e=>{
     case 'ret': returnOne(a.dataset.id,+a.dataset.i); break;
     case 'sale-cancel': arm(a,'sc'+a.dataset.id,'Tap again to cancel this sale',()=>cancelSale(a.dataset.id)); break;
     case 'sfilter': stockFilter=a.dataset.f; render(); break;
-    case 'add': {const c=cart.find(x=>x.k==='pack'&&x.packId===a.dataset.id); if(c)c.qty++; else cart.push({k:'pack',packId:a.dataset.id,qty:1}); buzz(); redrawTile(a.dataset.id); cartBar(); break;}
-    case 'minus': {const i=cart.findIndex(x=>x.k==='pack'&&x.packId===a.dataset.id); if(i<0) return; if(--cart[i].qty<=0) cart.splice(i,1); buzz(); redrawTile(a.dataset.id); cartBar(); break;}
+    case 'pick': {const ps=packsOf(a.dataset.id); if(ps.length===1){cartAdd(ps[0].id,1); drawTiles(); cartBar();} else openPicker(a.dataset.id); break;}
+    case 'pk': {cartAdd(a.dataset.id,+a.dataset.d); const id=sheet&&sheet.dataset.item; if(id) b.innerHTML=pickerHTML(id); drawTiles(); cartBar(); break;}
+    case 'more': if(a.dataset.w==='stock'){stockN+=PAGE;drawCards();} else {showN+=PAGE;drawTiles();} break;
     case 'cart': openCart(); break;
     case 'inc': cart[+a.dataset.i].qty++; refreshCart(); break;
     case 'dec': {const c=cart[+a.dataset.i]; if(--c.qty<=0) cart.splice(+a.dataset.i,1); refreshCart(); break;}
@@ -861,12 +997,8 @@ document.addEventListener('click',e=>{
     case 'deni-open': b.querySelector('#deni-box').hidden=false; a.classList.add('on'); b.querySelector('#deni-name').focus(); break;
     case 'deni-save': {const n=b.querySelector('#deni-name').value.trim(); if(!n){b.querySelector('#deni-err').hidden=false;return;} const ex=customers().find(k=>k.toLowerCase()===n.toLowerCase()); sell('deni',ex||n); break;}
     case 'undo': undo(); break;
-    case 'loose': openLoose(); break;
-    case 'loose-pick': looseSel=a.dataset.id; openLoose(); break;
-    case 'loose-amt': b.querySelector('#lo-amt').value=a.dataset.a; looseCalc(); break;
-    case 'loose-add': {const it=item(looseSel), amt=toNum(b.querySelector('#lo-amt').value); if(!(amt>0)) return; cart.push({k:'loose',itemId:it.id,amount:amt,units:r3(amt/it.loose)}); closeSheet(); render(); toast(`Added ${ksh(amt)} of ${it.name.toLowerCase()}`); break;}
     case 'item': openItem(a.dataset.id); break;
-    case 'product': {const pre=sheetKind==='delivery'&&!a.dataset.id?b.querySelector('#dl-name').value.trim():''; openProduct(a.dataset.id); if(pre){const n=$('#pf-name'); n.value=pre; const c=CATALOG.find(x=>x[0].toLowerCase()===pre.toLowerCase()); if(c){n.value=c[0];pickCatalog(c[0]);}} break;}
+    case 'product': {const pre=sheetKind==='delivery'&&!a.dataset.id?b.querySelector('#dl-name').value.trim():(tab==='sell'&&!a.dataset.id&&!sheet?findQ.trim():''); openProduct(a.dataset.id); if(pre){const n=$('#pf-name'); n.value=pre; const c=CATALOG.find(x=>x[0].toLowerCase()===pre.toLowerCase()); if(c){n.value=c[0];pickCatalog(c[0]);}} break;}
     case 'size-add': {const box=$('#pf-sizes'); box.insertAdjacentHTML('beforeend',sizeRow({},pfModeVal(),pfUnitVal())); wireSize(box.lastElementChild); box.lastElementChild.querySelector('.s-label').focus(); break;}
     case 'size-del': {const rows=document.querySelectorAll('#pf-sizes .size'); if(rows.length>1) a.closest('.size').remove(); else {a.closest('.size').querySelectorAll('input').forEach(i=>i.value='');} break;}
     case 'product-del': arm(a,'pd','Tap again to delete. Past sales stay.',()=>{const id=a.dataset.id, n=item(id).name; S.items=S.items.filter(i=>i.id!==id); S.packs=S.packs.filter(p=>p.itemId!==id); cart=cart.filter(c=>c.k==='pack'?pack(c.packId):item(c.itemId)); closeSheet(); commit(); toast(`Deleted ${n}`);}); break;
@@ -883,7 +1015,12 @@ document.addEventListener('click',e=>{
     case 'db-day': b.querySelector('#db-date').value=isoDay(Date.now()-(+a.dataset.d)*DAY); break;
     case 'person': openPerson(a.dataset.c); break;
     case 'paid': openPaid(a.dataset.c); break;
-    case 'paid-save': {const amt=toNum(b.querySelector('#pd-amt').value); if(!(amt>0)){b.querySelector('#pd-err').hidden=false;return;} S.payments.push({id:uid(),ts:Date.now(),customer:a.dataset.c,amount:amt}); closeSheet(); commit(); toast(`${a.dataset.c} paid ${ksh(amt)}`); break;}
+    case 'pd-set': b.querySelector('#pd-amt').value=a.dataset.v; break;
+    case 'paid-save': {const c=a.dataset.c, amt=toNum(b.querySelector('#pd-amt').value), err=b.querySelector('#pd-err'), owed=Math.max(0,(balances()[c]||{owed:0}).owed);
+      if(!(amt>0)){err.textContent='Enter the amount they paid.';err.hidden=false;return;}
+      if(amt>owed+0.5){err.textContent=`That is more than the ${ksh(owed)} they owe.`;err.hidden=false;return;}
+      S.payments.push({id:uid(),ts:Date.now(),customer:c,amount:amt,method:a.dataset.m}); closeSheet(); commit();
+      const left=owed-amt; toast(`${c} paid ${ksh(amt)} by ${payName(a.dataset.m)}. `+(left>0.5?`${ksh(left)} still owed.`:'Debt cleared.')); break;}
     case 'settings': openSettings(); break;
     case 'st-name': S.shop=b.querySelector('#st-name').value.trim(); closeSheet(); commit(); break;
     case 'install': if(installEvt){installEvt.prompt(); installEvt.userChoice.finally(()=>{installEvt=null;closeSheet();});} break;
