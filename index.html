@@ -137,12 +137,17 @@ nav.tabs .ic{width:56px;height:30px;border-radius:15px;display:grid;place-items:
 .stats .l{font-size:.75rem;font-weight:700;color:var(--muted)}
 .stats b{font-size:1.15rem;font-weight:800;overflow-wrap:anywhere}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-top:12px}
-.card{border:0;background:var(--surface);border-radius:20px;padding:14px;text-align:left;display:flex;flex-direction:column;gap:12px;width:100%}
+.card{border:0;background:var(--surface);border-radius:18px;padding:12px 14px;text-align:left;display:flex;flex-direction:column;gap:10px;width:100%}
 .card:active{background:#FBFAF4}
 .c-top{display:flex;align-items:center;gap:12px}
 .av{width:44px;height:44px;border-radius:14px;background:var(--sand);color:var(--brand-deep);display:grid;place-items:center;font-weight:800;font-size:.95rem;flex:none}
 .c-name{flex:1;min-width:0}
 .c-name b{display:block;font-weight:800;font-size:1.05rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c-name b .flag{font-size:.7rem;padding:2px 7px;vertical-align:2px;margin-left:4px}
+.c-side{display:flex;flex-direction:column;align-items:flex-end;flex:none;text-align:right}
+.c-side b{font-weight:800;font-size:.98rem}
+.c-side small{color:var(--muted);font-size:.78rem}
+.sz.bulkc{background:var(--brand-soft);color:var(--brand-deep)}
 .c-name small{color:var(--muted);font-size:.8rem}
 .sack-top{display:flex;justify-content:space-between;font-size:.88rem;color:var(--muted);margin-bottom:6px}
 .sack-top b{color:var(--ink);font-weight:800}
@@ -199,7 +204,7 @@ nav.tabs .ic{width:56px;height:30px;border-radius:15px;display:grid;place-items:
 .fld input,.fld textarea{border:0;background:var(--surface);border-radius:12px;padding:12px 14px;min-height:48px;width:100%}
 .fld textarea{min-height:90px;font-size:.75rem}
 .fld input:focus,.fld textarea:focus{outline:2px solid var(--brand)}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end}
 .hint{margin:0;color:var(--muted);font-size:.9rem}
 .calc{margin:0;background:var(--sand);border-radius:12px;padding:12px 14px}
 .err{margin:0;color:var(--bad);font-weight:700}
@@ -228,14 +233,15 @@ nav.tabs .ic{width:56px;height:30px;border-radius:15px;display:grid;place-items:
 .chip[aria-pressed="true"],.chip:has(input:checked){background:var(--brand);color:#fff}
 .chip input{position:absolute;opacity:0;pointer-events:none}
 
-.size{background:var(--surface);border-radius:14px;padding:12px;display:grid;grid-template-columns:1.3fr 1fr 1fr auto;gap:8px;align-items:start}
-.size .fld input{background:var(--bg);min-height:44px;padding:10px 12px}
-.size .x{background:var(--bg);margin-top:23px}
+.size{background:var(--surface);border-radius:14px;padding:10px;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,.9fr) auto;gap:6px;align-items:end}
+.size .fld input{background:var(--bg);min-height:44px;padding:10px}
+.size .fld>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.size .x{background:var(--bg);margin-bottom:2px}
 .size .wt{grid-column:1/-1}
 .size .sugg{grid-column:1/-1}
 #pf.ready .bulk-only,#pf.bulk .ready-only,#pf.single .sizes-only,#pf:not(.single) .single-only{display:none}
 .calc.bad{background:var(--bad-soft);color:var(--bad)}
-@media (max-width:440px){.size{grid-template-columns:1fr 1fr auto}.size .lab{grid-column:1/3}.size .x{grid-column:3;grid-row:1}}
+
 
 .line{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
 .line small{display:block;color:var(--muted);font-size:.82rem}
@@ -627,11 +633,12 @@ function drawCards(){
       const ref=Math.max(1,it.bulk,it.ref||0,...S.deliveries.filter(d=>d.itemId===it.id&&!d.packId).map(d=>d.qty)), pct=Math.max(0,Math.min(100,it.bulk/ref*100));
       meter=`<div class="sack"><div class="sack-top"><span>Bulk, not yet packed</span><b>${qty(it.bulk,it.unit)}</b></div><div class="meter"><i style="width:${pct.toFixed(0)}%" class="${it.bulk<=0?'out':s2==='low'?'low':''}"></i></div></div>`;
     }
+    const pk=ps.reduce((a,p)=>a+Math.max(0,p.stock),0);
+    const side=it.mode==='bulk'?`${pk} packed`:`${pk} in stock`;
     return `<button class="card" data-act="item" data-id="${it.id}">
-      <div class="c-top"><span class="av">${esc(initials(it.name))}</span><span class="c-name"><b>${esc(it.name)}</b><small>${it.mode==='bulk'?'Needs repackaging · '+esc(uName(it.unit)):'Ready to sell'}</small></span>${s2==='out'?'<span class="flag out">Out</span>':s2==='low'?'<span class="flag">Low</span>':''}</div>
-      ${meter}
-      <div class="szs">${ps.map(p=>`<span class="sz ${p.stock<=0?'out':''}"><span>${esc(p.label||'In stock')}</span><b>${p.stock}</b></span>`).join('')}</div>
-      <div class="c-foot"><span>Worth ${ksh(itemWorth(it))}</span><span class="chev">›</span></div>
+      <div class="c-top"><span class="c-name"><b>${esc(it.name)}${s2==='out'?' <span class="flag out">Out</span>':s2==='low'?' <span class="flag">Low</span>':''}</b><small>${it.mode==='bulk'?'Needs repackaging · '+esc(uName(it.unit)):'Ready to sell'}</small></span>
+        <span class="c-side"><b>${ksh(itemWorth(it))}</b><small>${side}</small></span><span class="chev">›</span></div>
+      <div class="szs">${it.mode==='bulk'?`<span class="sz bulkc ${it.bulk<=0?'out':''}"><span>Bulk</span><b>${qty(it.bulk,it.unit)}</b></span>`:''}${ps.map(p=>`<span class="sz ${p.stock<=0?'out':''}"><span>${esc(p.label||'In stock')}</span><b>${p.stock}</b></span>`).join('')}</div>
     </button>`;}).join('')+`</div>`+
     (list.length>shown.length?`<button class="btn line wide more" data-act="more" data-w="stock">Show more <span class="muted">(${list.length-shown.length} more)</span></button>`:'');
 }
@@ -781,8 +788,8 @@ function openItem(id){
 function sizeRow(p,kind,unit,isNew){p=p||{};
   return `<div class="size" data-pid="${p.id||''}">
     <label class="fld lab"><span>Size</span><input class="s-label" value="${esc(p.label||'')}" placeholder="${kind==='ready'?'e.g. 500 ml':'Type, e.g. quarter'}" autocomplete="off"></label>
-    <label class="fld"><span>Selling price</span><input class="s-price" type="number" inputmode="decimal" min="0" step="any" value="${p.price??''}" placeholder="Ksh"></label>
-    <label class="fld"><span class="s-stock-l">${kind==='bulk'&&isNew?'Already packed':'On shelf'}</span><input class="s-stock" type="number" inputmode="numeric" min="0" step="1" value="${p.stock??''}" placeholder="0"></label>
+    <label class="fld"><span>Price</span><input class="s-price" type="number" inputmode="decimal" min="0" step="any" value="${p.price??''}" placeholder="Ksh"></label>
+    <label class="fld"><span class="s-stock-l">${kind==='bulk'&&isNew?'Packed':'On shelf'}</span><input class="s-stock" type="number" inputmode="numeric" min="0" step="1" value="${p.stock??''}" placeholder="0"></label>
     <button type="button" class="x" data-act="size-del" aria-label="Remove size">×</button>
     <label class="fld wt bulk-only" hidden><span>How many <span class="u">${esc(uName(unit||'kg'))}</span> is this size?</span><input class="s-size" type="number" inputmode="decimal" min="0" step="any" value="${p.size??''}" placeholder="e.g. 0.25"></label>
     <label class="fld wt ready-only"><span>Bought at, each (to work out profit)</span><input class="s-cost" type="number" inputmode="decimal" min="0" step="any" value="${p.cost?Math.round(p.cost*100)/100:''}" placeholder="Ksh"></label>
@@ -864,7 +871,7 @@ function pfMode(){
   const u=pfUnitVal()||'units';
   f.querySelectorAll('.u').forEach(x=>x.textContent=uName(u));
   f.querySelectorAll('.s-label').forEach(i=>i.placeholder=m!=='bulk'?'e.g. 500 ml':'Type, e.g. '+(u==='kg'||u==='L'||u==='m'?'quarter':'1'));
-  f.querySelectorAll('.s-stock-l').forEach(x=>x.textContent=m==='bulk'&&f.dataset.new?'Already packed':f.classList.contains('wiz')?'How many':'On shelf');
+  f.querySelectorAll('.s-stock-l').forEach(x=>x.textContent=m==='bulk'&&f.dataset.new?'Packed':f.classList.contains('wiz')?'How many':'On shelf');
   f.querySelectorAll('.size').forEach(r=>sizeCheck(r));
   pfCheck();
 }
@@ -981,8 +988,8 @@ function awStep1(){
     <fieldset class="fld"><legend>How do you count what you bought?</legend><div class="chips" role="radiogroup" aria-label="Unit">${AW_UNITS.map(([v,l])=>`<label class="chip"><input type="radio" name="aw-unit" value="${v}" ${v===AW.unit?'checked':''}>${l}</label>`).join('')}<label class="chip"><input type="radio" name="aw-unit" value="other" ${known?'':'checked'}>Other</label></div>
       <input id="aw-other" class="other-in" placeholder="e.g. bundles, trays, cartons" autocomplete="off" value="${known?'':esc(AW.unit)}" ${known?'hidden':''}></fieldset>
     <div class="two">
-      <label class="fld"><span>How much did you buy? (<span class="u">${esc(uName(AW.unit||'units'))}</span>)</span><input id="aw-amt" type="number" inputmode="decimal" min="0" step="any" value="${AW.amt}" placeholder="e.g. 50"></label>
-      <label class="fld"><span>Total price paid (Ksh)</span><input id="aw-paid" type="number" inputmode="decimal" min="0" step="any" value="${AW.paid}" placeholder="e.g. 7500"></label>
+      <label class="fld"><span>Amount bought (<span class="u">${esc(uName(AW.unit||'units'))}</span>)</span><input id="aw-amt" type="number" inputmode="decimal" min="0" step="any" value="${AW.amt}" placeholder="e.g. 50"></label>
+      <label class="fld"><span>Total paid (Ksh)</span><input id="aw-paid" type="number" inputmode="decimal" min="0" step="any" value="${AW.paid}" placeholder="e.g. 7500"></label>
     </div>
     <p class="calc" id="aw-calc" hidden></p>
     <p class="err" id="aw-err" hidden></p>
@@ -1030,8 +1037,8 @@ function awNext(){
 }
 function awStep2(){
   const u=AW.unit, pcs=u==='pcs', per=AW.paid>0?AW.paid/AW.amt:0;
-  const opts=[['single','One price',`Sell each ${uOne(u)} as it is`],['bulk','Pack into smaller sizes',pcs?'Like sweets sold in 5s':(u==='kg'||u==='L'||u==='m')?`Like ${canon(.25,u)} and ${canon(.5,u)}`:`Like packs of 2 or 5 ${uName(u)}`]];
-  if(pcs) opts.push(['sizes','It came in different sizes','Like water in 500 ml and 1 L bottles']);
+  const opts=[['single','Sell it as is',`Each ${uOne(u)} at one price`],['bulk','Repackage',pcs?'Divide into smaller packs, like sweets in 5s':(u==='kg'||u==='L'||u==='m')?`Divide into smaller packs, like ${canon(.25,u)} and ${canon(.5,u)}`:`Divide into packs of 2 or 5 ${uName(u)}`]];
+  if(pcs) opts.push(['sizes','Mixed sizes','Like water in 500 ml and 1 L bottles']);
   if(!opts.some(o=>o[0]===AW.how)) AW.how='';
   const rows=(AW.sizes&&AW.sizes.length?AW.sizes:['']).map(l=>sizeRow({label:l},AW.how==='sizes'?'ready':'bulk',u,true)).join('');
   openSheet('add','Add '+AW.name,`<form id="pf" class="sb wiz ${AW.how||'none'} ${AW.how&&AW.how!=='bulk'?'ready':''}" data-unit="${esc(u)}" data-new="1" novalidate>
