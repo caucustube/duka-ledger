@@ -102,6 +102,23 @@ body.has-cart #toast{bottom:calc(196px + env(safe-area-inset-bottom,0px))}
 .cats{display:flex;flex-direction:column;gap:8px;margin-top:-4px}
 .cats .chips .chip{min-height:36px;padding:6px 13px;font-size:.88rem}
 #pf-cat-items{max-height:190px;overflow:auto}
+.dl-row{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,.8fr) auto;gap:8px;align-items:end;padding:10px 0;border-bottom:1px solid var(--line)}
+.panel>.dl-row:last-child{border-bottom:0}
+.dl-row .dl-l{align-self:center;min-width:0}
+.dl-row .dl-l b{display:block;font-weight:800}
+.dl-row .dl-l small{color:var(--muted);font-size:.78rem}
+.dl-row .fld input{background:var(--bg);min-height:42px;padding:9px 10px}
+.dl-row .fld>span{white-space:nowrap}
+.dl-row .x{background:var(--bg);margin-bottom:1px}
+.dl-row .sugg{grid-column:1/-1}
+.panel>.dl-row[data-pid]:not(.new) .x{display:none}
+.kvb{width:100%;border:0;background:none;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.kvb .chev{font-size:1rem;margin-left:4px}
+#db-sizes{margin-top:-6px}
+.photo{display:flex;justify-content:center;gap:8px;min-height:42px;font-size:.92rem;margin-top:-6px;width:100%}
+.photo svg{width:20px;height:20px}
+.photo-res .pr-top{display:flex;gap:10px;align-items:flex-start}
+.photo-res img{width:56px;height:56px;object-fit:cover;border-radius:10px;flex:none}
 .cchip{display:inline-flex;align-items:center;gap:4px;flex:none;background:var(--surface);border-radius:999px;padding:3px 3px 3px 12px;font-weight:700;font-size:.85rem;white-space:nowrap;box-shadow:0 2px 8px -4px rgba(39,43,34,.35)}
 .cchip button{width:32px;height:32px;border:0;border-radius:50%;background:var(--bad-soft);color:var(--bad);font-size:1.1rem;font-weight:800;line-height:1}
 .tile.soldout{opacity:.5}
@@ -128,14 +145,15 @@ nav.tabs .ic{width:56px;height:30px;border-radius:15px;display:grid;place-items:
 .row .amt{font-weight:800}
 .flag{font-size:.75rem;font-weight:800;border-radius:8px;padding:3px 8px;background:var(--warn-soft);color:var(--warn);white-space:nowrap}
 .flag.out{background:var(--bad-soft);color:var(--bad)}
-.sec{font-weight:800;font-size:1.05rem;margin:24px 0 8px}
+.sec{font-weight:800;font-size:.95rem;margin:20px 0 8px}
 
 /* stock */
-.stats{display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface);border-radius:18px;padding:14px 4px}
+.stats{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.6fr) minmax(0,1fr);background:var(--surface);border-radius:18px;padding:14px 4px}
 .stats>div{display:flex;flex-direction:column;align-items:center;gap:2px;padding:0 6px;min-width:0;text-align:center}
 .stats>div+div{border-left:1px solid var(--line)}
 .stats .l{font-size:.75rem;font-weight:700;color:var(--muted)}
-.stats b{font-size:1.15rem;font-weight:800;overflow-wrap:anywhere}
+.stats b{font-size:1.1rem;font-weight:800;white-space:nowrap}
+.stats .l{white-space:nowrap}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-top:12px}
 .card{border:0;background:var(--surface);border-radius:18px;padding:12px 14px;text-align:left;display:flex;flex-direction:column;gap:10px;width:100%}
 .card:active{background:#FBFAF4}
@@ -165,18 +183,18 @@ nav.tabs .ic{width:56px;height:30px;border-radius:15px;display:grid;place-items:
 .seg button{flex:1;border:0;background:none;border-radius:10px;padding:9px 6px;font-weight:700;color:var(--muted);min-height:40px}
 .seg button[aria-pressed="true"]{background:var(--sand);color:var(--ink)}
 .big{background:var(--surface);border-radius:18px;padding:18px;margin-top:12px}
-.big .l{color:var(--muted);font-weight:700;font-size:.9rem}
-.big .v{font-weight:800;font-size:2.3rem;line-height:1.1;margin:2px 0;overflow-wrap:anywhere}
-.big .s{color:var(--muted);font-size:.9rem}
+.big .l{color:var(--muted);font-weight:700;font-size:.82rem}
+.big .v{font-weight:800;font-size:1.8rem;line-height:1.15;margin:2px 0;overflow-wrap:anywhere}
+.big .s{color:var(--muted);font-size:.82rem}
 .up{color:var(--good);font-weight:800}.down{color:var(--bad);font-weight:800}
 .split2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
 .split2 span{display:block;color:var(--muted);font-weight:700;font-size:.78rem}
 .split2 b{font-weight:800;font-size:1.02rem}
 .pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .pair>div{background:var(--surface);border-radius:18px;padding:14px 16px;min-width:0}
-.pair .l{color:var(--muted);font-weight:700;font-size:.85rem}
-.pair .v{font-weight:800;font-size:1.45rem;overflow-wrap:anywhere}
-.kv{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.pair .l{color:var(--muted);font-weight:700;font-size:.8rem}
+.pair .v{font-weight:800;font-size:1.2rem;overflow-wrap:anywhere}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:.92rem}
 .kv:last-child{border-bottom:0}
 .kv span:last-child{font-weight:800}
 .chart{background:var(--surface);border-radius:18px;padding:16px 12px 8px}
@@ -507,6 +525,7 @@ function suggest(input,source,onPick,after,smart){
     box.hidden=!res.length;
   };
   input.addEventListener('input',show);
+  input.addEventListener('blur',()=>setTimeout(()=>{box.hidden=true;},150));
   box.addEventListener('pointerdown',e=>e.preventDefault());
   box.addEventListener('click',e=>{const b=e.target.closest('.sg'); if(!b) return; input.value=b.dataset.v; box.hidden=true; if(onPick) onPick(b.dataset.v); input.dispatchEvent(new Event('input',{bubbles:true}));});
   return box;
@@ -970,6 +989,71 @@ function pfSave(it){
   closeSheet(); commit(); toast(it?`Saved ${name}`:`${name} added`);
 }
 
+/* ---------- read a photo of the packet ----------
+   The text is read on the phone by Tesseract.js. It downloads once (needs internet the first time),
+   then the app picks out a product name, size and count for the shopkeeper to check. */
+const OCR_SRC='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+function loadScript(src){return new Promise((ok,no)=>{if(window.Tesseract) return ok(); const el=document.createElement('script'); el.src=src; el.onload=()=>ok(); el.onerror=()=>no(new Error('load')); document.head.appendChild(el);});}
+function shrinkImage(file,max){
+  return new Promise((ok,no)=>{const url=URL.createObjectURL(file), img=new Image();
+    img.onload=()=>{const k=Math.min(1,max/Math.max(img.width,img.height)), c=document.createElement('canvas'); c.width=Math.round(img.width*k); c.height=Math.round(img.height*k);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height); ok({canvas:c,url});};
+    img.onerror=()=>no(new Error('image')); img.src=url;});
+}
+const OCR_SKIP=/^(net|wt|weight|ingredients?|made|in|kenya|ltd|limited|www|com|co|ke|best|before|exp|expiry|mfg|batch|price|kes|ksh|store|keep|cool|dry|place|product|of|the|and|for|with|new|per|kg|kgs|g|gm|gms|ml|mls|l|ltr|ltrs|litre|litres|x|pcs|pieces|bottles|sachets|packets|rolls|bars|pack)$/i;
+/* picks out likely names, sizes and a count from the text found on a packet */
+function parsePacket(text,lines){
+  const t=String(text||'').replace(/\s+/g,' '), low=' '+t.toLowerCase().replace(/[^a-z0-9 ]/g,' ')+' ';
+  const sizes=[]; const re=/(\d+(?:[.,]\d+)?)\s?(kg|kgs|g|gm|gms|grams?|ml|mls|l|ltrs?|litres?|liters?)(?![a-z])/gi; let m;
+  while((m=re.exec(t))){const n=m[1].replace(',','.'); if(+n<=0||+n>5000) continue; const sz=tidyReady(n+' '+m[2]); if(parseQty(sz)&&!sizes.includes(sz)) sizes.push(sz);}
+  const cm=t.match(/\b(\d{1,3})\s?(?:x|×|pcs|pieces|pc|sachets|bars|bottles|rolls|packets)(?![a-z])/i)||t.match(/(?:pack of|×|x)\s?(\d{1,3})\b/i);
+  const count=cm&&+cm[1]>1?+cm[1]:null;
+  const cat=CATALOG.map(c=>c[0]).filter(n=>{const k=n.replace(/\(.*?\)/g,'').trim().toLowerCase(); const base=k.replace(/s$/,''); return low.includes(' '+k+' ')||low.includes(' '+base+' ')||low.includes(' '+base+'s ');})
+    .sort((a,b)=>b.length-a.length);
+  let ls=(lines&&lines.length?lines.map(l=>({t:l.text,h:l.bbox?l.bbox.y1-l.bbox.y0:0})):String(text||'').split('\n').map(x=>({t:x,h:x.length})));
+  const titles=[];
+  ls.sort((a,b)=>b.h-a.h).forEach(l=>{
+    const w=String(l.t).replace(/[^A-Za-z\s'&-]/g,' ').split(/\s+/).filter(x=>x.length>1&&!OCR_SKIP.test(x));
+    const nm=w.slice(0,4).join(' '); if(nm.length>=3&&nm.length<=30){const c=nm.toLowerCase().replace(/\b\w/g,ch=>ch.toUpperCase()); if(!titles.includes(c)) titles.push(c);}
+  });
+  return {cat:cat.slice(0,3),titles:titles.slice(0,3),sizes:sizes.slice(0,3),count};
+}
+async function awReadPhoto(file){
+  const f=$('#aw1'); if(!f) return; const res=f.querySelector('#aw-photo-res'), btn=f.querySelector('[data-act="aw-photo"]');
+  res.hidden=false; res.classList.remove('bad'); res.innerHTML='Reading the packet… this can take a few seconds.'; btn.disabled=true;
+  try{
+    if(!window.Tesseract){ if(!navigator.onLine) throw new Error('offline'); await loadScript(OCR_SRC); }
+    const {canvas,url}=await shrinkImage(file,1600);
+    const worker=await window.Tesseract.createWorker('eng');
+    const out=await worker.recognize(canvas); await worker.terminate();
+    const d=out&&out.data||{}, r=parsePacket(d.text,d.lines);
+    if(!$('#aw1')) return;
+    awShowPhoto(r,url);
+  }catch(e){
+    res.classList.add('bad');
+    res.innerHTML=e&&e.message==='offline'?'Reading a photo needs internet the first time. Type the details instead, or try again when you have data.':'The photo could not be read. Try again with the words on the packet clear and filling the picture, or type the details.';
+  }finally{ const b2=$('#aw1 [data-act="aw-photo"]'); if(b2) b2.disabled=false; }
+}
+function awShowPhoto(r,url){
+  const f=$('#aw1'), res=f.querySelector('#aw-photo-res'), name=f.querySelector('#pf-name'), done=[];
+  const best=r.cat[0]||r.titles[0];
+  if(best&&!name.value.trim()){
+    if(r.cat[0]) awPick(r.cat[0]); else { name.value=best; f.querySelector('#pf-cats').hidden=true; }
+    done.push(`name <b>${esc(best)}</b>`);
+  }
+  const isBulk=r.cat[0]&&CATALOG.find(c=>c[0]===r.cat[0])[1]==='bulk', u0=awUnitVal(), v0=r.sizes.length?sizeIn(r.sizes[0],u0):null;
+  /* a big size (a sack or jerrycan, 10 kg / 10 L or more) is how much was bought; a small one is a ready packet */
+  if(isBulk&&v0&&(v0>=10||!['kg','L'].includes(u0))){
+    if(!f.querySelector('#aw-amt').value){ f.querySelector('#aw-amt').value=r3(v0); done.push(`amount <b>${esc(qty(v0,u0))}</b>`); }
+  } else if(r.sizes.length){ AW.sizes=r.sizes.slice(); AW.how='sizes'; const pc=f.querySelector('input[name="aw-unit"][value="pcs"]'); if(pc) pc.checked=true; done.push(`size <b>${esc(r.sizes.join(', '))}</b>`); }
+  if(r.count&&!f.querySelector('#aw-amt').value){ f.querySelector('#aw-amt').value=r.count; done.push(`amount <b>${r.count}</b>`); }
+  awUnits();
+  const others=[...r.cat,...r.titles].filter(x=>x!==name.value.trim()).filter((x,i,a)=>a.indexOf(x)===i).slice(0,4);
+  res.hidden=false; res.classList.remove('bad');
+  res.innerHTML=`<div class="pr-top">${url?`<img src="${url}" alt="Photo of the packet">`:''}<div>${done.length?`Filled in ${done.join(', ')}. <b>Check them before you go on.</b>`:'Nothing clear could be read. Type the details, or try a closer photo.'}</div></div>`+
+    (others.length?`<div class="chips" style="margin-top:8px"><span class="hint sm" style="align-self:center;margin:0">Or use:</span>${others.map(x=>`<button type="button" class="chip" data-act="aw-photo-name" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>`:'');
+}
+
 /* ---------- add a product: two steps ----------
    Step 1 is what was bought: product, how it is counted, how much, total price.
    Step 2 is how it is sold, then Add to my shop. Editing a product still uses the one-page form. */
@@ -984,6 +1068,9 @@ function awStep1(){
   openSheet('add','Add a product',`<form id="aw1" class="sb" novalidate>
     <p class="steps"><b>Step 1 of 2</b> · What you bought</p>
     <label class="fld"><span>Product name</span><input id="pf-name" value="${esc(AW.name)}" placeholder="Start typing, e.g. su…" autocomplete="off"></label>
+    <button type="button" class="btn line photo" data-act="aw-photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Read it from a photo of the packet</button>
+    <input type="file" id="aw-file" accept="image/*" capture="environment" hidden>
+    <div class="calc photo-res" id="aw-photo-res" hidden></div>
     <div class="cats" id="pf-cats" ${AW.name?'hidden':''}><p class="hint sm" style="margin:0">Or tap a common item</p><div class="chips">${CATS.map((c,k)=>`<button type="button" class="chip" data-act="cat" data-k="${k}" aria-pressed="false">${c}</button>`).join('')}</div><div class="sugg" id="pf-cat-items" hidden></div></div>
     <fieldset class="fld"><legend>How do you count what you bought?</legend><div class="chips" role="radiogroup" aria-label="Unit">${AW_UNITS.map(([v,l])=>`<label class="chip"><input type="radio" name="aw-unit" value="${v}" ${v===AW.unit?'checked':''}>${l}</label>`).join('')}<label class="chip"><input type="radio" name="aw-unit" value="other" ${known?'':'checked'}>Other</label></div>
       <input id="aw-other" class="other-in" placeholder="e.g. bundles, trays, cartons" autocomplete="off" value="${known?'':esc(AW.unit)}" ${known?'hidden':''}></fieldset>
@@ -1002,6 +1089,7 @@ function awStep1(){
     f.addEventListener('change',e=>{if(e.target.name==='aw-unit') awUnits();});
     f.addEventListener('input',awUnits);
     f.addEventListener('submit',e=>{e.preventDefault();awNext();});
+    f.querySelector('#aw-file').addEventListener('change',e=>{const file=e.target.files&&e.target.files[0]; e.target.value=''; if(file) awReadPhoto(file);});
     awUnits(); if(!AW.name) setTimeout(()=>name.focus(),60);
   });
 }
@@ -1152,32 +1240,94 @@ function dlDraw(){
   if(box.dataset.for===(it?it.id:'')&&it) return;
   box.dataset.for=it?it.id:'';
   if(!it){box.innerHTML=name.trim()?`<p class="hint">${esc(name.trim())} is not in your shop yet.</p><button class="btn soft wide" data-act="product">+ Add it as a new product</button>`:''; return;}
-  const ps=packsOf(it.id), bulk=it.mode==='bulk';
-  box.innerHTML=`${bulk?'':`<div class="chips" role="radiogroup" aria-label="Size">${ps.map((p,i)=>`<label class="chip"><input type="radio" name="dl-pack" value="${p.id}" ${i===0?'checked':''}>${esc(plab(p))}</label>`).join('')}</div>`}
-    <div class="two">
-      <label class="fld"><span>${bulk?`How much (${esc(uName(it.unit))})`:'How many'}</span><input id="dl-qty" type="number" inputmode="decimal" min="0" step="any" placeholder="${bulk?'e.g. 50':'e.g. 24'}"></label>
-      <label class="fld"><span>Total paid (Ksh)</span><input id="dl-paid" type="number" inputmode="decimal" min="0" step="any" placeholder="e.g. 7500"></label>
-    </div>
-    <p class="calc" id="dl-calc">Fill both to see the buying price.</p>
-    <p class="err" id="dl-err" hidden></p>
-    <button class="btn primary wide" data-act="delivery-save">Add to stock</button>`;
+  const ps=packsOf(it.id);
+  if(it.mode==='bulk'){
+    /* bulk: how much came and what it cost; selling prices can be changed at the same time */
+    box.innerHTML=`<div class="two">
+        <label class="fld"><span>Amount (${esc(uName(it.unit))})</span><input id="dl-qty" type="number" inputmode="decimal" min="0" step="any" placeholder="e.g. 50"></label>
+        <label class="fld"><span>Total paid (Ksh)</span><input id="dl-paid" type="number" inputmode="decimal" min="0" step="any" placeholder="e.g. 7500"></label>
+      </div>
+      <p class="calc" id="dl-calc">Fill both to see the new buying price.</p>
+      ${ps.length?`<p class="hint" style="font-weight:700;margin-bottom:-6px">Selling prices <span class="muted">(change them if the market moved)</span></p>
+      <div class="panel">${ps.map(p=>`<div class="dl-row" data-pid="${p.id}"><span class="dl-l"><b>${esc(plab(p))}</b><small>${p.stock} on shelf</small></span><label class="fld"><span>Price</span><input class="dl-price" type="number" inputmode="decimal" min="0" step="any" value="${p.price}"></label></div>`).join('')}</div>`:''}
+      <p class="err" id="dl-err" hidden></p>
+      <button class="btn primary wide" data-act="delivery-save">Add to stock</button>`;
+  } else {
+    /* ready to sell: a row per size; new sizes can be added; one total price for everything */
+    box.innerHTML=`<p class="hint" style="font-weight:700;margin-bottom:-6px">How many of each came?</p>
+      <div class="panel" id="dl-rows">${ps.map(p=>dlRow(p)).join('')}</div>
+      <button class="btn line" data-act="dl-newsize">+ A new size came</button>
+      <label class="fld"><span>Total paid for all of it (Ksh)</span><input id="dl-paid" type="number" inputmode="decimal" min="0" step="any" placeholder="e.g. 1200"></label>
+      <p class="calc" id="dl-calc">Fill in how many came and the total paid.</p>
+      <p class="err" id="dl-err" hidden></p>
+      <button class="btn primary wide" data-act="delivery-save">Add to stock</button>`;
+  }
   if(!box.dataset.wired){box.dataset.wired='1'; box.addEventListener('input',dlCalc); box.addEventListener('change',dlCalc);}
+  const first=box.querySelector('#dl-qty, .dl-n'); if(first) setTimeout(()=>first.focus(),40);
+}
+function dlRow(p){
+  const isNew=!p, unl=p&&!p.label;
+  return `<div class="dl-row${isNew?' new':''}" data-pid="${p?p.id:''}">
+    ${isNew||unl?`<label class="fld dl-lab"><span>${isNew?'New size':'Size'}</span><input class="dl-label" placeholder="${isNew?'e.g. 800 g':'e.g. 400 g'}" autocomplete="off" value=""></label>`:`<span class="dl-l"><b>${esc(p.label)}</b><small>${p.stock} on shelf</small></span>`}
+    <label class="fld"><span>Price</span><input class="dl-price" type="number" inputmode="decimal" min="0" step="any" value="${p?p.price:''}" placeholder="Ksh"></label>
+    <label class="fld"><span>Came</span><input class="dl-n" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></label>
+    ${isNew?'<button type="button" class="x" data-act="dl-delrow" aria-label="Remove this size">×</button>':''}
+  </div>`;
+}
+function dlReadRows(){
+  return [...sheetBody().querySelectorAll('#dl-rows .dl-row')].map(r=>({r,pid:r.dataset.pid,label:r.querySelector('.dl-label')?tidyReady(r.querySelector('.dl-label').value):null,price:toNum(r.querySelector('.dl-price').value),n:Math.max(0,Math.floor(toNum(r.querySelector('.dl-n').value)||0))}));
 }
 function dlCalc(){
-  const b=sheetBody(), it=byName(b.querySelector('#dl-name').value); if(!it) return;
-  const q=toNum(b.querySelector('#dl-qty').value), paid=toNum(b.querySelector('#dl-paid').value), p=it.mode==='bulk'?null:pack(b.querySelector('input[name="dl-pack"]:checked')?.value);
-  b.querySelector('#dl-calc').innerHTML=q>0&&paid>=0?(p?`<b>${ksh(paid/q)}</b> each. You sell at ${ksh(p.price)}, so you make <b>${ksh(p.price-paid/q)}</b> on each.`:`<b>${ksh(paid/q)}</b> per ${esc(uOne(it.unit))}.`):'Fill both to see the buying price.';
+  const b=sheetBody(), it=byName(b.querySelector('#dl-name').value); if(!it) return; const c=b.querySelector('#dl-calc'), paid=toNum(b.querySelector('#dl-paid')?.value);
+  if(it.mode==='bulk'){
+    const q=toNum(b.querySelector('#dl-qty').value);
+    if(!(q>0&&paid>=0)){c.textContent='Fill both to see the new buying price.';return;}
+    const nw=paid/q, h=Math.max(0,it.bulk), avg=h>0&&it.cost?(it.cost*h+paid)/(h+q):nw;
+    c.innerHTML=`This lot costs <b>${ksh(nw)}</b> per ${esc(uOne(it.unit))}${it.cost?` (before: ${ksh(it.cost)})`:''}.`+(h>0&&it.cost&&Math.abs(nw-it.cost)>0.5?` Mixed with the ${qty(h,it.unit)} you still have, it averages <b>${ksh(avg)}</b>.`:'');
+    return;
+  }
+  const rows=dlReadRows().filter(x=>x.n>0), n=rows.reduce((a,x)=>a+x.n,0), val=rows.reduce((a,x)=>a+x.n*(x.price||0),0);
+  if(!n){c.textContent='Fill in how many came and the total paid.';return;}
+  if(!(paid>0)||!val){c.innerHTML=`<b>${n}</b> pieces came. Add the total paid to see what each one cost you.`;return;}
+  c.innerHTML=`<b>${n}</b> pieces for ${ksh(paid)}. Each costs you about: `+rows.map(x=>`${esc(x.label||plab(pack(x.pid)||{}))} <b>${ksh(x.price*paid/val)}</b>`).join(' · ');
 }
 function dlSave(){
-  const b=sheetBody(), it=byName(b.querySelector('#dl-name').value), q=toNum(b.querySelector('#dl-qty').value), paid=toNum(b.querySelector('#dl-paid').value), err=b.querySelector('#dl-err');
+  const b=sheetBody(), it=byName(b.querySelector('#dl-name').value), err=b.querySelector('#dl-err'), fail=m=>{err.textContent=m;err.hidden=false;};
   if(!it) return;
-  if(!(q>0)){err.textContent='Enter how much came in.';err.hidden=false;return;}
-  if(!(paid>=0)){err.textContent='Enter what you paid. Put 0 if it was free.';err.hidden=false;return;}
-  let p=null;
-  if(it.mode==='bulk'){const h=Math.max(0,it.bulk); it.cost=h>0&&it.cost?(it.cost*h+paid)/(h+q):paid/q; it.bulk=r3(it.bulk+q);}
-  else{p=pack(b.querySelector('input[name="dl-pack"]:checked').value); const h=Math.max(0,p.stock); p.cost=h>0&&p.cost?(p.cost*h+paid)/(h+q):paid/q; p.stock+=q;}
-  S.deliveries.push({id:uid(),ts:Date.now(),itemId:it.id,packId:p?p.id:null,qty:q,paid});
-  closeSheet(); commit(); toast(`Added ${p?q+' × '+fullName(it,p):qty(q,it.unit)+' of '+it.name}`);
+  const paid=toNum(b.querySelector('#dl-paid').value), now=Date.now();
+  if(b.querySelector('#dl-paid').value.trim()!==''&&!(paid>=0)) return fail('Write the total paid, or leave it empty.');
+  if(it.mode==='bulk'){
+    const q=toNum(b.querySelector('#dl-qty').value);
+    if(!(q>0)) return fail('Enter how much came in.');
+    if(!(paid>=0)) return fail('Enter what you paid. Put 0 if it was free.');
+    const prices=[...b.querySelectorAll('.dl-row')].map(r=>({p:pack(r.dataset.pid),price:toNum(r.querySelector('.dl-price').value)}));
+    for(const x of prices) if(!(x.price>0)) return fail(`Set a selling price for ${plab(x.p)}.`);
+    const h=Math.max(0,it.bulk); it.cost=h>0&&it.cost?(it.cost*h+paid)/(h+q):paid/q; it.bulk=r3(it.bulk+q);
+    prices.forEach(x=>{x.p.price=x.price;});
+    S.deliveries.push({id:uid(),ts:now,itemId:it.id,packId:null,qty:q,paid});
+    closeSheet(); commit(); toast(`Added ${qty(q,it.unit)} of ${it.name}`); return;
+  }
+  const rows=dlReadRows();
+  const unl=rows.find(x=>x.pid&&x.label!==null), anyNew=rows.some(x=>!x.pid&&(x.label||x.n||x.price));
+  const seen=new Set(packsOf(it.id).map(p=>(p.label||'').toLowerCase()).filter(Boolean));
+  for(const x of rows){
+    if(!x.pid&&!(x.label||x.n||x.price)) continue;
+    if(!x.pid){ if(!x.label) return fail('Write the new size, like 800 g.'); if(seen.has(x.label.toLowerCase())) return fail(`${x.label} is already listed.`); seen.add(x.label.toLowerCase()); }
+    if(!(x.price>0)) return fail(`Set a selling price for ${x.label||plab(pack(x.pid))}.`);
+  }
+  if(unl&&anyNew&&!unl.label) return fail(`Write the size of the ${it.name} you already have (e.g. 400 g), so the sizes don't mix up.`);
+  const got=rows.filter(x=>x.n>0&&(x.pid||x.label)); if(!got.length) return fail('Write how many came of at least one size.');
+  const val=got.reduce((a,x)=>a+x.n*x.price,0);
+  rows.forEach(x=>{
+    if(!x.pid&&!x.label) return;
+    let p=x.pid?pack(x.pid):null;
+    if(!p){p={id:uid(),itemId:it.id,label:x.label,size:1,price:x.price,stock:0,cost:0};S.packs.push(p);}
+    if(x.pid&&x.label) p.label=x.label;
+    p.price=x.price;
+    if(x.n>0){ const each=paid>0&&val?x.price*paid/val:0, hv=Math.max(0,p.stock); p.cost=hv>0&&p.cost?(p.cost*hv+each*x.n)/(hv+x.n):each; p.stock+=x.n;
+      S.deliveries.push({id:uid(),ts:now,itemId:it.id,packId:p.id,qty:x.n,paid:paid>0&&val?paid*x.n*x.price/val:0}); }
+  });
+  closeSheet(); commit(); toast(`Added ${got.reduce((a,x)=>a+x.n,0)} ${it.name} to stock`);
 }
 
 /* repack */
@@ -1218,18 +1368,46 @@ function rpSave(id){
 }
 
 /* deni */
+/* add a debt: optionally pick what they took from stock (stock goes down and the amount fills in) */
+let dbLines=[];
 function openAddDebt(){
+  dbLines=[];
   openSheet('debt','Add debt',`
     <label class="fld"><span>Who owes you?</span><input id="db-name" autocomplete="off" placeholder="Type a name"></label>
+    <label class="fld"><span>What did they take? (optional)</span><input id="db-prod" autocomplete="off" placeholder="Type a product, e.g. su…"></label>
+    <div class="chips" id="db-sizes" hidden></div>
+    <div class="panel" id="db-lines" hidden></div>
     <label class="fld"><span>Amount (Ksh)</span><input id="db-amt" type="number" inputmode="numeric" min="1" placeholder="e.g. 200"></label>
-    <label class="fld"><span>What did they take? (optional)</span><input id="db-note" autocomplete="off" placeholder="e.g. sugar and bread"></label>
+    <p class="hint sm" id="db-amt-note" hidden style="margin:-8px 0 0">Worked out from what they took.</p>
+    <label class="fld"><span>Note (optional)</span><input id="db-note" autocomplete="off" placeholder="e.g. will pay on Friday"></label>
     <label class="fld"><span>Date</span><input id="db-date" type="date" value="${isoDay(Date.now())}" max="${isoDay(Date.now())}"></label>
     <div class="chips" style="margin-top:-6px"><button type="button" class="chip" data-act="db-day" data-d="0">Today</button><button type="button" class="chip" data-act="db-day" data-d="1">Yesterday</button><button type="button" class="chip" data-act="db-day" data-d="2">2 days ago</button></div>
     <p class="err" id="db-err" hidden></p>
     <button class="btn primary wide" data-act="debt-save">Save</button>`,b=>{
-      suggest(b.querySelector('#db-name'),customers); suggest(b.querySelector('#db-note'),()=>S.items.map(i=>i.name.toLowerCase()));
+      suggest(b.querySelector('#db-name'),customers);
+      suggest(b.querySelector('#db-prod'),()=>S.items.filter(i=>packsOf(i.id).some(p=>p.stock>0)).map(i=>i.name),dbPickProduct);
       setTimeout(()=>b.querySelector('#db-name').focus(),60);
     });
+}
+function dbPickProduct(name){
+  const b=sheetBody(), it=byName(name); if(!it) return; const ps=packsOf(it.id).filter(p=>p.stock>0), box=b.querySelector('#db-sizes');
+  if(ps.length===1){ dbAdd(ps[0].id,1); b.querySelector('#db-prod').value=''; box.hidden=true; return; }
+  box.innerHTML=ps.map(p=>`<button type="button" class="chip" data-act="db-size" data-id="${p.id}">${esc(plab(p))} · ${ksh(p.price)}</button>`).join('')+'<span class="hint sm" style="align-self:center;margin:0">Tap the size they took</span>';
+  box.hidden=false;
+}
+function dbAdd(pid,d){
+  const p=pack(pid), it=p&&item(p.itemId); if(!it) return;
+  const l=dbLines.find(x=>x.packId===pid), have=l?l.qty:0;
+  if(d>0&&have+d>p.stock){ toast(`Only ${p.stock} ${fullName(it,p)} in stock.`); return; }
+  if(l){ l.qty+=d; if(l.qty<=0) dbLines=dbLines.filter(x=>x!==l); } else if(d>0) dbLines.push({packId:pid,qty:d});
+  dbDraw();
+}
+function dbDraw(){
+  const b=sheetBody(), box=b.querySelector('#db-lines'), amt=b.querySelector('#db-amt');
+  box.hidden=!dbLines.length; b.querySelector('#db-amt-note').hidden=!dbLines.length; amt.readOnly=!!dbLines.length;
+  box.innerHTML=dbLines.map(l=>{const p=pack(l.packId), it=item(p.itemId);
+    return `<div class="line"><div><b>${esc(fullName(it,p))}</b><small>${ksh(p.price)} each</small></div><div class="step"><button type="button" data-act="db-q" data-d="-1" data-id="${p.id}" aria-label="One less">−</button><span>${l.qty}</span><button type="button" data-act="db-q" data-d="1" data-id="${p.id}" aria-label="One more">+</button></div><span class="amt">${ksh(p.price*l.qty)}</span></div>`;}).join('');
+  if(dbLines.length) amt.value=Math.round(dbLines.reduce((a,l)=>a+pack(l.packId).price*l.qty,0));
 }
 function openPaid(c){
   const owed=Math.max(0,(balances()[c]||{owed:0}).owed), o=Math.round(owed);
@@ -1241,13 +1419,75 @@ function openPaid(c){
     <p class="err" id="pd-err" hidden></p>`);
 }
 function openPerson(c){
-  const ev=[...S.sales.filter(s=>s.pay==='deni'&&s.customer===c).map(s=>({ts:s.ts,t:s.lines.map(l=>l.name).join(', '),a:s.total})),
-    ...S.debts.filter(d=>d.customer===c).map(d=>({ts:d.ts,t:d.note||'Debt',a:d.amount})),
-    ...S.payments.filter(p=>p.customer===c).map(p=>({ts:p.ts,t:'Paid'+(p.method?' by '+payName(p.method):''),a:-p.amount}))].sort((a,b)=>b.ts-a.ts);
+  const ev=[...S.sales.filter(s=>s.pay==='deni'&&s.customer===c).map(s=>({k:'sale',id:s.id,ts:s.ts,t:s.lines.map(l=>(l.qty>1?l.qty+'× ':'')+l.name).join(', '),a:s.total})),
+    ...S.debts.filter(d=>d.customer===c).map(d=>({k:'debt',id:d.id,ts:d.ts,t:d.note||'Debt',a:d.amount})),
+    ...S.payments.filter(p=>p.customer===c).map(p=>({k:'pay',id:p.id,ts:p.ts,t:'Paid'+(p.method?' by '+payName(p.method):''),a:-p.amount}))].sort((a,b)=>b.ts-a.ts);
   const owed=(balances()[c]||{owed:0}).owed;
   openSheet('person',c,`<div class="big" style="margin-top:0"><div class="l">Owes you</div><div class="v">${ksh(Math.max(0,owed))}</div></div>
-    <div class="panel">${ev.map(e=>`<div class="kv"><span>${esc(e.t)} <span style="color:var(--muted);font-weight:600">· ${day(e.ts)}</span></span><span class="${e.a<0?'up':''}">${e.a<0?'−':'+'}${ksh(Math.abs(e.a))}</span></div>`).join('')}</div>
-    ${owed>0.5?`<button class="btn primary wide" data-act="paid" data-c="${esc(c)}">Settle debt</button>`:''}`);
+    <p class="hint sm" style="margin:-4px 0 -6px">Tap an entry to fix or delete it.</p>
+    <div class="panel">${ev.map(e=>`<button class="kv kvb" data-act="db-entry" data-k="${e.k}" data-id="${e.id}"><span>${esc(e.t)} <span style="color:var(--muted);font-weight:600">· ${day(e.ts)}</span></span><span class="${e.a<0?'up':''}">${e.a<0?'−':'+'}${ksh(Math.abs(e.a))} <span class="chev">›</span></span></button>`).join('')}</div>
+    ${owed>0.5?`<button class="btn primary wide" data-act="paid" data-c="${esc(c)}">Settle debt</button>`:''}
+    <div id="pr-rename" hidden class="sb"><label class="fld"><span>Correct name</span><input id="pr-name" value="${esc(c)}" autocomplete="off"></label><button class="btn primary wide" data-act="pr-rename-save" data-c="${esc(c)}">Save name</button></div>
+    <button class="btn line wide" data-act="pr-rename" id="pr-rename-btn">Change ${esc(c)}'s name</button>`);
+}
+function renameCustomer(from,to){
+  S.sales.forEach(x=>{if(x.customer===from)x.customer=to;}); S.debts.forEach(x=>{if(x.customer===from)x.customer=to;}); S.payments.forEach(x=>{if(x.customer===from)x.customer=to;});
+}
+/* fix or delete one debt entry */
+function openDebtEntry(k,id){
+  const dateRow=ts=>`<label class="fld"><span>Date</span><input id="de-date" type="date" value="${isoDay(ts)}" max="${isoDay(Date.now())}"></label>`;
+  if(k==='debt'){
+    const d=S.debts.find(x=>x.id===id); if(!d) return;
+    openSheet('dentry','Fix this debt',`
+      <label class="fld"><span>Who owes you?</span><input id="de-name" value="${esc(d.customer)}" autocomplete="off"></label>
+      <label class="fld"><span>Amount (Ksh)</span><input id="de-amt" type="number" inputmode="numeric" min="1" value="${d.amount}"></label>
+      <label class="fld"><span>Note (optional)</span><input id="de-note" value="${esc(d.note||'')}" autocomplete="off"></label>
+      ${dateRow(d.ts)}
+      <p class="err" id="de-err" hidden></p>
+      <button class="btn primary wide" data-act="de-save" data-k="debt" data-id="${id}">Save changes</button>
+      <button class="btn danger wide" data-act="de-del" data-k="debt" data-id="${id}">Delete this debt</button>`,b=>suggest(b.querySelector('#de-name'),customers));
+  } else if(k==='pay'){
+    const p=S.payments.find(x=>x.id===id); if(!p) return;
+    openSheet('dentry','Fix this payment',`
+      <label class="fld"><span>Amount paid (Ksh)</span><input id="de-amt" type="number" inputmode="numeric" min="1" value="${p.amount}"></label>
+      <div class="chips" role="radiogroup" aria-label="Paid by"><label class="chip"><input type="radio" name="de-m" value="cash" ${p.method!=='mpesa'?'checked':''}>Cash</label><label class="chip"><input type="radio" name="de-m" value="mpesa" ${p.method==='mpesa'?'checked':''}>M-Pesa</label></div>
+      ${dateRow(p.ts)}
+      <p class="err" id="de-err" hidden></p>
+      <button class="btn primary wide" data-act="de-save" data-k="pay" data-id="${id}">Save changes</button>
+      <button class="btn danger wide" data-act="de-del" data-k="pay" data-id="${id}">Delete this payment</button>`);
+  } else {
+    const x=S.sales.find(z=>z.id===id); if(!x) return;
+    openSheet('dentry','Debt from a sale',`
+      <div class="panel">${x.lines.map(l=>`<div class="kv"><span>${l.qty>1?l.qty+' × ':''}${esc(l.name)}</span><span>${ksh(l.price)}</span></div>`).join('')}<div class="kv"><span><b>Total</b> · ${day(x.ts)}</span><span>${ksh(x.total)}</span></div></div>
+      <label class="fld"><span>Who owes you?</span><input id="de-name" value="${esc(x.customer)}" autocomplete="off"></label>
+      <p class="err" id="de-err" hidden></p>
+      <button class="btn primary wide" data-act="de-save" data-k="sale" data-id="${id}">Save name</button>
+      <button class="btn soft wide" data-act="sale" data-id="${id}">Return items or cancel this sale</button>`,b=>suggest(b.querySelector('#de-name'),customers));
+  }
+}
+function saveDebtEntry(k,id){
+  const b=sheetBody(), err=b.querySelector('#de-err'), fail=m=>{err.textContent=m;err.hidden=false;};
+  const match=n=>customers().find(c=>c.toLowerCase()===n.toLowerCase())||n;
+  const keepTs=(old)=>{const v=b.querySelector('#de-date').value; if(v===isoDay(old)) return old; return tsFromIso(v);};
+  let who;
+  if(k==='debt'){
+    const d=S.debts.find(x=>x.id===id), n=b.querySelector('#de-name').value.trim(), amt=toNum(b.querySelector('#de-amt').value), ts=keepTs(d.ts);
+    if(!n) return fail('Write who owes you.'); if(!(amt>0)) return fail('Enter the amount.'); if(!ts) return fail('Pick a date that is today or earlier.');
+    Object.assign(d,{customer:match(n),amount:amt,note:b.querySelector('#de-note').value.trim(),ts}); who=d.customer;
+  } else if(k==='pay'){
+    const p=S.payments.find(x=>x.id===id), amt=toNum(b.querySelector('#de-amt').value), ts=keepTs(p.ts), max=Math.max(0,(balances()[p.customer]||{owed:0}).owed)+p.amount;
+    if(!(amt>0)) return fail('Enter the amount paid.'); if(amt>max+0.5) return fail(`That is more than the ${ksh(max)} they owed.`); if(!ts) return fail('Pick a date that is today or earlier.');
+    Object.assign(p,{amount:amt,method:b.querySelector('input[name="de-m"]:checked').value,ts}); who=p.customer;
+  } else {
+    const x=S.sales.find(z=>z.id===id), n=b.querySelector('#de-name').value.trim(); if(!n) return fail('Write who owes you.');
+    x.customer=match(n); who=x.customer;
+  }
+  commit(); openPerson(who); toast('Saved');
+}
+function deleteDebtEntry(k,id){
+  const list=k==='debt'?S.debts:S.payments, e=list.find(x=>x.id===id); if(!e) return; const who=e.customer;
+  if(k==='debt') S.debts=S.debts.filter(x=>x.id!==id); else S.payments=S.payments.filter(x=>x.id!==id);
+  commit(); const left=customers().includes(who); if(left) openPerson(who); else closeSheet(); toast(k==='debt'?'Debt deleted':'Payment deleted');
 }
 
 /* recent sales and returns */
@@ -1348,6 +1588,8 @@ document.addEventListener('click',e=>{
       const list=CATALOG.filter(c=>c[4]===k&&!byName(c[0]));
       box.innerHTML=list.length?list.map(c=>`<button type="button" class="sg" data-act="cat-item" data-v="${esc(c[0])}">${esc(c[0])}</button>`).join(''):'<p class="hint sm" style="margin:0">All of these are already in your shop.</p>'; box.hidden=false; break;}
     case 'cat-item': {if(sheetKind==='add'){awPick(a.dataset.v);break;} const n=$('#pf-name'); n.value=a.dataset.v; $('#pf-cats').hidden=true; pickCatalog(a.dataset.v); break;}
+    case 'aw-photo': $('#aw-file').click(); break;
+    case 'aw-photo-name': {const v=a.dataset.v; if(CATALOG.some(c=>c[0]===v)) awPick(v); else {$('#pf-name').value=v; $('#pf-cats').hidden=true;} break;}
     case 'aw-back': {const f=$('#pf'); if(f&&f.classList.contains('wiz')){const r=[...f.querySelectorAll('.s-label')].map(i=>i.value.trim()).filter(Boolean); if(r.length) AW.sizes=r;} awStep1(); break;}
     case 'aw-change': {const f=$('#pf'); f.querySelector('.choice').classList.remove('picked'); a.hidden=true; break;}
     case 'size-add': {const box=$('#pf-sizes'); box.insertAdjacentHTML('beforeend',sizeRow({},pfKind(),pfUnitVal(),!!$('#pf').dataset.new)); wireSize(box.lastElementChild); box.lastElementChild.querySelector('.s-label').focus(); break;}
@@ -1355,6 +1597,9 @@ document.addEventListener('click',e=>{
     case 'product-del': arm(a,'pd','Tap again to delete. Past sales stay.',()=>{const id=a.dataset.id, n=item(id).name; S.items=S.items.filter(i=>i.id!==id); S.packs=S.packs.filter(p=>p.itemId!==id); cart=cart.filter(c=>c.k==='pack'?pack(c.packId):item(c.itemId)); closeSheet(); commit(); toast(`Deleted ${n}`);}); break;
     case 'delivery': openDelivery(a.dataset.id); break;
     case 'delivery-save': dlSave(); break;
+    case 'dl-newsize': {const box=b.querySelector('#dl-rows'); box.insertAdjacentHTML('beforeend',dlRow(null)); const r=box.lastElementChild, l=r.querySelector('.dl-label');
+      suggest(l,raw=>sizeOptions(raw,'ready','pcs'),null,r.querySelector('.x'),true); l.addEventListener('blur',()=>{const t=tidyReady(l.value); if(t!==l.value){l.value=t;dlCalc();}}); l.focus(); break;}
+    case 'dl-delrow': a.closest('.dl-row').remove(); dlCalc(); break;
     case 'repack': openRepack(a.dataset.id); break;
     case 'rp': {const i=b.querySelector('#rp-'+a.dataset.id); i.value=Math.max(0,(parseInt(i.value)||0)+(+a.dataset.d)); rpCalc(b.querySelector('#rp-save').dataset.id); break;}
     case 'repack-save': rpSave(a.dataset.id); break;
@@ -1362,7 +1607,21 @@ document.addEventListener('click',e=>{
     case 'debt-save': {const n=b.querySelector('#db-name').value.trim(), amt=toNum(b.querySelector('#db-amt').value), err=b.querySelector('#db-err');
       if(!n){err.textContent='Write who owes you.';err.hidden=false;return;} if(!(amt>0)){err.textContent='Enter the amount.';err.hidden=false;return;}
       const ts=tsFromIso(b.querySelector('#db-date').value); if(!ts){err.textContent='Pick a date that is today or earlier.';err.hidden=false;return;}
-      const ex=customers().find(k=>k.toLowerCase()===n.toLowerCase()); S.debts.push({id:uid(),ts,customer:ex||n,amount:amt,note:b.querySelector('#db-note').value.trim()}); closeSheet(); commit(); toast(`${ex||n} owes ${ksh(amt)} more`); break;}
+      const ex=customers().find(k=>k.toLowerCase()===n.toLowerCase()), who=ex||n, note=b.querySelector('#db-note').value.trim();
+      if(dbLines.length){
+        const lines=dbLines.map(l=>{const p=pack(l.packId),it=item(p.itemId);return {k:'pack',packId:p.id,itemId:it.id,name:fullName(it,p),qty:l.qty,units:r3(p.size*l.qty),price:p.price*l.qty,cost:(p.cost||0)*l.qty};});
+        const sale={id:uid(),ts,lines,total:lines.reduce((a,l)=>a+l.price,0),cost:lines.reduce((a,l)=>a+l.cost,0),pay:'deni',customer:who,note};
+        applySale(sale,-1); S.sales.push(sale); dbLines=[]; closeSheet(); commit(); toast(`${who} owes ${ksh(sale.total)} more. Stock updated.`); break;
+      }
+      S.debts.push({id:uid(),ts,customer:who,amount:amt,note}); closeSheet(); commit(); toast(`${who} owes ${ksh(amt)} more`); break;}
+    case 'db-size': dbAdd(a.dataset.id,1); b.querySelector('#db-prod').value=''; b.querySelector('#db-sizes').hidden=true; break;
+    case 'db-q': dbAdd(a.dataset.id,+a.dataset.d); break;
+    case 'db-entry': openDebtEntry(a.dataset.k,a.dataset.id); break;
+    case 'de-save': saveDebtEntry(a.dataset.k,a.dataset.id); break;
+    case 'de-del': arm(a,'dd'+a.dataset.id,'Tap again to delete',()=>deleteDebtEntry(a.dataset.k,a.dataset.id)); break;
+    case 'pr-rename': b.querySelector('#pr-rename').hidden=false; a.hidden=true; b.querySelector('#pr-name').focus(); break;
+    case 'pr-rename-save': {const from=a.dataset.c, to=b.querySelector('#pr-name').value.trim(); if(!to) return; const ex=customers().find(c=>c.toLowerCase()===to.toLowerCase()&&c!==from);
+      renameCustomer(from,ex||to); commit(); openPerson(ex||to); toast(ex?`Joined with ${ex}`:'Name changed'); break;}
     case 'db-day': b.querySelector('#db-date').value=isoDay(Date.now()-(+a.dataset.d)*DAY); break;
     case 'person': openPerson(a.dataset.c); break;
     case 'paid': openPaid(a.dataset.c); break;
