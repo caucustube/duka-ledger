@@ -214,6 +214,13 @@ nav.tabs .ic{width:56px;height:30px;border-radius:15px;display:grid;place-items:
 .choice label{background:var(--surface);border-radius:12px;padding:9px 12px;display:flex;flex-direction:column;gap:0;cursor:pointer;box-shadow:inset 0 0 0 2px transparent;line-height:1.3}
 .choice label b{font-weight:800;font-size:.95rem}
 .choice label small{color:var(--muted);font-size:.75rem}
+.choice.picked label:not(:has(input:checked)){display:none}
+.chg{align-self:flex-start;color:var(--brand)!important;margin-top:6px}
+.steps{margin:-6px 0 0;font-size:.82rem;color:var(--muted)}
+.steps b{color:var(--brand)}
+.bought{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border-radius:12px;padding:10px 14px;font-size:.92rem}
+#pf.wiz .ready-only{display:none}
+#pf.wiz.none .sizes-only,#pf.wiz.none .single-only{display:none}
 .choice label:has(input:checked){box-shadow:inset 0 0 0 2px var(--brand);background:var(--brand-soft)}
 .choice input{position:absolute;opacity:0;pointer-events:none}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
@@ -293,11 +300,11 @@ const CATALOG=[
   ['Green grams (ndengu)','bulk','kg',['½ kg','1 kg'],0],['Lentils (kamande)','bulk','kg',['½ kg','1 kg'],0],['Maize (mahindi)','bulk','kg',['1 kg','2 kg'],0],
   ['Potatoes','bulk','kg',['1 kg','2 kg'],0],['Cooking oil','bulk','L',['¼ L','½ L','1 L'],0],
   ['Unga (maize flour)','ready','',['1 kg','2 kg'],0],['Wheat flour','ready','',['1 kg','2 kg'],0],['Porridge flour','ready','',['500 g','1 kg'],0],
-  ['Bread','ready','',['400 g','800 g'],0],['Salt','ready','',['500 g','1 kg'],0],['Tea leaves','ready','',['50 g','100 g','250 g','500 g'],0],
-  ['Tea bags','ready','',['25 bags','50 bags','100 bags'],0],['Instant coffee','ready','',['Sachet','50 g','100 g'],0],['Ground coffee','ready','',['250 g','500 g'],0],
-  ['Coffee creamer','ready','',['200 g','400 g'],0],['Vegetable oil (bottle)','ready','',['500 ml','1 L','2 L','5 L'],0],['Olive oil','ready','',['250 ml','500 ml'],0],
+  ['Bread','ready','',['400 g','800 g'],0],['Salt','ready','',['500 g','1 kg'],0],['Tea leaves','ready','',['50 g','100 g','250 g','500 g'],0],['Coffee','ready','',['Sachet','50 g','100 g'],0],['Pasta','ready','',['400 g','500 g'],0],
+  
+  ['Coffee creamer','ready','',['200 g','400 g'],0],
   ['Margarine','ready','',['100 g','250 g','500 g'],0],['Cooking fat','ready','',['100 g','250 g','500 g'],0],['Eggs','bulk','pcs',['1 piece','30 pieces'],0],
-  ['Spaghetti','ready','',['400 g'],0],['Macaroni','ready','',['400 g'],0],['Baking powder','ready','',['50 g','100 g','200 g'],0],
+  ['Baking powder','ready','',['50 g','100 g','200 g'],0],
   ['Bicarbonate of soda','ready','',['100 g'],0],['Spices','ready','',['Sachet'],0],['Mchuzi mix','ready','',['Sachet','200 g'],0],['MSG','ready','',['50 g','100 g'],0],
   ['Honey','ready','',['250 g','500 g','1 kg'],0],['Breakfast cereal','ready','',['250 g','500 g'],0],['Peanut butter','ready','',['200 g','400 g'],0],
   ['Tomato sauce','ready','',['250 ml','400 ml'],0],['Mayonnaise','ready','',['250 ml','400 ml'],0],['Soy sauce','ready','',['150 ml','250 ml'],0],
@@ -307,8 +314,8 @@ const CATALOG=[
   ['Sweets','bulk','pcs',['1 piece','5 pieces'],0],['Chewing gum','bulk','pcs',['1 piece','5 pieces'],0],
   /* Drinks & fridge */
   ['Bottled water','ready','',['500 ml','1 L','1.5 L'],1],['Soda','ready','',['300 ml','500 ml','1 L'],1],['Fruit juice','ready','',['250 ml','500 ml','1 L'],1],
-  ['Milk','ready','',['250 ml','500 ml'],1],['Long life milk (UHT)','ready','',['250 ml','500 ml','1 L'],1],['Yoghurt','ready','',['150 ml','250 ml','500 ml'],1],
-  ['Butter','ready','',['250 g','500 g'],1],['Cheese','ready','',['200 g'],1],['Sausages','ready','',['1 piece','Pack'],1],['Smokies','ready','',['1 piece','Pack'],1],
+  ['Milk','ready','',['250 ml','500 ml'],1],['Yoghurt','ready','',['150 ml','250 ml','500 ml'],1],
+  ['Butter','ready','',['250 g','500 g'],1],['Cheese','ready','',['200 g'],1],['Sausages','ready','',['1 piece','Pack'],1],
   ['Chicken','ready','',['Whole','Half'],1],
   /* Personal care */
   ['Tissue paper','ready','',['1 roll'],2],['Toothpaste','ready','',['Small','Large'],2],['Toothbrush','ready','',['1 piece'],2],['Dental floss','ready','',['1 piece'],2],
@@ -316,12 +323,12 @@ const CATALOG=[
   ['Body lotion','ready','',['100 ml','200 ml','400 ml'],2],['Glycerine','ready','',['50 ml','100 ml'],2],['Petroleum jelly','ready','',['Small','Large'],2],
   ['Deodorant','ready','',['Roll-on','Spray'],2],['Perfume','ready','',['1 bottle'],2],['Face wash','ready','',['100 ml'],2],['Lip balm','ready','',['1 piece'],2],
   ['Shaving cream','ready','',['1 tube'],2],['Razor','ready','',['1 piece','Pack'],2],['Shampoo','ready','',['Sachet','200 ml','400 ml'],2],
-  ['Hair conditioner','ready','',['200 ml','400 ml'],2],['Sanitary pads','ready','',['Pack'],2],['Panty liners','ready','',['Pack'],2],['Wet wipes','ready','',['Pack'],2],
+  ['Hair conditioner','ready','',['200 ml','400 ml'],2],['Sanitary pads','ready','',['Pack'],2],['Wet wipes','ready','',['Pack'],2],
   ['Cotton buds','ready','',['Pack'],2],['Diapers','ready','',['1 piece','Pack'],2],['Nail polish','ready','',['1 bottle'],2],['Nail polish remover','ready','',['1 bottle'],2],
   /* Cleaning */
-  ['Bar soap','ready','',['Piece','Full bar'],3],['Washing powder','ready','',['Sachet','500 g','1 kg'],3],['Washing gel','ready','',['500 ml','1 L'],3],
-  ['Dishwashing liquid','ready','',['250 ml','500 ml','1 L'],3],['Dishwashing paste','ready','',['200 g','400 g'],3],['Hand wash','ready','',['250 ml','500 ml'],3],
-  ['Steel wire','ready','',['1 piece'],3],['Steel wool','ready','',['1 piece'],3],['Sponge & scrubber','ready','',['1 piece'],3],['Scouring powder','ready','',['500 g'],3],
+  ['Bar soap','ready','',['Piece','Full bar'],3],['Washing powder','ready','',['Sachet','500 g','1 kg'],3],
+  ['Dishwashing liquid','ready','',['250 ml','500 ml','1 L'],3],['Hand wash','ready','',['250 ml','500 ml'],3],
+  ['Steel wire','ready','',['1 piece'],3],['Sponge & scrubber','ready','',['1 piece'],3],['Scouring powder','ready','',['500 g'],3],
   ['Bleach','ready','',['250 ml','500 ml','1 L'],3],['Fabric softener','ready','',['500 ml','1 L'],3],['Disinfectant','ready','',['125 ml','250 ml','500 ml'],3],
   ['Toilet cleaner','ready','',['500 ml'],3],['Floor cleaner','ready','',['500 ml','1 L'],3],['Air freshener','ready','',['Spray','Block'],3],
   ['Toilet balls','ready','',['Pack'],3],['Garbage bags','ready','',['1 roll'],3],['Rubber gloves','ready','',['Pair'],3],['Toilet brush','ready','',['1 piece'],3],
@@ -857,13 +864,13 @@ function pfMode(){
   const u=pfUnitVal()||'units';
   f.querySelectorAll('.u').forEach(x=>x.textContent=uName(u));
   f.querySelectorAll('.s-label').forEach(i=>i.placeholder=m!=='bulk'?'e.g. 500 ml':'Type, e.g. '+(u==='kg'||u==='L'||u==='m'?'quarter':'1'));
-  f.querySelectorAll('.s-stock-l').forEach(x=>x.textContent=m==='bulk'&&f.dataset.new?'Already packed':'On shelf');
+  f.querySelectorAll('.s-stock-l').forEach(x=>x.textContent=m==='bulk'&&f.dataset.new?'Already packed':f.classList.contains('wiz')?'How many':'On shelf');
   f.querySelectorAll('.size').forEach(r=>sizeCheck(r));
   pfCheck();
 }
 /* live check: buying cost per unit, and packed sizes can't add up to more than was bought */
 function pfCheck(){
-  const f=$('#pf'); if(!f) return; const calc=f.querySelector('#pf-calc'), pk=f.querySelector('#pf-pack');
+  const f=$('#pf'); if(!f) return; if(f.classList.contains('wiz')) return awCheck(); const calc=f.querySelector('#pf-calc'), pk=f.querySelector('#pf-pack');
   if(pfModeVal()!=='bulk'){calc.hidden=true; pk.hidden=true; return;}
   const u=pfUnitVal()||'units', paid=toNum(f.querySelector('#pf-paid')?.value), amt=toNum(f.querySelector('#pf-for')?.value);
   const rows=[...f.querySelectorAll('.size')].map(r=>({label:r.querySelector('.s-label').value.trim(),size:sizeIn(r.querySelector('.s-label').value,u)||toNum(r.querySelector('.s-size').value),n:toNum(r.querySelector('.s-stock').value)||0})).filter(r=>r.label&&r.size>0);
@@ -954,6 +961,172 @@ function pfSave(it){
   });
   S.packs=S.packs.filter(p=>p.itemId!==t.id||keep.has(p.id));
   closeSheet(); commit(); toast(it?`Saved ${name}`:`${name} added`);
+}
+
+/* ---------- add a product: two steps ----------
+   Step 1 is what was bought: product, how it is counted, how much, total price.
+   Step 2 is how it is sold, then Add to my shop. Editing a product still uses the one-page form. */
+let AW=null;
+const AW_UNITS=[['pcs','Pieces'],['kg','Kilograms'],['L','Litres'],['m','Metres']];
+function openAdd(pre){
+  AW={name:'',unit:'pcs',other:'',amt:'',paid:'',how:'',sizes:null};
+  awStep1(); if(pre){ const n=$('#pf-name'); n.value=pre; const c=CATALOG.find(x=>x[0].toLowerCase()===pre.toLowerCase()); if(c) awPick(c[0]); else awUnits(); }
+}
+function awStep1(){
+  const known=AW_UNITS.some(u=>u[0]===AW.unit);
+  openSheet('add','Add a product',`<form id="aw1" class="sb" novalidate>
+    <p class="steps"><b>Step 1 of 2</b> · What you bought</p>
+    <label class="fld"><span>Product name</span><input id="pf-name" value="${esc(AW.name)}" placeholder="Start typing, e.g. su…" autocomplete="off"></label>
+    <div class="cats" id="pf-cats" ${AW.name?'hidden':''}><p class="hint sm" style="margin:0">Or tap a common item</p><div class="chips">${CATS.map((c,k)=>`<button type="button" class="chip" data-act="cat" data-k="${k}" aria-pressed="false">${c}</button>`).join('')}</div><div class="sugg" id="pf-cat-items" hidden></div></div>
+    <fieldset class="fld"><legend>How do you count what you bought?</legend><div class="chips" role="radiogroup" aria-label="Unit">${AW_UNITS.map(([v,l])=>`<label class="chip"><input type="radio" name="aw-unit" value="${v}" ${v===AW.unit?'checked':''}>${l}</label>`).join('')}<label class="chip"><input type="radio" name="aw-unit" value="other" ${known?'':'checked'}>Other</label></div>
+      <input id="aw-other" class="other-in" placeholder="e.g. bundles, trays, cartons" autocomplete="off" value="${known?'':esc(AW.unit)}" ${known?'hidden':''}></fieldset>
+    <div class="two">
+      <label class="fld"><span>How much did you buy? (<span class="u">${esc(uName(AW.unit||'units'))}</span>)</span><input id="aw-amt" type="number" inputmode="decimal" min="0" step="any" value="${AW.amt}" placeholder="e.g. 50"></label>
+      <label class="fld"><span>Total price paid (Ksh)</span><input id="aw-paid" type="number" inputmode="decimal" min="0" step="any" value="${AW.paid}" placeholder="e.g. 7500"></label>
+    </div>
+    <p class="calc" id="aw-calc" hidden></p>
+    <p class="err" id="aw-err" hidden></p>
+    <button class="btn primary wide" type="submit">Next: how you sell it</button>
+  </form>`,b=>{
+    const f=b.querySelector('#aw1'), name=f.querySelector('#pf-name'), other=f.querySelector('#aw-other');
+    suggest(name,()=>CATALOG.map(c=>c[0]).filter(n=>!byName(n)),awPick);
+    suggest(other,()=>OTHER_UNITS);
+    name.addEventListener('input',()=>{f.querySelector('#pf-cats').hidden=!!name.value.trim();});
+    f.addEventListener('change',e=>{if(e.target.name==='aw-unit') awUnits();});
+    f.addEventListener('input',awUnits);
+    f.addEventListener('submit',e=>{e.preventDefault();awNext();});
+    awUnits(); if(!AW.name) setTimeout(()=>name.focus(),60);
+  });
+}
+function awUnitVal(){const f=$('#aw1'), r=f.querySelector('input[name="aw-unit"]:checked'); if(!r) return 'pcs'; return r.value==='other'?f.querySelector('#aw-other').value.trim().toLowerCase():r.value;}
+function awUnits(){
+  const f=$('#aw1'); if(!f) return; const r=f.querySelector('input[name="aw-unit"]:checked');
+  f.querySelector('#aw-other').hidden=!(r&&r.value==='other');
+  const u=awUnitVal()||'units'; f.querySelectorAll('.u').forEach(x=>x.textContent=uName(u));
+  const amt=toNum(f.querySelector('#aw-amt').value), paid=toNum(f.querySelector('#aw-paid').value), c=f.querySelector('#aw-calc');
+  if(amt>0&&paid>0){c.innerHTML=`That is <b>${ksh(paid/amt)}</b> per ${esc(uOne(u))}.`; c.hidden=false;} else c.hidden=true;
+}
+/* a common item fills in how it is counted and how it is usually sold */
+function awPick(n){
+  const c=CATALOG.find(x=>x[0]===n); if(!c) return; const f=$('#aw1');
+  f.querySelector('#pf-name').value=c[0]; f.querySelector('#pf-cats').hidden=true;
+  const unit=c[1]==='bulk'?c[2]:'pcs', ur=f.querySelector(`input[name="aw-unit"][value="${unit}"]`);
+  if(ur) ur.checked=true; else {f.querySelector('input[name="aw-unit"][value="other"]').checked=true; f.querySelector('#aw-other').value=unit;}
+  AW.how=c[1]==='bulk'?'bulk':c[3].length===1?'single':'sizes'; AW.sizes=c[1]==='bulk'||c[3].length>1?c[3].slice():null;
+  awUnits(); setTimeout(()=>f.querySelector('#aw-amt').focus(),30);
+}
+function awNext(){
+  const f=$('#aw1'), err=f.querySelector('#aw-err'), fail=m=>{err.textContent=m;err.hidden=false;};
+  const name=f.querySelector('#pf-name').value.trim(), unit=awUnitVal(), amt=toNum(f.querySelector('#aw-amt').value), paid=toNum(f.querySelector('#aw-paid').value);
+  if(!name) return fail('Write the product name, or tap a common item.');
+  if(byName(name)) return fail(`${name} is already in your shop. To add more of it, use Delivery in Stock.`);
+  if(!unit) return fail('Write what you count it in, like bundles.');
+  if(!(amt>0)) return fail(`Write how many ${uName(unit)} you bought.`);
+  if(f.querySelector('#aw-paid').value.trim()!==''&&!(paid>=0)) return fail('Write the total price paid, or leave it empty.');
+  const changedUnit=AW.unit!==unit;
+  Object.assign(AW,{name,unit,amt,paid:paid>0?paid:''});
+  if(changedUnit&&AW.how==='sizes'&&unit!=='pcs') AW.how='';
+  awStep2();
+}
+function awStep2(){
+  const u=AW.unit, pcs=u==='pcs', per=AW.paid>0?AW.paid/AW.amt:0;
+  const opts=[['single','One price',`Sell each ${uOne(u)} as it is`],['bulk','Pack into smaller sizes',pcs?'Like sweets sold in 5s':(u==='kg'||u==='L'||u==='m')?`Like ${canon(.25,u)} and ${canon(.5,u)}`:`Like packs of 2 or 5 ${uName(u)}`]];
+  if(pcs) opts.push(['sizes','It came in different sizes','Like water in 500 ml and 1 L bottles']);
+  if(!opts.some(o=>o[0]===AW.how)) AW.how='';
+  const rows=(AW.sizes&&AW.sizes.length?AW.sizes:['']).map(l=>sizeRow({label:l},AW.how==='sizes'?'ready':'bulk',u,true)).join('');
+  openSheet('add','Add '+AW.name,`<form id="pf" class="sb wiz ${AW.how||'none'} ${AW.how&&AW.how!=='bulk'?'ready':''}" data-unit="${esc(u)}" data-new="1" novalidate>
+    <p class="steps"><b>Step 2 of 2</b> · How you sell it</p>
+    <div class="bought"><span><b>${qty(AW.amt,u)}</b>${AW.paid?` for <b>${ksh(AW.paid)}</b> · ${ksh(per)} per ${esc(uOne(u))}`:''}</span><button type="button" class="linkbtn" data-act="aw-back" style="color:var(--brand)">Change</button></div>
+    <input type="hidden" id="pf-for" value="${AW.amt}"><input type="hidden" id="pf-paid" value="${AW.paid}">
+    <fieldset class="fld"><legend>How do you sell it?</legend><div class="choice${AW.how?' picked':''}">
+      ${opts.map(([v,t,d])=>`<label><input type="radio" name="pf-mode" value="${v}" ${AW.how===v?'checked':''}><b>${t}</b><small>${esc(d)}</small></label>`).join('')}</div>
+      <button type="button" class="linkbtn chg" data-act="aw-change" ${AW.how?'':'hidden'}>Choose another way</button></fieldset>
+    <div class="single-only two">
+      <label class="fld"><span>Selling price, per ${esc(uOne(u))}</span><input id="pf-s-price" type="number" inputmode="decimal" min="0" step="any" placeholder="Ksh"></label>
+      <p class="hint" style="align-self:end;margin:0 0 12px">${pcs?`${nf(Math.floor(AW.amt),0)} go on the shelf.`:`${qty(Math.floor(AW.amt),u)} go on the shelf as ${canon(1,u)} each.`}</p>
+    </div>
+    <p class="hint sizes-only" style="font-weight:700;margin-bottom:-6px">Sizes and prices</p>
+    <div class="sb sizes-only" id="pf-sizes">${rows}</div>
+    <button type="button" class="btn line sizes-only" data-act="size-add">+ Another size</button>
+    <p class="calc" id="pf-calc" hidden></p>
+    <p class="calc" id="pf-pack" hidden></p>
+    <p class="err" id="pf-err" hidden></p>
+    <button class="btn primary wide" type="submit" ${AW.how?'':'disabled'}>Add to my shop</button>
+    <button type="button" class="btn line wide" data-act="aw-back">Back</button>
+  </form>`,b=>{
+    const f=b.querySelector('#pf');
+    f.addEventListener('change',e=>{if(e.target.name==='pf-mode'){AW.how=e.target.value; awReshape(); }});
+    f.addEventListener('input',pfCheck);
+    f.addEventListener('submit',e=>{e.preventDefault();awSave();});
+    f.querySelectorAll('.size').forEach(wireSize);
+    pfMode();
+  });
+}
+/* after choosing how it is sold, hide the other choices and show the right boxes */
+function awReshape(){
+  const f=$('#pf'); f.querySelector('.choice').classList.add('picked'); f.querySelector('.chg').hidden=false; f.classList.remove('none');
+  f.querySelector('button[type=submit]').disabled=false;
+  const kind=AW.how==='sizes'?'ready':'bulk', box=f.querySelector('#pf-sizes');
+  const keep=[...box.querySelectorAll('.size')].map(r=>({label:r.querySelector('.s-label').value,price:r.querySelector('.s-price').value,stock:r.querySelector('.s-stock').value}));
+  box.innerHTML=keep.map(p=>sizeRow({label:p.label,price:p.price===''?undefined:p.price,stock:p.stock===''?undefined:p.stock},kind,AW.unit,true)).join('');
+  box.querySelectorAll('.size').forEach(wireSize);
+  pfMode(); const first=AW.how==='single'?f.querySelector('#pf-s-price'):f.querySelector('.s-label'); if(first&&!first.value) setTimeout(()=>first.focus(),30);
+}
+/* live checks for step 2: cost of each pack, and nothing adds up to more than was bought */
+function awCheck(){
+  const f=$('#pf'), calc=f.querySelector('#pf-calc'), pk=f.querySelector('#pf-pack'), u=AW.unit, per=AW.paid>0?AW.paid/AW.amt:0;
+  calc.hidden=true; pk.hidden=true; pk.classList.remove('bad');
+  if(AW.how==='bulk'){
+    const rows=[...f.querySelectorAll('.size')].map(r=>({label:r.querySelector('.s-label').value.trim(),size:sizeIn(r.querySelector('.s-label').value,u)||toNum(r.querySelector('.s-size').value),n:toNum(r.querySelector('.s-stock').value)||0})).filter(r=>r.label&&r.size>0);
+    if(per&&rows.length){calc.innerHTML=`Each pack costs you: ${rows.slice(0,4).map(r=>`${esc(tidySize(r.label,'bulk',u))} <b>${ksh(per*r.size)}</b>`).join(' · ')}`; calc.hidden=false;}
+    const packed=r3(rows.reduce((a,r)=>a+r.size*r.n,0)); if(!(packed>0)) return;
+    pk.hidden=false;
+    if(packed>AW.amt+1e-9){pk.classList.add('bad'); pk.innerHTML=`The packs add up to <b>${qty(packed,u)}</b>, more than the <b>${qty(AW.amt,u)}</b> you bought. Lower the numbers.`; return;}
+    pk.innerHTML=`Packed <b>${qty(packed,u)}</b> of ${qty(AW.amt,u)}. <b>${qty(r3(AW.amt-packed),u)}</b> stays in bulk to pack later.`;
+  } else if(AW.how==='sizes'){
+    const n=[...f.querySelectorAll('.size')].reduce((a,r)=>a+(Math.floor(toNum(r.querySelector('.s-stock').value))||0),0); if(!n) return;
+    pk.hidden=false;
+    if(n>AW.amt){pk.classList.add('bad'); pk.innerHTML=`That is <b>${n}</b> pieces, more than the <b>${nf(AW.amt,0)}</b> you bought.`; return;}
+    pk.innerHTML=`<b>${n}</b> of ${nf(AW.amt,0)} pieces listed.`+(AW.paid?' The price you paid is shared across the sizes by their selling price.':'');
+  }
+}
+function awSave(){
+  const f=$('#pf'), err=f.querySelector('#pf-err'), fail=m=>{err.textContent=m;err.hidden=false;err.scrollIntoView({block:'nearest'});};
+  const u=AW.unit, amt=AW.amt, paid=AW.paid>0?AW.paid:0, per=paid?paid/amt:0, now=Date.now();
+  if(!AW.how) return fail('Choose how you sell it.');
+  if(byName(AW.name)) return fail(`${AW.name} is already in your shop.`);
+  let t, packs=[];
+  if(AW.how==='single'){
+    const price=toNum(f.querySelector('#pf-s-price').value); if(!(price>0)) return fail(`Set the selling price per ${uOne(u)}.`);
+    const n=Math.floor(amt+1e-9);
+    if(u==='pcs'){ t={id:uid(),name:AW.name,mode:'ready',unit:'pc',bulk:0,cost:0,added:now}; packs.push({label:'',size:1,price,stock:n,cost:per}); }
+    else { t={id:uid(),name:AW.name,mode:'bulk',unit:u,bulk:r3(amt-n),cost:per,ref:amt,added:now}; packs.push({label:canon(1,u),size:1,price,stock:n,cost:per}); }
+  } else {
+    const kind=AW.how==='sizes'?'ready':'bulk';
+    const rows=[...f.querySelectorAll('.size')].map(r=>({label:tidySize(r.querySelector('.s-label').value,kind,u),price:toNum(r.querySelector('.s-price').value),n:Math.max(0,Math.floor(toNum(r.querySelector('.s-stock').value)||0)),size:toNum(r.querySelector('.s-size').value)})).filter(r=>r.label||r.price>0);
+    if(!rows.length) return fail('Add at least one size you sell.');
+    const seen=new Set();
+    for(const r of rows){
+      if(!r.label) return fail('Every size needs a name, like ¼ kg or 500 ml.');
+      if(seen.has(r.label.toLowerCase())) return fail(`${r.label} is listed twice.`); seen.add(r.label.toLowerCase());
+      if(!(r.price>0)) return fail(`Set a selling price for ${r.label}.`);
+      if(kind==='bulk'){ const v=sizeIn(r.label,u); if(v) r.size=v; if(!(r.size>0)) return fail(`How many ${uName(u)} is ${r.label}? Write it under the size.`); }
+    }
+    if(kind==='bulk'){
+      const packed=r3(rows.reduce((a,r)=>a+r.size*r.n,0));
+      if(packed>amt+1e-9) return fail(`The packs add up to ${qty(packed,u)}, more than the ${qty(amt,u)} you bought.`);
+      t={id:uid(),name:AW.name,mode:'bulk',unit:u,bulk:r3(amt-packed),cost:per,ref:amt,added:now};
+      rows.forEach(r=>packs.push({label:r.label,size:r.size,price:r.price,stock:r.n,cost:per*r.size}));
+    } else {
+      const n=rows.reduce((a,r)=>a+r.n,0); if(n>amt) return fail(`That is ${n} pieces, more than the ${nf(amt,0)} you bought.`);
+      const value=rows.reduce((a,r)=>a+r.n*r.price,0);
+      t={id:uid(),name:AW.name,mode:'ready',unit:'pc',bulk:0,cost:0,added:now};
+      rows.forEach(r=>packs.push({label:r.label,size:1,price:r.price,stock:r.n,cost:paid&&value?r.price*paid/value:0}));
+    }
+  }
+  S.items.push(t); packs.forEach(p=>S.packs.push(Object.assign({id:uid(),itemId:t.id},p)));
+  S.deliveries.push({id:uid(),ts:now,itemId:t.id,packId:null,qty:amt,paid});
+  AW=null; closeSheet(); commit(); toast(`${t.name} added`);
 }
 
 /* delivery */
@@ -1161,13 +1334,15 @@ document.addEventListener('click',e=>{
     case 'deni-save': {const n=b.querySelector('#deni-name').value.trim(); if(!n){b.querySelector('#deni-err').hidden=false;return;} const ex=customers().find(k=>k.toLowerCase()===n.toLowerCase()); sell('deni',ex||n); break;}
     case 'undo': undo(); break;
     case 'item': openItem(a.dataset.id); break;
-    case 'product': {const pre=sheetKind==='delivery'&&!a.dataset.id?b.querySelector('#dl-name').value.trim():(tab==='sell'&&!a.dataset.id&&!sheet?findQ.trim():''); openProduct(a.dataset.id); if(pre){const n=$('#pf-name'); n.value=pre; const c=CATALOG.find(x=>x[0].toLowerCase()===pre.toLowerCase()); if(c){n.value=c[0];pickCatalog(c[0]);}} break;}
+    case 'product': {const pre=sheetKind==='delivery'&&!a.dataset.id?b.querySelector('#dl-name').value.trim():(tab==='sell'&&!a.dataset.id&&!sheet?findQ.trim():''); if(!a.dataset.id){openAdd(pre);break;} openProduct(a.dataset.id); if(pre){const n=$('#pf-name'); n.value=pre; const c=CATALOG.find(x=>x[0].toLowerCase()===pre.toLowerCase()); if(c){n.value=c[0];pickCatalog(c[0]);}} break;}
     case 'cat': {const k=+a.dataset.k, box=$('#pf-cat-items'), on=a.getAttribute('aria-pressed')==='true';
       document.querySelectorAll('#pf-cats [data-act="cat"]').forEach(x=>x.setAttribute('aria-pressed','false'));
       if(on){box.hidden=true;break;} a.setAttribute('aria-pressed','true');
       const list=CATALOG.filter(c=>c[4]===k&&!byName(c[0]));
       box.innerHTML=list.length?list.map(c=>`<button type="button" class="sg" data-act="cat-item" data-v="${esc(c[0])}">${esc(c[0])}</button>`).join(''):'<p class="hint sm" style="margin:0">All of these are already in your shop.</p>'; box.hidden=false; break;}
-    case 'cat-item': {const n=$('#pf-name'); n.value=a.dataset.v; $('#pf-cats').hidden=true; pickCatalog(a.dataset.v); break;}
+    case 'cat-item': {if(sheetKind==='add'){awPick(a.dataset.v);break;} const n=$('#pf-name'); n.value=a.dataset.v; $('#pf-cats').hidden=true; pickCatalog(a.dataset.v); break;}
+    case 'aw-back': {const f=$('#pf'); if(f&&f.classList.contains('wiz')){const r=[...f.querySelectorAll('.s-label')].map(i=>i.value.trim()).filter(Boolean); if(r.length) AW.sizes=r;} awStep1(); break;}
+    case 'aw-change': {const f=$('#pf'); f.querySelector('.choice').classList.remove('picked'); a.hidden=true; break;}
     case 'size-add': {const box=$('#pf-sizes'); box.insertAdjacentHTML('beforeend',sizeRow({},pfKind(),pfUnitVal(),!!$('#pf').dataset.new)); wireSize(box.lastElementChild); box.lastElementChild.querySelector('.s-label').focus(); break;}
     case 'size-del': {const rows=document.querySelectorAll('#pf-sizes .size'); if(rows.length>1) a.closest('.size').remove(); else {a.closest('.size').querySelectorAll('input').forEach(i=>i.value='');} pfCheck(); break;}
     case 'product-del': arm(a,'pd','Tap again to delete. Past sales stay.',()=>{const id=a.dataset.id, n=item(id).name; S.items=S.items.filter(i=>i.id!==id); S.packs=S.packs.filter(p=>p.itemId!==id); cart=cart.filter(c=>c.k==='pack'?pack(c.packId):item(c.itemId)); closeSheet(); commit(); toast(`Deleted ${n}`);}); break;
