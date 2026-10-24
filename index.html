@@ -119,6 +119,10 @@ body.has-cart #toast{bottom:calc(196px + env(safe-area-inset-bottom,0px))}
 .photo svg{width:20px;height:20px}
 .photo-res .pr-top{display:flex;gap:10px;align-items:flex-start}
 .photo-res img{width:56px;height:56px;object-fit:cover;border-radius:10px;flex:none}
+.banner{display:flex;align-items:center;gap:12px;background:var(--brand-soft);border-radius:16px;padding:12px 14px;margin:4px 0 6px}
+.banner>div{flex:1;min-width:0}.banner b{display:block;font-weight:800}.banner small{color:var(--muted);font-size:.82rem}
+.banner.bad{background:var(--bad-soft)}.banner .btn{min-height:40px;padding:8px 14px;flex:none}
+.pin{font-size:2.2rem;font-weight:800;letter-spacing:.2em;text-align:center;color:var(--brand);margin:0}
 .cchip{display:inline-flex;align-items:center;gap:4px;flex:none;background:var(--surface);border-radius:999px;padding:3px 3px 3px 12px;font-weight:700;font-size:.85rem;white-space:nowrap;box-shadow:0 2px 8px -4px rgba(39,43,34,.35)}
 .cchip button{width:32px;height:32px;border:0;border-radius:50%;background:var(--bad-soft);color:var(--bad);font-size:1.1rem;font-weight:800;line-height:1}
 .tile.soldout{opacity:.5}
@@ -504,7 +508,7 @@ function load(){
   S=blank(); save();
 }
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));storageOk=true;}catch(e){storageOk=false;}}
-function commit(){save();render();}
+function commit(){S.rev=(S.rev||0)+1; save(); render(); scheduleBackup(60000);}
 
 /* ---------- suggestions ---------- */
 function hl(x,q){const i=x.toLowerCase().indexOf(q); return i<0?esc(x):esc(x.slice(0,i))+'<b>'+esc(x.slice(i,i+q.length))+'</b>'+esc(x.slice(i+q.length));}
@@ -581,8 +585,8 @@ function cartAdd(pid,d){
   buzz();
 }
 function vSell(){
-  if(!S.packs.length) return `<div class="vh"><h2>Sell</h2></div>`+empty('Your shop is empty','Add the things you sell, one at a time. Start with something you sell every day, like sugar.','+ Add a product','product');
-  return `<div class="vh"><h2>Sell</h2>${S.sales.length?'<button class="btn line" data-act="sales">Recent sales</button>':''}</div>
+  if(!S.packs.length) return `${sellBanner()}<div class="vh"><h2>Sell</h2></div>`+empty('Your shop is empty','Add the things you sell, one at a time. Start with something you sell every day, like sugar.','+ Add a product','product');
+  return `${sellBanner()}<div class="vh"><h2>Sell</h2>${S.sales.length?'<button class="btn line" data-act="sales">Recent sales</button>':''}</div>
     <div class="find"><input id="find" type="search" placeholder="Search ${S.items.length} products" value="${esc(findQ)}" autocomplete="off" aria-label="Search products"></div>
     <div id="tiles-wrap"></div>`;
 }
@@ -1534,6 +1538,165 @@ function cancelSale(id){
   toast(x.pay==='deni'?`Sale cancelled. ${x.customer}'s debt is ${ksh(x.total)} less.`:`Sale cancelled. Give back ${ksh(x.total)}.`);
 }
 
+/* ---------- shop account, free month and Google Drive backup ----------
+   All of this talks to the Doppler Shop server (a free Cloudflare Worker).
+   Until SERVER below is filled in, the app works as before with no account and no time limit. */
+const SERVER='https://doppler-shop.cyruskirui0.workers.dev';          /* e.g. https://doppler-shop.yourname.workers.dev */
+const serverOn=/^https:\/\/[^/]+/.test(SERVER);
+const API=SERVER.replace(/\/+$/,'');
+const ACCT_KEY='duka-ledger.acct', GRACE=3*DAY;
+let acct=(()=>{try{return JSON.parse(localStorage.getItem(ACCT_KEY))||{};}catch(e){return {};}})(), bkTimer=null, bkBusy=false;
+const saveAcct=()=>{try{localStorage.setItem(ACCT_KEY,JSON.stringify(acct));}catch(e){}};
+if(!acct.firstOpen){acct.firstOpen=Date.now(); saveAcct();}
+const hhmm=t=>new Date(t).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+const dmy=t=>new Date(t).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+async function api(path,opt={}){
+  const h=Object.assign({},opt.headers||{}); if(acct.token) h.Authorization='Bearer '+acct.token; if(opt.json){h['content-type']='application/json';}
+  const r=await fetch(API+path,{method:opt.method||'GET',headers:h,body:opt.json?JSON.stringify(opt.json):opt.body});
+  let j={}; try{j=await r.json();}catch(e){j={ok:false,error:'bad-reply'};}
+  return j;
+}
+function takeStatus(j){ ['status','ends','daysLeft','trialEnds','paidUntil','drive','price','pay','name','phone'].forEach(k=>{if(k in j) acct[k]=j[k];}); acct.checked=Date.now(); saveAcct(); }
+async function refreshStatus(){
+  if(!serverOn||!acct.token||!navigator.onLine) return;
+  try{ const j=await api('/api/status'); if(j.ok){ takeStatus(j); render(); refreshAcctBox(); } else if(j.error==='bad-token'){ acct={firstOpen:acct.firstOpen}; saveAcct(); render(); } }catch(e){}
+}
+/* view only when the free month or paid time is over (3 days' grace if the phone has been offline) */
+function locked(){
+  if(!serverOn) return false;
+  const now=Date.now();
+  if(!acct.token) return now-acct.firstOpen>GRACE;
+  if(acct.status==='expired') return true;
+  return !!acct.ends&&now>acct.ends+GRACE;
+}
+function acctLine(){
+  if(!acct.token) return '';
+  if(acct.status==='paid') return `Paid until <b>${dmy(acct.paidUntil)}</b>.`;
+  if(acct.status==='trial') return `Free month: <b>${acct.daysLeft} day${acct.daysLeft===1?'':'s'} left</b> (until ${dmy(acct.trialEnds)}).`;
+  return 'Your free month has ended.';
+}
+function payHTML(){ return `${acct.price?`<p class="calc">The service costs <b>${esc(acct.price)}</b>.<br>${esc(acct.pay||'')}</p>`:''}<p class="hint">After you pay, tap <b>Check again</b>. It opens as soon as your payment is recorded.</p>`; }
+function sellBanner(){
+  if(!serverOn) return '';
+  if(!acct.token){ const left=Math.max(0,Math.ceil((acct.firstOpen+GRACE-Date.now())/DAY));
+    return `<div class="banner"><div><b>Start your free month</b><small>${locked()?'Sign up to keep selling. Your records are safe.':'Needs internet once. '+left+' day'+(left===1?'':'s')+' to do it.'}</small></div><button class="btn primary" data-act="acct-start">Start</button></div>`; }
+  if(locked()) return `<div class="banner bad"><div><b>Your free month has ended</b><small>You can still see everything. Pay to keep selling.</small></div><button class="btn primary" data-act="paywall">How to pay</button></div>`;
+  if(acct.status==='trial'&&acct.daysLeft<=5) return `<div class="banner"><div><b>${acct.daysLeft} day${acct.daysLeft===1?'':'s'} left of your free month</b><small>${esc(acct.price||'')}</small></div><button class="btn line" data-act="paywall">How to pay</button></div>`;
+  if(acct.token&&acct.drive&&!acct.drive.connected) return `<div class="banner"><div><b>Back up to Google Drive</b><small>So a lost phone never loses your records.</small></div><button class="btn line" data-act="drive-connect">Connect</button></div>`;
+  return '';
+}
+function openPaywall(){
+  if(!acct.token){ openStart(); return; }
+  openSheet('paywall',locked()?'Your free month has ended':'Pay for Doppler Shop',`
+    <p>${locked()?'You can still see all your sales, stock and debts. To keep selling and adding stock, pay for the service.':acctLine()}</p>
+    ${payHTML()}
+    <button class="btn primary wide" data-act="acct-check">Check again</button>`);
+}
+/* sign up: starts the free month */
+function openStart(){
+  if(!serverOn) return;
+  openSheet('acct','Start your free month',`
+    <p class="hint">Free for ${'30'} days. After that, ${esc(acct.price||'a small monthly fee')}. Needs internet once.</p>
+    <label class="fld"><span>Shop name</span><input id="ac-name" value="${esc(S.shop||'')}" autocomplete="off" placeholder="e.g. Mama Wanjiru's duka"></label>
+    <label class="fld"><span>Phone number</span><input id="ac-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="e.g. 0712 345 678"></label>
+    <p class="err" id="ac-err" hidden></p>
+    <button class="btn primary wide" data-act="acct-register">Start my free month</button>
+    <button class="btn line wide" data-act="acct-login-open">I already have a shop</button>`);
+}
+function openLogin(){
+  openSheet('acct','Open my shop on this phone',`
+    <p class="hint">Use the phone number you signed up with and your 6-digit shop PIN.</p>
+    <label class="fld"><span>Phone number</span><input id="ac-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="e.g. 0712 345 678"></label>
+    <label class="fld"><span>Shop PIN</span><input id="ac-pin" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="6 digits"></label>
+    <p class="err" id="ac-err" hidden></p>
+    <button class="btn primary wide" data-act="acct-login">Open my shop</button>
+    <p class="hint sm">Forgot the PIN? Ask Doppler Shop for a new one.</p>`);
+}
+async function doRegister(){
+  const b=sheetBody(), err=b.querySelector('#ac-err'), fail=m=>{err.textContent=m;err.hidden=false;};
+  const name=b.querySelector('#ac-name').value.trim(), phone=b.querySelector('#ac-phone').value.trim();
+  if(!name) return fail('Write your shop name.'); if(phone.replace(/\D/g,'').length<9) return fail('Write your phone number.');
+  if(!navigator.onLine) return fail('This needs internet once. Try again when you have data.');
+  try{
+    const j=await api('/api/register',{method:'POST',json:{name,phone}});
+    if(!j.ok) return fail(j.error==='phone-used'?'This phone number already has a shop. Tap "I already have a shop" below.':j.error==='bad-phone'?'Check the phone number.':'Could not start. Try again.');
+    acct.token=j.token; takeStatus(j); S.shop=name; save();
+    openSheet('acct','Your free month has started',`<p>Your shop PIN is:</p><p class="pin">${esc(j.pin)}</p>
+      <p class="calc"><b>Write it down now.</b> You need it with your phone number to open your shop on another phone. It is shown only once.</p>
+      <button class="btn primary wide" data-act="acct-done">I have written it down</button>`);
+    render();
+  }catch(e){ fail('Could not reach the server. Check the internet and try again.'); }
+}
+async function doLogin(){
+  const b=sheetBody(), err=b.querySelector('#ac-err'), fail=m=>{err.textContent=m;err.hidden=false;};
+  const phone=b.querySelector('#ac-phone').value.trim(), pin=b.querySelector('#ac-pin').value.trim();
+  if(!navigator.onLine) return fail('This needs internet.');
+  try{
+    const j=await api('/api/login',{method:'POST',json:{phone,pin}});
+    if(!j.ok) return fail(j.error==='wrong-pin'?'That PIN is not right.':j.error==='no-shop'?'No shop has that phone number.':j.error==='locked'?'Too many wrong PINs. Try again in an hour, or ask for a new PIN.':'Could not open the shop. Try again.');
+    acct.token=j.token; takeStatus(j); if(j.name&&!S.shop){S.shop=j.name; save();}
+    if(j.drive&&j.drive.connected){
+      openSheet('acct','Welcome back',`<p>Your shop is open on this phone.</p><p class="calc">Your records are backed up in Google Drive${j.drive.email?' ('+esc(j.drive.email)+')':''}. Bring them to this phone?</p>
+        <button class="btn primary wide" data-act="drive-restore-now">Bring back my records</button><button class="btn line wide" data-act="close">Not now</button>`);
+    } else { closeSheet(); toast('Your shop is open on this phone'); }
+    render();
+  }catch(e){ fail('Could not reach the server. Check the internet and try again.'); }
+}
+/* backups go through the server into the shop's own Google Drive */
+function scheduleBackup(ms){ if(!serverOn||!acct.token||!(acct.drive&&acct.drive.connected)) return; clearTimeout(bkTimer); bkTimer=setTimeout(()=>backupNow(false),ms); }
+async function backupNow(manual){
+  if(!serverOn||!acct.token||bkBusy) return false;
+  if(!(acct.drive&&acct.drive.connected)){ if(manual) toast('Connect Google Drive first.'); return false; }
+  if(!S.items.length){ if(manual) toast('Nothing to back up yet. Add your products first.'); return false; }
+  if(!navigator.onLine){ if(manual) toast('No internet. It will back up by itself when you are online.'); return false; }
+  if(!manual&&acct.bkRev===S.rev&&acct.bkAt) return true;
+  bkBusy=true; const rev=S.rev;
+  try{
+    const j=await api('/api/backup',{method:'POST',body:JSON.stringify(S),headers:{'X-Items':String(S.items.length)}});
+    if(!j.ok) throw new Error(j.error||'failed');
+    acct.bkAt=Date.now(); acct.bkRev=rev; acct.bkErr=''; saveAcct(); if(manual) toast('Backed up to Google Drive'); return true;
+  }catch(e){
+    if(e.message==='drive-disconnected'){ acct.drive={connected:false}; acct.bkErr='Google Drive was disconnected. Connect it again.'; }
+    else acct.bkErr='Could not back up just now. It will try again.';
+    saveAcct(); if(manual) toast(acct.bkErr); return false;
+  }finally{ bkBusy=false; refreshAcctBox(); }
+}
+async function restoreFromDrive(){
+  if(!navigator.onLine){toast('Restoring needs internet.');return;}
+  try{
+    const j=await api('/api/restore');
+    if(!j.ok) throw new Error(j.error||'failed');
+    if(!j.data||!Array.isArray(j.data.items)) throw new Error('bad');
+    S=Object.assign(blank(),j.data); cart=[]; save(); acct.bkRev=S.rev; acct.bkAt=Date.now(); saveAcct();
+    closeSheet(); render(); toast('Your records are back from Google Drive');
+  }catch(e){ toast(e.message==='no-backup'?'There is no backup in Drive yet.':e.message==='drive-disconnected'?'Google Drive was disconnected. Connect it again first.':'Could not get the backup. Check the internet and try again.'); }
+}
+function driveConnect(){
+  if(!acct.token){ openStart(); return; }
+  if(!navigator.onLine){ toast('Connecting Google Drive needs internet.'); return; }
+  location.href=API+'/drive/start?t='+encodeURIComponent(acct.token);
+}
+function acctBoxHTML(){
+  if(!acct.token) return `<p class="hint">Start your free month to use Doppler Shop and back up to Google Drive.</p>
+    <div class="btns"><button class="btn primary" data-act="acct-start">Start my free month</button><button class="btn line" data-act="acct-login-open">I already have a shop</button></div>`;
+  const d=acct.drive||{};
+  const ph=String(acct.phone||''), phs=/^254\d{9}$/.test(ph)?('0'+ph.slice(3)).replace(/^(\d{4})(\d{3})(\d{3})$/,'$1 $2 $3'):ph;
+  return `<p class="calc">${esc(acct.name||S.shop||'')} · ${esc(phs)}<br>${acctLine()}</p>
+    ${acct.status!=='paid'?'<button class="linkbtn" data-act="paywall" style="color:var(--brand);align-self:flex-start">How to pay</button>':''}
+    <p class="hint" style="font-weight:700;margin-bottom:-6px">Google Drive backup</p>
+    ${d.connected?`<p class="calc ${acct.bkErr?'bad':''}">${acct.bkErr?esc(acct.bkErr):acct.bkAt?`Connected${d.email?' to <b>'+esc(d.email)+'</b>':''}. Last backup <b>${day(acct.bkAt)} at ${hhmm(acct.bkAt)}</b>. It backs up by itself.`:`Connected${d.email?' to <b>'+esc(d.email)+'</b>':''}. Not backed up yet.`}</p>
+      <div class="btns"><button class="btn primary" data-act="drive-backup">Back up now</button><button class="btn soft" data-act="drive-restore">Restore from Drive</button></div>`
+     :`<p class="hint">Keeps a copy of everything in your own Google Drive. It backs up by itself once connected.</p><button class="btn primary wide" data-act="drive-connect">Connect Google Drive</button>`}`;
+}
+function refreshAcctBox(){const box=sheetKind==='settings'&&$('#acct-box'); if(box) box.innerHTML=acctBoxHTML();}
+/* back from Google after connecting Drive */
+function driveReturn(){
+  const q=new URLSearchParams(location.search), r=q.get('drive'); if(!r) return;
+  history.replaceState(null,'',location.pathname);
+  if(r==='ok'){ acct.drive=Object.assign({},acct.drive,{connected:true}); saveAcct(); toast('Google Drive connected. Backing up now…'); refreshStatus().then(()=>backupNow(false)); }
+  else toast(r==='cancelled'?'Google Drive was not connected.':'Could not connect Google Drive. Try again.');
+}
+
 /* settings */
 function openSettings(){
   const standalone=(()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;}catch(e){return false;}})();
@@ -1542,7 +1705,8 @@ function openSettings(){
     <button class="btn primary wide" data-act="st-name">Save name</button>
     <p class="calc">${storageOk?'Everything is saved on this phone and works without internet.':'This browser is blocking storage, so nothing will be kept after you close the page.'}</p>
     ${installEvt?'<button class="btn soft wide" data-act="install">Put the app on the home screen</button>':standalone?'':'<p class="hint">To put it on the home screen: in Chrome, tap ⋮ then <b>Add to Home screen</b>. On iPhone, tap Share then <b>Add to Home Screen</b>.</p>'}
-    <p class="hint" style="font-weight:700;margin-bottom:-6px">Backup</p>
+    ${serverOn?`<p class="hint" style="font-weight:700;margin-bottom:-6px">Your Doppler Shop account</p><div class="sb" id="acct-box">${acctBoxHTML()}</div>`:''}
+    <p class="hint" style="font-weight:700;margin-bottom:-6px">Backup as text</p>
     <button class="btn soft wide" data-act="st-copy">Copy backup</button>
     <label class="fld"><span>Paste a backup to restore it</span><textarea id="st-backup" spellcheck="false"></textarea></label>
     <p class="err" id="st-err" hidden></p>
@@ -1556,9 +1720,12 @@ function arm(btn,key,text,fn){
 }
 
 /* ---------- events ---------- */
+const VIEW_ONLY_BLOCK=new Set(['pick','pk','cart','pay','deni-open','deni-save','undo','product','delivery','delivery-save','dl-newsize','repack','repack-save','rp',
+  'add-debt','debt-save','db-size','db-q','paid','paid-save','ret','sale-cancel','de-save','de-del','pr-rename-save','aw-photo','size-add','product-del']);
 document.addEventListener('click',e=>{
   const a=e.target.closest('[data-act]'); if(!a) return;
   const b=sheetBody(), act=a.dataset.act;
+  if(VIEW_ONLY_BLOCK.has(act)&&locked()){ openPaywall(); return; }
   switch(act){
     case 'tab': tab=a.dataset.tab; closeSheet(); $('#toast').hidden=true; render(); scrollTo(0,0); break;
     case 'period': period=a.dataset.p; render(); break;
@@ -1632,6 +1799,17 @@ document.addEventListener('click',e=>{
       S.payments.push({id:uid(),ts:Date.now(),customer:c,amount:amt,method:a.dataset.m}); closeSheet(); commit();
       const left=owed-amt; toast(`${c} paid ${ksh(amt)} by ${payName(a.dataset.m)}. `+(left>0.5?`${ksh(left)} still owed.`:'Debt cleared.')); break;}
     case 'settings': openSettings(); break;
+    case 'acct-start': openStart(); break;
+    case 'acct-login-open': openLogin(); break;
+    case 'acct-register': doRegister(); break;
+    case 'acct-login': doLogin(); break;
+    case 'acct-done': closeSheet(); render(); toast('Your free month has started'); break;
+    case 'acct-check': toast('Checking…'); refreshStatus().then(()=>{ if(!locked()){closeSheet(); render(); toast(acct.status==='paid'?'Thank you! Your shop is open.':'Your shop is open.');} else toast('Payment not recorded yet. Try again in a little while.'); }); break;
+    case 'paywall': openPaywall(); break;
+    case 'drive-connect': driveConnect(); break;
+    case 'drive-backup': backupNow(true); break;
+    case 'drive-restore': arm(a,'drr','Tap again: this replaces everything on this phone',()=>restoreFromDrive()); break;
+    case 'drive-restore-now': restoreFromDrive(); break;
     case 'st-name': S.shop=b.querySelector('#st-name').value.trim(); closeSheet(); commit(); break;
     case 'install': if(installEvt){installEvt.prompt(); installEvt.userChoice.finally(()=>{installEvt=null;closeSheet();});} break;
     case 'st-copy': {const txt=JSON.stringify(S), ta=b.querySelector('#st-backup'), fb=()=>{ta.value=txt;ta.select();toast('Select all the text in the box and copy it.');};
@@ -1644,11 +1822,11 @@ document.addEventListener('click',e=>{
   }
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape') closeSheet();});
-addEventListener('online',render); addEventListener('offline',render);
+addEventListener('online',()=>{render();refreshStatus();scheduleBackup(3000);}); addEventListener('offline',render);
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e;});
 addEventListener('appinstalled',()=>{installEvt=null;toast('Done. Open Doppler Shop from your home screen.');});
 
-load(); render();
+load(); render(); driveReturn(); setTimeout(refreshStatus,1500); scheduleBackup(5000); setInterval(()=>scheduleBackup(1000),15*60000); setInterval(refreshStatus,6*3600000);
 if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
 })();
