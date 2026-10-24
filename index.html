@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Duka Ledger</title>
 <meta name="description" content="Sales, stock and debts for a small shop. Works offline.">
-<meta name="theme-color" content="#EEEEEE">
+<meta name="theme-color" content="#F6F4EA">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -17,8 +17,9 @@
 <style>
 /* Layout: one calm column (max 680px), header with shop name, four labelled tabs at the bottom, every form in a bottom sheet. */
 :root{
-  --bg:#EEEEEE; --sand:#EAE2D6; --sand-press:#DFD5C5; --olive:#8B9A6E; --olive-deep:#4E5A38; --olive-soft:#DFE4D3;
-  --surface:#FFFFFF; --ink:#272B22; --muted:#6E7263; --line:#DDD6CA;
+  /* brand: blue #0B3D91, cream #F6F4EA */
+  --bg:#F6F4EA; --sand:#ECE8D9; --sand-press:#E1DCC8; --brand:#0B3D91; --brand-deep:#082D6B; --brand-soft:#E2E8F4;
+  --surface:#FFFFFF; --ink:#18213A; --muted:#5E6577; --line:#E2DED0; --good:#1D7A4C;
   --bad:#A4442F; --bad-soft:#F2E0D9; --warn:#86621A; --warn-soft:#F3EAD6;
   --font:"Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   color-scheme:light;
@@ -30,14 +31,14 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 [hidden]{display:none!important}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
-:focus-visible{outline:3px solid var(--olive);outline-offset:2px}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
 .gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .col{max-width:680px;margin:0 auto}
 
 /* header */
 header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg)}
 header .col{display:flex;align-items:center;gap:10px;padding-block:14px 8px}
-header .mark{width:36px;height:36px;flex:none}
+header .mark{width:30px;height:33px;flex:none}
 header h1{flex:1;min-width:0;margin:0;font-weight:800;font-size:1.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pill{font-size:.78rem;font-weight:700;border-radius:999px;padding:4px 10px;background:var(--warn-soft);color:var(--warn)}
 .gear{width:42px;height:42px;border-radius:14px;border:0;background:var(--surface);display:grid;place-items:center;color:var(--muted)}
@@ -49,7 +50,7 @@ main{padding-block:6px 250px}
 
 /* buttons */
 .btn{border:0;border-radius:14px;padding:11px 16px;font-weight:700;min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--surface);color:var(--ink)}
-.btn.primary{background:var(--olive);color:#1D2216}
+.btn.primary{background:var(--brand);color:#fff}
 .btn.soft{background:var(--sand)}
 .btn.line{background:transparent;box-shadow:inset 0 0 0 1.5px var(--line)}
 .btn.danger{background:transparent;color:var(--bad);box-shadow:inset 0 0 0 1.5px var(--bad)}
@@ -62,17 +63,18 @@ main{padding-block:6px 250px}
 /* sell */
 .find{display:flex;gap:8px;margin-bottom:14px}
 .find input{flex:1;min-width:0;border:0;border-radius:14px;background:var(--surface);padding:12px 14px;min-height:48px}
-.find input:focus{outline:2px solid var(--olive)}
+.find input:focus{outline:2px solid var(--brand)}
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
-.tile{position:relative;border:0;border-radius:18px;background:var(--sand);text-align:left;padding:14px 14px 12px;min-height:112px;display:flex;flex-direction:column;gap:2px;transition:transform .08s ease,background .08s}
-.tile.picked{box-shadow:inset 0 0 0 2.5px var(--olive)}
+.tile{position:relative;border:0;border-radius:18px;background:var(--sand);text-align:left;padding:11px 12px 10px;display:flex;flex-direction:column;gap:1px;transition:transform .08s ease,background .08s}
+.tile.picked{box-shadow:inset 0 0 0 2.5px var(--brand)}
 .tile:active{transform:scale(.96);background:var(--sand-press)}
-.t-name{font-size:1.12rem;font-weight:800;line-height:1.2;padding-right:34px;overflow-wrap:anywhere}
-.t-sub{font-size:.85rem;font-weight:600;color:var(--muted)}
-.t-price{margin-top:auto;padding-top:8px;font-weight:700;padding-right:48px}
-.t-flag{position:absolute;bottom:12px;right:12px;font-size:.75rem;font-weight:700;color:var(--warn)}
+.t-name{font-size:1.02rem;font-weight:800;line-height:1.2;padding-right:30px;overflow-wrap:anywhere}
+.t-sub{font-size:.8rem;font-weight:600;color:var(--muted)}
+.t-foot{margin-top:auto;padding-top:6px;display:flex;align-items:baseline;justify-content:space-between;gap:6px;min-width:0}
+.t-price{font-weight:700;white-space:nowrap}
+.t-flag{font-size:.72rem;font-weight:700;color:var(--warn);white-space:nowrap}
 .t-flag.out{color:var(--bad)}
-.t-n{position:absolute;top:10px;right:10px;min-width:30px;height:30px;padding:0 8px;border-radius:15px;background:var(--olive-deep);color:#fff;font-weight:800;display:grid;place-items:center;font-size:.92rem}
+.t-n{position:absolute;top:8px;right:8px;min-width:26px;height:26px;padding:0 7px;border-radius:13px;background:var(--brand-deep);color:#fff;font-weight:800;display:grid;place-items:center;font-size:.92rem}
 .hint.sm{font-size:.82rem;margin:-6px 0 10px}
 .muted{color:var(--muted);font-weight:600}
 .more{margin-top:12px}
@@ -81,8 +83,9 @@ main{padding-block:6px 250px}
 
 #cartbar{position:fixed;left:0;right:0;bottom:calc(70px + env(safe-area-inset-bottom,0px));z-index:25}
 #cartbar .col{padding-bottom:8px}
-#cartbar .finish{width:100%;border:0;border-radius:18px;background:var(--olive);color:#1D2216;display:flex;align-items:center;gap:10px;padding:15px 18px;font-weight:800;font-size:1.05rem;box-shadow:0 10px 24px -14px rgba(39,43,34,.6)}
+#cartbar .finish{width:100%;border:0;border-radius:18px;background:var(--brand);color:#fff;display:flex;align-items:center;gap:10px;padding:15px 18px;font-weight:800;font-size:1.05rem;box-shadow:0 10px 24px -14px rgba(39,43,34,.6)}
 #cartbar .amt{margin-left:auto}
+body.has-cart #toast{bottom:calc(196px + env(safe-area-inset-bottom,0px))}
 .cstrip{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}
 .cstrip::-webkit-scrollbar{display:none}
 .dayh{margin:6px 0 -6px;font-weight:800;font-size:.9rem;color:var(--muted)}
@@ -94,6 +97,9 @@ main{padding-block:6px 250px}
 .srow .sp{font-size:.72rem;font-weight:800;border-radius:6px;padding:2px 6px;background:var(--bg);color:var(--muted)}
 .srow .sp.deni{background:var(--warn-soft);color:var(--warn)}
 .srow .sa{font-weight:800;text-align:right;min-width:64px}
+.cats{display:flex;flex-direction:column;gap:8px;margin-top:-4px}
+.cats .chips .chip{min-height:36px;padding:6px 13px;font-size:.88rem}
+#pf-cat-items{max-height:190px;overflow:auto}
 .cchip{display:inline-flex;align-items:center;gap:4px;flex:none;background:var(--surface);border-radius:999px;padding:3px 3px 3px 12px;font-weight:700;font-size:.85rem;white-space:nowrap;box-shadow:0 2px 8px -4px rgba(39,43,34,.35)}
 .cchip button{width:32px;height:32px;border:0;border-radius:50%;background:var(--bad-soft);color:var(--bad);font-size:1.1rem;font-weight:800;line-height:1}
 .tile.soldout{opacity:.5}
@@ -105,8 +111,8 @@ nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:26;background:var(--surf
 nav.tabs .col{display:grid;grid-template-columns:repeat(4,1fr)}
 nav.tabs button{border:0;background:none;min-height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-weight:700;font-size:.82rem;color:var(--muted)}
 nav.tabs svg{width:24px;height:24px}
-nav.tabs .on{color:var(--olive-deep)}
-nav.tabs .on .ic{background:var(--olive-soft)}
+nav.tabs .on{color:var(--brand-deep)}
+nav.tabs .on .ic{background:var(--brand-soft)}
 nav.tabs .ic{width:56px;height:30px;border-radius:15px;display:grid;place-items:center}
 
 /* lists */
@@ -130,17 +136,17 @@ nav.tabs .ic{width:56px;height:30px;border-radius:15px;display:grid;place-items:
 .stats b{font-size:1.15rem;font-weight:800;overflow-wrap:anywhere}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-top:12px}
 .card{border:0;background:var(--surface);border-radius:20px;padding:14px;text-align:left;display:flex;flex-direction:column;gap:12px;width:100%}
-.card:active{background:#FAF8F4}
+.card:active{background:#FBFAF4}
 .c-top{display:flex;align-items:center;gap:12px}
-.av{width:44px;height:44px;border-radius:14px;background:var(--sand);color:var(--olive-deep);display:grid;place-items:center;font-weight:800;font-size:.95rem;flex:none}
+.av{width:44px;height:44px;border-radius:14px;background:var(--sand);color:var(--brand-deep);display:grid;place-items:center;font-weight:800;font-size:.95rem;flex:none}
 .c-name{flex:1;min-width:0}
 .c-name b{display:block;font-weight:800;font-size:1.05rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .c-name small{color:var(--muted);font-size:.8rem}
 .sack-top{display:flex;justify-content:space-between;font-size:.88rem;color:var(--muted);margin-bottom:6px}
 .sack-top b{color:var(--ink);font-weight:800}
 .meter{height:10px;border-radius:5px;background:var(--bg);overflow:hidden}
-.meter i{display:block;height:100%;border-radius:5px;background:var(--olive)}
-.meter i.low{background:#C9A44C}.meter i.out{background:var(--bad)}
+.meter i{display:block;height:100%;border-radius:5px;background:var(--brand)}
+.meter i.low{background:#C99A2E}.meter i.out{background:var(--bad)}
 .szs{display:flex;flex-wrap:wrap;gap:6px}
 .sz{display:inline-flex;align-items:center;gap:8px;background:var(--sand);border-radius:10px;padding:6px 10px;font-size:.88rem;font-weight:600}
 .sz b{font-weight:800}
@@ -155,10 +161,10 @@ nav.tabs .ic{width:56px;height:30px;border-radius:15px;display:grid;place-items:
 .big .l{color:var(--muted);font-weight:700;font-size:.9rem}
 .big .v{font-weight:800;font-size:2.3rem;line-height:1.1;margin:2px 0;overflow-wrap:anywhere}
 .big .s{color:var(--muted);font-size:.9rem}
-.up{color:var(--olive-deep);font-weight:800}.down{color:var(--bad);font-weight:800}
+.up{color:var(--good);font-weight:800}.down{color:var(--bad);font-weight:800}
 .split2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
-.split2 span{display:block;color:var(--muted);font-weight:700;font-size:.85rem}
-.split2 b{font-weight:800;font-size:1.2rem}
+.split2 span{display:block;color:var(--muted);font-weight:700;font-size:.78rem}
+.split2 b{font-weight:800;font-size:1.02rem}
 .pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .pair>div{background:var(--surface);border-radius:18px;padding:14px 16px;min-width:0}
 .pair .l{color:var(--muted);font-weight:700;font-size:.85rem}
@@ -190,7 +196,7 @@ nav.tabs .ic{width:56px;height:30px;border-radius:15px;display:grid;place-items:
 .fld>span,.fld>legend{font-size:.85rem;font-weight:700;color:var(--muted);padding:0}
 .fld input,.fld textarea{border:0;background:var(--surface);border-radius:12px;padding:12px 14px;min-height:48px;width:100%}
 .fld textarea{min-height:90px;font-size:.75rem}
-.fld input:focus,.fld textarea:focus{outline:2px solid var(--olive)}
+.fld input:focus,.fld textarea:focus{outline:2px solid var(--brand)}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .hint{margin:0;color:var(--muted);font-size:.9rem}
 .calc{margin:0;background:var(--sand);border-radius:12px;padding:12px 14px}
@@ -199,18 +205,18 @@ nav.tabs .ic{width:56px;height:30px;border-radius:15px;display:grid;place-items:
 
 /* suggestions */
 .sugg{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
-.sg{border:0;border-radius:999px;background:var(--olive-soft);color:var(--olive-deep);padding:8px 14px;font-weight:600;min-height:38px}
+.sg{border:0;border-radius:999px;background:var(--brand-soft);color:var(--brand-deep);padding:8px 14px;font-weight:600;min-height:38px}
 .sg b{font-weight:800}
 
 .choice{display:grid;grid-template-columns:1fr;gap:6px}
 .choice label{background:var(--surface);border-radius:12px;padding:9px 12px;display:flex;flex-direction:column;gap:0;cursor:pointer;box-shadow:inset 0 0 0 2px transparent;line-height:1.3}
 .choice label b{font-weight:800;font-size:.95rem}
 .choice label small{color:var(--muted);font-size:.75rem}
-.choice label:has(input:checked){box-shadow:inset 0 0 0 2px var(--olive);background:var(--olive-soft)}
+.choice label:has(input:checked){box-shadow:inset 0 0 0 2px var(--brand);background:var(--brand-soft)}
 .choice input{position:absolute;opacity:0;pointer-events:none}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{border:0;border-radius:999px;background:var(--surface);padding:8px 16px;font-weight:700;min-height:40px}
-.chip[aria-pressed="true"],.chip:has(input:checked){background:var(--olive);color:#1D2216}
+.chip[aria-pressed="true"],.chip:has(input:checked){background:var(--brand);color:#fff}
 .chip input{position:absolute;opacity:0;pointer-events:none}
 
 .size{background:var(--surface);border-radius:14px;padding:12px;display:grid;grid-template-columns:1.3fr 1fr 1fr auto;gap:8px;align-items:start}
@@ -240,31 +246,19 @@ nav.tabs .ic{width:56px;height:30px;border-radius:15px;display:grid;place-items:
 .prow .pl small{color:var(--muted);font-size:.88rem}
 .prow .addb{min-width:84px}
 .other-in{margin-top:8px;border:0;background:var(--surface);border-radius:12px;padding:12px 14px;min-height:48px;width:100%}
-.other-in:focus{outline:2px solid var(--olive)}
-.pay button{border:0;border-radius:16px;background:var(--surface);min-height:64px;font-weight:800;font-size:1.05rem}
-.pay button:active{background:var(--olive);}
-.pay .on{background:var(--olive);color:#1D2216}
+.other-in:focus{outline:2px solid var(--brand)}
+.pay button{border:0;border-radius:14px;background:var(--surface);min-height:52px;font-weight:800;font-size:.98rem}
+.pay button:active{background:var(--brand);color:#fff}
+.pay .on{background:var(--brand);color:#fff}
 
-#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(205px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--ink);color:#fff;border-radius:16px;padding:10px 10px 10px 16px;display:flex;align-items:center;gap:12px;width:min(92vw,440px)}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--ink);color:#fff;border-radius:16px;padding:10px 10px 10px 16px;display:flex;align-items:center;gap:12px;width:min(92vw,440px)}
 #toast span{flex:1}
-#toast button{border:0;border-radius:10px;background:var(--olive);color:#1D2216;font-weight:800;padding:8px 14px}
+#toast button{border:0;border-radius:10px;background:var(--bg);color:var(--brand);font-weight:800;padding:8px 14px}
 </style>
 </head>
 <body>
 <header class="gut"><div class="col">
-  <svg class="mark" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="24" fill="#8B9A6E"/><g>
- <path d="M14 21a5 5 0 0 1 5-5h62a5 5 0 0 1 5 5v3H14z" fill="#4E5A38"/>
- <path d="M14 24h18v12a9 9 0 0 1-18 0z" fill="#EAE2D6"/>
- <path d="M32 24h18v12a9 9 0 0 1-18 0z" fill="#D3C5AD"/>
- <path d="M50 24h18v12a9 9 0 0 1-18 0z" fill="#EAE2D6"/>
- <path d="M68 24h18v12a9 9 0 0 1-18 0z" fill="#D3C5AD"/>
- <rect x="19" y="45" width="5" height="20" fill="#EAE2D6"/>
- <rect x="76" y="45" width="5" height="20" fill="#EAE2D6"/>
- <path d="M44 53l2.5-5h11l2.5 5z" fill="#3B452B"/>
- <rect x="43" y="52" width="18" height="14" rx="2.5" fill="#4E5A38"/>
- <rect x="14" y="64" width="72" height="20" rx="5" fill="#EAE2D6"/>
- <rect x="14" y="71" width="72" height="2.5" fill="#D3C5AD"/>
-</g></svg>
+  <svg class="mark" viewBox="0 0 91.12 100.00" aria-hidden="true"><path fill="#0B3D91" fill-rule="evenodd" d="M0.14 27.20 0.07 72.16 0.28 72.37 22.69 72.37 24.10 72.09 25.65 72.09 26.57 71.81 27.34 71.81 27.91 71.53 28.54 71.53 29.18 71.25 29.60 71.25 30.23 70.97 30.58 70.97 31.08 70.68 31.50 70.68 31.99 70.40 32.28 70.40 34.95 69.27 36.36 68.43 37.21 68.08 40.94 65.47 42.78 63.85 45.03 61.38 46.23 59.69 47.43 57.65 48.84 53.98 49.40 51.59 49.40 47.64 49.12 46.51 49.12 45.88 48.84 45.24 48.56 43.83 47.99 42.71 47.71 41.79 46.58 39.61 45.24 37.70 42.92 35.02 40.80 33.26 38.41 31.64 36.36 30.51 32.91 29.03 32.63 29.03 31.29 28.47 30.87 28.47 30.23 28.19 29.67 28.19 27.63 27.63 26.99 27.63 25.79 27.34 21.14 27.13 0.28 27.06ZM19.10 34.88 22.27 34.88 23.04 35.17 23.68 35.17 24.38 35.45 25.79 35.73 28.68 36.93 31.43 38.83 33.76 41.16 35.24 43.55 36.22 45.88 36.43 46.65 36.50 48.20 36.65 48.70 36.43 52.22 35.87 54.12 34.67 56.52 33.19 58.70 30.51 61.24 28.12 62.79 26.00 63.71 24.24 64.27 23.82 64.27 23.19 64.55 22.27 64.55 21.14 64.83 19.24 64.83 18.96 64.62 18.82 60.61 18.89 58.70 19.31 58.28 21.00 58.28 23.19 57.72 24.59 57.01 26.36 55.67 27.34 54.62 28.12 53.42 28.75 51.94 28.89 51.02 28.82 47.92 28.47 46.79 27.98 45.81 26.99 44.40 25.65 43.13 24.59 42.42 23.04 41.72 22.69 41.72 22.06 41.44 21.35 41.44 20.08 41.16 19.17 41.16 18.96 41.01 18.89 35.17ZM0.28 0.00 0.07 0.21 0.00 13.46 0.14 20.16 24.24 20.23 26.07 20.51 27.20 20.51 28.19 20.79 28.89 20.79 29.67 21.07 30.30 21.07 34.39 22.20 37.98 23.61 42.00 25.58 45.67 27.91 48.91 30.66 50.53 32.35 52.57 34.81 54.19 37.28 55.11 39.04 56.52 42.49 57.36 46.72 57.51 50.67 57.08 53.84 56.80 54.62 56.80 55.11 56.59 55.53 56.52 56.17 55.95 57.72 54.83 60.32 53.98 61.87 51.80 65.12 50.32 66.88 47.85 69.34 46.16 70.75 44.05 72.30 42.14 73.50 37.63 75.83 36.65 76.11 34.67 76.96 34.39 76.96 33.90 77.24 33.47 77.24 32.98 77.52 32.56 77.52 31.92 77.80 31.36 77.80 30.73 78.08 30.02 78.08 29.39 78.37 28.47 78.37 27.48 78.65 26.50 78.65 24.95 78.93 0.14 79.00 0.14 99.86 0.35 100.00 37.77 100.00 43.13 99.93 44.89 99.72 46.30 99.72 47.36 99.44 48.20 99.44 49.12 99.15 49.68 99.15 50.46 98.87 50.95 98.87 51.59 98.59 52.08 98.59 52.64 98.31 53.07 98.31 54.47 97.74 54.97 97.74 55.46 97.46 56.66 97.18 57.08 96.90 60.82 95.49 65.68 92.88 69.70 90.20 72.30 88.16 76.18 84.57 79.84 80.48 82.88 76.32 85.20 72.52 86.33 70.33 87.46 67.72 88.87 63.92 88.94 63.35 89.43 61.95 89.43 61.52 89.99 59.83 89.99 59.34 90.27 58.56 90.27 57.86 90.56 56.87 90.56 55.88 90.84 55.11 91.12 52.29 91.12 46.23 90.84 44.54 90.84 43.41 90.56 42.42 90.56 41.72 90.27 40.66 90.27 40.10 88.87 34.74 87.17 30.23 84.28 24.52 81.75 20.65 79.77 18.11 77.52 15.57 73.71 12.05 71.60 10.29 67.30 7.33 63.92 5.43 59.48 3.38 59.20 3.38 58.77 3.10 58.42 3.10 58.00 2.82 57.65 2.82 56.38 2.26 56.03 2.26 55.60 1.97 55.18 1.97 53.77 1.41 53.21 1.41 52.71 1.13 51.94 1.13 51.37 0.85 50.46 0.85 49.75 0.56 48.84 0.56 47.99 0.28 46.86 0.28 45.81 0.00ZM35.87 10.78 40.38 10.85 44.75 11.28 48.48 12.05 51.44 12.97 54.90 14.31 58.77 16.35 62.16 18.53 65.12 20.93 67.51 23.33 70.19 26.50 72.09 29.32 74.21 33.12 75.62 36.65 76.74 40.31 76.81 41.23 77.10 41.93 77.10 42.85 77.38 43.62 77.38 45.17 77.59 46.09 77.66 50.11 77.38 52.71 77.38 54.19 77.10 54.97 77.10 55.53 76.81 56.45 76.81 57.22 76.53 57.93 76.53 58.42 76.25 59.13 76.25 59.48 75.69 61.03 75.69 61.38 74.28 64.98 71.67 69.70 67.94 74.56 64.41 78.01 61.03 80.69 58.63 82.31 54.62 84.50 53.21 85.13 52.92 85.13 51.87 85.69 48.56 86.82 45.03 87.67 41.16 88.23 36.01 88.30 35.66 88.02 35.73 82.10 36.08 81.89 38.69 81.89 39.96 81.68 41.30 81.68 42.07 81.40 44.12 81.11 47.57 79.99 50.18 78.86 54.12 76.60 56.66 74.84 58.84 72.94 60.96 70.82 63.71 67.51 65.89 63.85 67.44 60.54 67.44 60.25 68.29 58.00 68.29 57.58 68.50 57.15 69.13 54.19 69.20 52.85 69.42 52.01 69.42 47.22 69.13 45.74 69.13 44.61 68.85 43.76 68.85 43.06 68.57 42.35 68.57 41.79 68.29 41.30 68.01 40.03 67.16 38.05 66.88 37.07 64.69 32.98 63.07 30.58 60.96 28.05 58.56 25.65 55.67 23.40 52.01 21.21 49.68 20.08 46.65 18.96 42.71 18.04 41.37 17.83 37.14 17.62 35.87 17.41 35.66 17.12 35.59 11.13Z"/></svg>
   <h1 id="shop">Duka Ledger</h1>
   <span class="pill" id="offline" hidden>Offline</span>
   <button class="gear" data-act="settings" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg></button>
@@ -287,22 +281,58 @@ nav.tabs .ic{width:56px;height:30px;border-radius:15px;display:grid;place-items:
 "use strict";
 const KEY='duka-ledger.v2', DAY=86400000;
 
-/* Common duka products. Picking one fills in how it is sold and the usual sizes. */
+/* Common duka products, grouped for tapping. [name, how it is sold, bulk unit, usual sizes, group]
+   'bulk' = needs repackaging; 'ready' with one size = one item, one price; 'ready' with several = different sizes. */
+const CATS=['Food','Drinks & fridge','Personal care','Cleaning','Household','Kitchen'];
 const CATALOG=[
-  ['Sugar','bulk','kg',['¼ kg','½ kg','1 kg']],['Rice','bulk','kg',['½ kg','1 kg']],['Beans','bulk','kg',['½ kg','1 kg']],
-  ['Green grams (ndengu)','bulk','kg',['½ kg','1 kg']],['Maize (mahindi)','bulk','kg',['1 kg','2 kg']],['Lentils (kamande)','bulk','kg',['½ kg','1 kg']],
-  ['Cooking oil','bulk','L',['¼ L','½ L','1 L']],['Paraffin','bulk','L',['¼ L','½ L','1 L']],
-  ['Sweets','bulk','pcs',['1 piece','5 pieces']],['Chewing gum','bulk','pcs',['1 piece','5 pieces']],['Cigarettes','bulk','pcs',['1 piece','10 pieces']],
-  ['Eggs','bulk','pcs',['1 piece','30 pieces']],['Mandazi','bulk','pcs',['1 piece','5 pieces']],
-  ['Unga (maize flour)','ready','',['1 kg','2 kg']],['Wheat flour','ready','',['1 kg','2 kg']],['Salt','ready','',['500 g','1 kg']],
-  ['Bread','ready','',['400 g','800 g']],['Milk','ready','',['250 ml','500 ml']],
-  ['Tea leaves','ready','',['50 g','100 g','250 g']],['Margarine','ready','',['100 g','250 g','500 g']],['Bar soap','ready','',['Piece','Full bar']],
-  ['Washing powder','ready','',['Sachet','500 g','1 kg']],['Toothpaste','ready','',['Small','Large']],['Tissue paper','ready','',['1 roll']],
-  ['Sanitary pads','ready','',['Pack']],['Matches','ready','',['Box']],['Candles','ready','',['1 candle']],['Batteries','ready','',['Pair']],
-  ['Bottled water','ready','',['500 ml','1 L']],['Soda','ready','',['300 ml','500 ml']],['Biscuits','ready','',['Packet']],
-  ['Petroleum jelly','ready','',['Small','Large']],['Diapers','ready','',['1 piece','Pack']],['Tomatoes','ready','',['1 piece','Heap']],
-  ['Onions','ready','',['1 piece','Heap']],['Spices','ready','',['Sachet']],['Cooking fat','ready','',['100 g','250 g','500 g']],
-  ['Spaghetti','ready','',['400 g']],['Airtime','ready','',['Ksh 20','Ksh 50','Ksh 100']]
+  /* Food */
+  ['Sugar','bulk','kg',['¼ kg','½ kg','1 kg'],0],['Rice','bulk','kg',['½ kg','1 kg'],0],['Beans','bulk','kg',['½ kg','1 kg'],0],
+  ['Green grams (ndengu)','bulk','kg',['½ kg','1 kg'],0],['Lentils (kamande)','bulk','kg',['½ kg','1 kg'],0],['Maize (mahindi)','bulk','kg',['1 kg','2 kg'],0],
+  ['Potatoes','bulk','kg',['1 kg','2 kg'],0],['Cooking oil','bulk','L',['¼ L','½ L','1 L'],0],
+  ['Unga (maize flour)','ready','',['1 kg','2 kg'],0],['Wheat flour','ready','',['1 kg','2 kg'],0],['Porridge flour','ready','',['500 g','1 kg'],0],
+  ['Bread','ready','',['400 g','800 g'],0],['Salt','ready','',['500 g','1 kg'],0],['Tea leaves','ready','',['50 g','100 g','250 g','500 g'],0],
+  ['Tea bags','ready','',['25 bags','50 bags','100 bags'],0],['Instant coffee','ready','',['Sachet','50 g','100 g'],0],['Ground coffee','ready','',['250 g','500 g'],0],
+  ['Coffee creamer','ready','',['200 g','400 g'],0],['Vegetable oil (bottle)','ready','',['500 ml','1 L','2 L','5 L'],0],['Olive oil','ready','',['250 ml','500 ml'],0],
+  ['Margarine','ready','',['100 g','250 g','500 g'],0],['Cooking fat','ready','',['100 g','250 g','500 g'],0],['Eggs','bulk','pcs',['1 piece','30 pieces'],0],
+  ['Spaghetti','ready','',['400 g'],0],['Macaroni','ready','',['400 g'],0],['Baking powder','ready','',['50 g','100 g','200 g'],0],
+  ['Bicarbonate of soda','ready','',['100 g'],0],['Spices','ready','',['Sachet'],0],['Mchuzi mix','ready','',['Sachet','200 g'],0],['MSG','ready','',['50 g','100 g'],0],
+  ['Honey','ready','',['250 g','500 g','1 kg'],0],['Breakfast cereal','ready','',['250 g','500 g'],0],['Peanut butter','ready','',['200 g','400 g'],0],
+  ['Tomato sauce','ready','',['250 ml','400 ml'],0],['Mayonnaise','ready','',['250 ml','400 ml'],0],['Soy sauce','ready','',['150 ml','250 ml'],0],
+  ['Vinegar','ready','',['250 ml','500 ml'],0],['Pasta sauce','ready','',['400 g'],0],['Tomatoes','ready','',['1 piece','Heap'],0],['Onions','ready','',['1 piece','Heap'],0],
+  ['Sukuma wiki','ready','',['Bunch'],0],['Cabbage','ready','',['Small','Large'],0],['Bananas','ready','',['1 piece','Bunch'],0],['Avocado','ready','',['1 piece'],0],
+  ['Mandazi','bulk','pcs',['1 piece','5 pieces'],0],['Biscuits','ready','',['Packet'],0],['Crisps','ready','',['Small','Large'],0],
+  ['Sweets','bulk','pcs',['1 piece','5 pieces'],0],['Chewing gum','bulk','pcs',['1 piece','5 pieces'],0],
+  /* Drinks & fridge */
+  ['Bottled water','ready','',['500 ml','1 L','1.5 L'],1],['Soda','ready','',['300 ml','500 ml','1 L'],1],['Fruit juice','ready','',['250 ml','500 ml','1 L'],1],
+  ['Milk','ready','',['250 ml','500 ml'],1],['Long life milk (UHT)','ready','',['250 ml','500 ml','1 L'],1],['Yoghurt','ready','',['150 ml','250 ml','500 ml'],1],
+  ['Butter','ready','',['250 g','500 g'],1],['Cheese','ready','',['200 g'],1],['Sausages','ready','',['1 piece','Pack'],1],['Smokies','ready','',['1 piece','Pack'],1],
+  ['Chicken','ready','',['Whole','Half'],1],
+  /* Personal care */
+  ['Tissue paper','ready','',['1 roll'],2],['Toothpaste','ready','',['Small','Large'],2],['Toothbrush','ready','',['1 piece'],2],['Dental floss','ready','',['1 piece'],2],
+  ['Mouthwash','ready','',['250 ml','500 ml'],2],['Toilet soap','ready','',['Small','Large'],2],['Bathing sponge','ready','',['1 piece'],2],['Shower gel','ready','',['250 ml','500 ml'],2],
+  ['Body lotion','ready','',['100 ml','200 ml','400 ml'],2],['Glycerine','ready','',['50 ml','100 ml'],2],['Petroleum jelly','ready','',['Small','Large'],2],
+  ['Deodorant','ready','',['Roll-on','Spray'],2],['Perfume','ready','',['1 bottle'],2],['Face wash','ready','',['100 ml'],2],['Lip balm','ready','',['1 piece'],2],
+  ['Shaving cream','ready','',['1 tube'],2],['Razor','ready','',['1 piece','Pack'],2],['Shampoo','ready','',['Sachet','200 ml','400 ml'],2],
+  ['Hair conditioner','ready','',['200 ml','400 ml'],2],['Sanitary pads','ready','',['Pack'],2],['Panty liners','ready','',['Pack'],2],['Wet wipes','ready','',['Pack'],2],
+  ['Cotton buds','ready','',['Pack'],2],['Diapers','ready','',['1 piece','Pack'],2],['Nail polish','ready','',['1 bottle'],2],['Nail polish remover','ready','',['1 bottle'],2],
+  /* Cleaning */
+  ['Bar soap','ready','',['Piece','Full bar'],3],['Washing powder','ready','',['Sachet','500 g','1 kg'],3],['Washing gel','ready','',['500 ml','1 L'],3],
+  ['Dishwashing liquid','ready','',['250 ml','500 ml','1 L'],3],['Dishwashing paste','ready','',['200 g','400 g'],3],['Hand wash','ready','',['250 ml','500 ml'],3],
+  ['Steel wire','ready','',['1 piece'],3],['Steel wool','ready','',['1 piece'],3],['Sponge & scrubber','ready','',['1 piece'],3],['Scouring powder','ready','',['500 g'],3],
+  ['Bleach','ready','',['250 ml','500 ml','1 L'],3],['Fabric softener','ready','',['500 ml','1 L'],3],['Disinfectant','ready','',['125 ml','250 ml','500 ml'],3],
+  ['Toilet cleaner','ready','',['500 ml'],3],['Floor cleaner','ready','',['500 ml','1 L'],3],['Air freshener','ready','',['Spray','Block'],3],
+  ['Toilet balls','ready','',['Pack'],3],['Garbage bags','ready','',['1 roll'],3],['Rubber gloves','ready','',['Pair'],3],['Toilet brush','ready','',['1 piece'],3],
+  ['Broom','ready','',['1 piece'],3],['Dustpan','ready','',['1 piece'],3],['Mop','ready','',['1 piece'],3],['Bucket','ready','',['Small','Large'],3],
+  /* Household */
+  ['Matches','ready','',['Box'],4],['Candles','ready','',['1 candle'],4],['Batteries','ready','',['AA','AAA','D'],4],['Torch','ready','',['1 piece'],4],
+  ['Mosquito coil','ready','',['1 coil','Pack'],4],['Insect spray','ready','',['300 ml','600 ml'],4],['Shoe polish','ready','',['Small','Large'],4],['Shoe brush','ready','',['1 piece'],4],
+  ['Serviettes','ready','',['Pack'],4],['Kitchen towels','ready','',['1 roll'],4],['Aluminium foil','ready','',['1 roll'],4],['Cling film','ready','',['1 roll'],4],
+  ['Toothpicks','ready','',['Pack'],4],['Paraffin','bulk','L',['¼ L','½ L','1 L'],4],['Charcoal','bulk','tins',['1 tin','2 tins'],4],
+  ['Cigarettes','bulk','pcs',['1 piece','10 pieces'],4],['Airtime','ready','',['Ksh 20','Ksh 50','Ksh 100'],4],
+  /* Kitchen */
+  ['Cups','ready','',['1 piece'],5],['Plates','ready','',['1 piece'],5],['Bowls','ready','',['1 piece'],5],['Spoons','ready','',['Teaspoon','Tablespoon'],5],
+  ['Forks','ready','',['1 piece'],5],['Knife','ready','',['1 piece'],5],['Mwiko','ready','',['1 piece'],5],['Chapati roller','ready','',['1 piece'],5],
+  ['Chopping board','ready','',['1 piece'],5],['Sufuria','ready','',['Small','Medium','Large'],5]
 ];
 /* Units a bulk product can be measured in. Anything else is typed under "Other". */
 const UNITS=[['kg','Kilograms'],['L','Litres'],['pcs','Pieces'],['m','Metres']];
@@ -534,14 +564,15 @@ function drawTiles(){
   wrap.innerHTML=`${!q&&sc.size?'<p class="hint sm">Your best sellers are first</p>':''}<div class="tiles">${shown.map(i=>tileHTML(i,picked.get(i.id)||0)).join('')}</div>`+
     (list.length>shown.length?`<button class="btn line wide more" data-act="more" data-w="sell">Show more <span class="muted">(${list.length-shown.length} more)</span></button>`:'');
 }
+/* "Ksh 40–160" fits on one line; very wide ranges become "From Ksh 1,200" */
+function priceRange(lo,hi){ if(lo===hi) return ksh(lo); const r=ksh(lo)+'–'+Math.round(hi).toLocaleString('en-KE'); return r.length>13?'From '+ksh(lo):r; }
 function tileHTML(it,n){
   const ps=packsOf(it.id), pr=ps.map(p=>p.price), lo=Math.min(...pr), hi=Math.max(...pr);
   const out=ps.every(p=>p.stock<=0), one=ps.length===1, few=!out&&one&&ps[0].stock<=3;
   return `<button class="tile${n?' picked':''}${out?' soldout':''}" data-act="pick" data-id="${it.id}" aria-label="${esc(it.name)}${out?', sold out':''}${n?', '+n+' in this sale':''}">
     <span class="t-name">${esc(it.name)}</span>
     <span class="t-sub">${one?esc(ps[0].label):ps.length+' sizes'}</span>
-    <span class="t-price">${lo===hi?ksh(lo):ksh(lo)+'–'+Math.round(hi).toLocaleString('en-KE')}</span>
-    ${out?'<span class="t-flag out">Sold out</span>':few?`<span class="t-flag">${ps[0].stock} left</span>`:''}
+    <span class="t-foot"><span class="t-price">${priceRange(lo,hi)}</span>${out?'<span class="t-flag out">Sold out</span>':few?`<span class="t-flag">${ps[0].stock} left</span>`:''}</span>
     ${n?`<span class="t-n">${n}</span>`:''}</button>`;
 }
 /* products with several sizes open this list */
@@ -625,7 +656,6 @@ function vReport(){
     ${gNow.back||onDebt?`<div class="s" style="margin-top:8px">${gNow.back?`Includes ${ksh(gNow.back)} of debts paid back.`:''}${gNow.back&&onDebt?' ':''}${onDebt?`${ksh(onDebt)} more was sold on debt.`:''}</div>`:''}</div>
     <div class="pair"><div><div class="l">Profit</div><div class="v">${ksh(prof)}</div></div><div><div class="l">Customers</div><div class="v">${ss.length}</div></div></div>`;
   const bp={cash:0,mpesa:0,deni:0}; ss.forEach(s=>bp[s.pay]+=s.total);
-  h+=`<p class="sec">Paid by</p><div class="panel"><div class="kv"><span>Cash</span><span>${ksh(bp.cash)}</span></div><div class="kv"><span>M-Pesa</span><span>${ksh(bp.mpesa)}</span></div><div class="kv"><span>Debt</span><span>${ksh(bp.deni)}</span></div></div>`;
   const pays=S.payments.filter(p=>p.ts>=from);
   if(pays.length){const pm={cash:0,mpesa:0,other:0}; pays.forEach(p=>pm[p.method==='cash'||p.method==='mpesa'?p.method:'other']+=p.amount);
     h+=`<p class="sec">Debts paid back</p><div class="panel"><div class="kv"><span>Cash</span><span>${ksh(pm.cash)}</span></div><div class="kv"><span>M-Pesa</span><span>${ksh(pm.mpesa)}</span></div>${pm.other?`<div class="kv"><span>Not recorded</span><span>${ksh(pm.other)}</span></div>`:''}</div>`;}
@@ -643,12 +673,12 @@ function chart(){
   const td=sod(Date.now()), v=[];
   for(let i=6;i>=0;i--){const ds=td-i*DAY; v.push({ds,x:S.sales.filter(s=>s.ts>=ds&&s.ts<ds+DAY).reduce((a,s)=>a+s.total,0)});}
   const W=700,H=220,pt=30,pb=34,ih=H-pt-pb,max=Math.max(1,...v.map(d=>d.x)),bw=W/7,g=18;
-  let o=`<line x1="0" x2="${W}" y1="${H-pb}" y2="${H-pb}" stroke="#DDD6CA" stroke-width="2"/>`;
+  let o=`<line x1="0" x2="${W}" y1="${H-pb}" y2="${H-pb}" stroke="#E2DED0" stroke-width="2"/>`;
   v.forEach((d,i)=>{
     const h=d.x/max*ih, X=i*bw+g/2, Y=H-pb-h, now=d.ds===td, k=d.x>=1000?(d.x/1000).toFixed(d.x>=10000?0:1).replace(/\.0$/,'')+'k':String(Math.round(d.x));
-    o+=`<rect x="${X.toFixed(1)}" y="${Y.toFixed(1)}" width="${(bw-g).toFixed(1)}" height="${h.toFixed(1)}" rx="8" fill="${now?'#8B9A6E':'#EAE2D6'}"/>`;
-    if(d.x>0) o+=`<text x="${(X+(bw-g)/2).toFixed(1)}" y="${(Y-9).toFixed(1)}" text-anchor="middle" font-size="20" font-weight="${now?800:600}" fill="#272B22" font-family="Nunito, system-ui, sans-serif">${k}</text>`;
-    o+=`<text x="${(X+(bw-g)/2).toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="19" font-weight="${now?800:600}" fill="${now?'#4E5A38':'#6E7263'}" font-family="Nunito, system-ui, sans-serif">${now?'Today':new Date(d.ds).toLocaleDateString('en-GB',{weekday:'short'})}</text>`;
+    o+=`<rect x="${X.toFixed(1)}" y="${Y.toFixed(1)}" width="${(bw-g).toFixed(1)}" height="${h.toFixed(1)}" rx="8" fill="${now?'#0B3D91':'#D9DFEC'}"/>`;
+    if(d.x>0) o+=`<text x="${(X+(bw-g)/2).toFixed(1)}" y="${(Y-9).toFixed(1)}" text-anchor="middle" font-size="20" font-weight="${now?800:600}" fill="#18213A" font-family="Nunito, system-ui, sans-serif">${k}</text>`;
+    o+=`<text x="${(X+(bw-g)/2).toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="19" font-weight="${now?800:600}" fill="${now?'#0B3D91':'#5E6577'}" font-family="Nunito, system-ui, sans-serif">${now?'Today':new Date(d.ds).toLocaleDateString('en-GB',{weekday:'short'})}</text>`;
   });
   return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Money in for each of the last 7 days">${o}</svg>`;
 }
@@ -671,7 +701,7 @@ function lowList(){
 const cartTotal=()=>cart.reduce((a,c)=>a+(c.k==='pack'?(pack(c.packId)?.price||0)*c.qty:c.amount),0);
 function cartBar(){
   const n=cart.reduce((a,c)=>a+(c.k==='pack'?c.qty:1),0);
-  $('#cartbar').hidden=!(n&&tab==='sell');
+  $('#cartbar').hidden=!(n&&tab==='sell'); document.body.classList.toggle('has-cart',!!(n&&tab==='sell'));
   $('#cb-n').textContent=n+(n===1?' item':' items')+' · Finish sale';
   $('#cb-t').textContent=ksh(cartTotal());
   $('#cb-strip').innerHTML=cart.map((c,i)=>{
@@ -688,7 +718,7 @@ function cartHTML(){
     return `<div class="line"><div><b>${esc(it?.name||'')}, loose</b><small>About ${qty(c.units,it?.unit)}</small></div><div class="step"><button data-act="del" data-i="${i}" aria-label="Remove">×</button></div><span class="amt">${ksh(c.amount)}</span></div>`;
   }).join('');
   return `<div>${lines}</div><div class="total"><span>Total</span><b>${ksh(cartTotal())}</b></div>
-    <p class="hint" style="font-weight:700">How did they pay?</p>
+    <p class="hint" style="font-weight:700;font-size:.85rem;margin-bottom:-6px">How did they pay?</p>
     <div class="pay"><button data-act="pay" data-pay="cash">Cash</button><button data-act="pay" data-pay="mpesa">M-Pesa</button><button data-act="deni-open" id="deni-btn">Debt</button></div>
     <div id="deni-box" class="sb" hidden>
       <label class="fld"><span>Who is taking it on credit?</span><input id="deni-name" autocomplete="off" placeholder="Type a name"></label>
@@ -763,6 +793,7 @@ function openProduct(id){
   const single=mode==='single'?ps[0]:null;
   openSheet('product',it?'Edit '+it.name:'Add a product',`<form id="pf" class="sb ${mode} ${mode==='bulk'?'':'ready'}" data-unit="${it?esc(unit):''}" data-new="${it?'':'1'}" novalidate>
     <label class="fld"><span>Product name</span><input id="pf-name" value="${esc(it?.name||'')}" placeholder="Start typing, e.g. su…" autocomplete="off"></label>
+    ${!it?`<div class="cats" id="pf-cats"><p class="hint sm" style="margin:0">Or tap a common item</p><div class="chips">${CATS.map((c,k)=>`<button type="button" class="chip" data-act="cat" data-k="${k}" aria-pressed="false">${c}</button>`).join('')}</div><div class="sugg" id="pf-cat-items" hidden></div></div>`:''}
     ${!it?`<fieldset class="fld"><legend>How do you sell it?</legend><div class="choice">
       <label><input type="radio" name="pf-mode" value="single"><b>One item, one price</b><small>Like a bar of soap or a loaf of bread</small></label>
       <label><input type="radio" name="pf-mode" value="sizes"><b>Different sizes</b><small>Like water in 500 ml and 1 L</small></label>
@@ -798,6 +829,7 @@ function openProduct(id){
   </form>`,b=>{
     const f=b.querySelector('#pf'), name=f.querySelector('#pf-name'), other=f.querySelector('#pf-unit-other');
     suggest(name,()=>it?[]:CATALOG.map(c=>c[0]).filter(n=>!byName(n)),pickCatalog);
+    const cats=f.querySelector('#pf-cats'); if(cats) name.addEventListener('input',()=>{cats.hidden=!!name.value.trim();});
     if(other){ suggest(other,()=>OTHER_UNITS); other.addEventListener('input',pfMode); }
     f.addEventListener('change',e=>{if(e.target.name==='pf-mode'||e.target.name==='pf-unit') pfMode();});
     f.addEventListener('input',pfCheck);
@@ -862,7 +894,7 @@ function pickCatalog(n){
   const rows=[...f.querySelectorAll('.size')]; const blankRows=rows.every(r=>!r.querySelector('.s-label').value&&!r.querySelector('.s-price').value);
   const mode=c[1]==='bulk'?'bulk':c[3].length===1?'single':'sizes';
   const mr=f.querySelector(`input[name="pf-mode"][value="${mode}"]`); if(mr) mr.checked=true;
-  if(c[2]){const ur=f.querySelector(`input[name="pf-unit"][value="${c[2]}"]`); if(ur) ur.checked=true;}
+  if(c[2]){const ur=f.querySelector(`input[name="pf-unit"][value="${c[2]}"]`); if(ur) ur.checked=true; else {const o=f.querySelector('input[name="pf-unit"][value="other"]'), oi=f.querySelector('#pf-unit-other'); if(o&&oi){o.checked=true; oi.value=c[2];}}}
   if(blankRows&&mode!=='single'){const box=f.querySelector('#pf-sizes'); box.innerHTML=c[3].map(l=>sizeRow({label:l},mode==='bulk'?'bulk':'ready',c[2]||'kg',true)).join(''); box.querySelectorAll('.size').forEach(wireSize);}
   pfMode();
   const next=mode==='bulk'?f.querySelector('#pf-for'):mode==='single'?f.querySelector('#pf-s-price'):f.querySelector('.s-price'); if(next) setTimeout(()=>next.focus(),30);
@@ -1022,7 +1054,7 @@ function openPaid(c){
   openSheet('paid','Settle debt',`<div class="big" style="margin-top:0"><div class="l">${esc(c)} owes</div><div class="v">${ksh(owed)}</div></div>
     <label class="fld"><span>Amount paid (Ksh)</span><input id="pd-amt" type="number" inputmode="numeric" min="1" value="${o}"></label>
     <div class="chips" style="margin-top:-6px"><button type="button" class="chip" data-act="pd-set" data-v="${o}">All of it</button>${o>=20?`<button type="button" class="chip" data-act="pd-set" data-v="${Math.round(o/2)}">Half</button>`:''}</div>
-    <p class="hint" style="font-weight:700;margin-bottom:-6px">How did they pay?</p>
+    <p class="hint" style="font-weight:700;font-size:.85rem;margin-bottom:-6px">How did they pay?</p>
     <div class="pay pay2"><button data-act="paid-save" data-m="cash" data-c="${esc(c)}">Cash</button><button data-act="paid-save" data-m="mpesa" data-c="${esc(c)}">M-Pesa</button></div>
     <p class="err" id="pd-err" hidden></p>`);
 }
@@ -1106,7 +1138,7 @@ document.addEventListener('click',e=>{
   const a=e.target.closest('[data-act]'); if(!a) return;
   const b=sheetBody(), act=a.dataset.act;
   switch(act){
-    case 'tab': tab=a.dataset.tab; closeSheet(); render(); scrollTo(0,0); break;
+    case 'tab': tab=a.dataset.tab; closeSheet(); $('#toast').hidden=true; render(); scrollTo(0,0); break;
     case 'period': period=a.dataset.p; render(); break;
     case 'sales': openSales(); break;
     case 'sales-more': openSales(+a.dataset.n); break;
@@ -1128,6 +1160,12 @@ document.addEventListener('click',e=>{
     case 'undo': undo(); break;
     case 'item': openItem(a.dataset.id); break;
     case 'product': {const pre=sheetKind==='delivery'&&!a.dataset.id?b.querySelector('#dl-name').value.trim():(tab==='sell'&&!a.dataset.id&&!sheet?findQ.trim():''); openProduct(a.dataset.id); if(pre){const n=$('#pf-name'); n.value=pre; const c=CATALOG.find(x=>x[0].toLowerCase()===pre.toLowerCase()); if(c){n.value=c[0];pickCatalog(c[0]);}} break;}
+    case 'cat': {const k=+a.dataset.k, box=$('#pf-cat-items'), on=a.getAttribute('aria-pressed')==='true';
+      document.querySelectorAll('#pf-cats [data-act="cat"]').forEach(x=>x.setAttribute('aria-pressed','false'));
+      if(on){box.hidden=true;break;} a.setAttribute('aria-pressed','true');
+      const list=CATALOG.filter(c=>c[4]===k&&!byName(c[0]));
+      box.innerHTML=list.length?list.map(c=>`<button type="button" class="sg" data-act="cat-item" data-v="${esc(c[0])}">${esc(c[0])}</button>`).join(''):'<p class="hint sm" style="margin:0">All of these are already in your shop.</p>'; box.hidden=false; break;}
+    case 'cat-item': {const n=$('#pf-name'); n.value=a.dataset.v; $('#pf-cats').hidden=true; pickCatalog(a.dataset.v); break;}
     case 'size-add': {const box=$('#pf-sizes'); box.insertAdjacentHTML('beforeend',sizeRow({},pfKind(),pfUnitVal(),!!$('#pf').dataset.new)); wireSize(box.lastElementChild); box.lastElementChild.querySelector('.s-label').focus(); break;}
     case 'size-del': {const rows=document.querySelectorAll('#pf-sizes .size'); if(rows.length>1) a.closest('.size').remove(); else {a.closest('.size').querySelectorAll('input').forEach(i=>i.value='');} pfCheck(); break;}
     case 'product-del': arm(a,'pd','Tap again to delete. Past sales stay.',()=>{const id=a.dataset.id, n=item(id).name; S.items=S.items.filter(i=>i.id!==id); S.packs=S.packs.filter(p=>p.itemId!==id); cart=cart.filter(c=>c.k==='pack'?pack(c.packId):item(c.itemId)); closeSheet(); commit(); toast(`Deleted ${n}`);}); break;
