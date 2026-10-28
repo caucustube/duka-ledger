@@ -369,8 +369,26 @@ nav.tabs .ic{transition:background .15s}
 .imp-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.8fr) minmax(0,1fr);gap:8px}
 .imp-st{margin:0;font-size:.82rem;font-weight:700;border-radius:10px;padding:6px 10px;background:var(--brand-soft);color:var(--brand-deep)}
 .imp-st.bulk,.imp-st.pack{background:var(--mint-soft);color:var(--mint)}
-.imp-st.new,.imp-st.newsize{background:var(--sun-soft);color:#6B4E00}
+.imp-st.new,.imp-st.newsize,.imp-st.newbulk{background:var(--sun-soft);color:#6B4E00}
 .imp-st.bad,.imp-st.need{background:var(--bad-soft);color:var(--bad)}
+.tick{display:flex;gap:10px;align-items:flex-start;background:var(--sun-soft);border-radius:12px;padding:10px 12px;font-weight:700;font-size:.9rem;cursor:pointer}
+.tick input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--brand);flex:none}
+.tick small{display:block;font-weight:600;color:var(--muted);font-size:.8rem}
+.kv.lots{font-size:.82rem;color:var(--muted);padding-top:0;align-items:center}.kv.lots span:last-child{font-weight:600}.kv.lots .btn{min-height:36px;padding:6px 10px;font-size:.82rem}
+/* waiting to be packed */
+.notice{display:flex;align-items:center;gap:10px;width:100%;border:0;background:var(--sun-soft);border-radius:14px;padding:8px 12px;margin:-4px 0 14px;text-align:left;color:#5A4200;font-size:.9rem}
+.notice b{color:#3B2A00}.notice .chev{margin-left:auto;font-size:1.2rem}
+.pic.sm{width:30px;height:30px;font-size:1rem;margin:0;border-radius:9px}
+.waitbox{background:var(--sun-soft);border-radius:18px;padding:12px 14px;margin-bottom:12px;display:flex;flex-direction:column;gap:8px}
+.waitbox p{margin:0}.waitbox p b{display:block;font-weight:800;color:#3B2A00}.waitbox p small{color:#6B4E00;font-size:.82rem}
+.wrow{display:flex;align-items:center;gap:10px;border:0;background:var(--surface);border-radius:12px;padding:8px 10px;text-align:left;width:100%}
+.wrow>span:nth-child(2){flex:1;min-width:0}.wrow b{display:block;font-weight:800}.wrow small{color:var(--muted);font-size:.8rem}
+.wrow .btn{min-height:36px;padding:6px 10px;font-size:.82rem;flex:none}
+#pf.packnow .s-stock,#pf.packnow .s-stock-l{display:none}
+.imp-how{display:flex;flex-direction:column;gap:8px}.imp-how .chip{min-height:36px;padding:6px 12px;font-size:.88rem;background:var(--bg)}.imp-how .chip:has(input:checked){background:var(--brand)}
+.imp-bulk{display:flex;flex-direction:column;gap:6px}
+.imp-cost{margin:0;font-size:.85rem;color:var(--ink)}
+.imp-pp .ppr{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px}
 </style>
 </head>
 <body>
@@ -641,6 +659,14 @@ function allBrands(name){
   return [...new Set([...first,...rest])];
 }
 
+/* bulk that came in without pack sizes yet: the app keeps reminding until they are set */
+const waitingPack=()=>S.items.filter(i=>i.mode==='bulk'&&i.bulk>0&&!packsOf(i.id).length);
+function waitHTML(where){
+  const w=waitingPack(); if(!w.length) return '';
+  if(where==='sell') return `<button class="notice" ${w.length===1?`data-act="packsizes" data-id="${w[0].id}"`:'data-act="tab" data-tab="stock"'}>${ico(w[0],'pic sm')}<span>${w.length===1?`<b>${esc(itName(w[0]))}</b>: ${qty(w[0].bulk,w[0].unit)} waiting to be packed`:`<b>${w.length} products</b> waiting to be packed`}</span><span class="chev">›</span></button>`;
+  return `<div class="waitbox"><p><b>Waiting to be packed</b><small>Say how you will pack these, so they can be sold.</small></p>${w.map(i=>`<button class="wrow" data-act="packsizes" data-id="${i.id}">${ico(i,'pic sm')}<span><b>${esc(itName(i))}</b><small>${qty(i.bulk,i.unit)} came in${(()=>{const d=S.deliveries.filter(x=>x.itemId===i.id).sort((a,b)=>b.ts-a.ts)[0]; return d?' '+day(d.ts):'';})()}</small></span><span class="btn soft">Set pack sizes</span></button>`).join('')}</div>`;
+}
+
 /* ---------- money owed ---------- */
 function balances(){
   const b={}; const add=(c,v,t)=>{b[c]=b[c]||{owed:0,last:0,since:t};b[c].owed+=v;b[c].last=Math.max(b[c].last,t);};
@@ -663,6 +689,43 @@ function empty(h,p,btn,act){return `<div class="empty"><h3>${esc(h)}</h3><p>${es
 const fullName=(it,p)=>p&&p.label?itName(it)+' '+p.label:itName(it);
 const plab=p=>p.label||'Each';
 const matches=(name,q)=>{const n=name.toLowerCase(); return n.includes(q)||n.split(/[\s(]+/).some(w=>w.startsWith(q));};
+
+/* ---------- old stock sells first, at its own price ----------
+   A size can hold stock bought at different prices. p.lots lists them, oldest first, only while
+   there is more than one price on the shelf. Sales take the oldest first at its price; when it runs out,
+   the next price starts by itself. p.price is always the price customers pay right now. p.np is the
+   price for packs made later from bulk, when a delivery changed it but old packs are still on the shelf. */
+const lotsOf=p=>p.lots&&p.lots.length?p.lots:[{n:Math.max(0,p.stock),price:p.price,cost:p.cost||0}];
+function tidyLots(p){
+  if(!p.lots) return; const m=[];
+  p.lots.filter(l=>l.n>0).forEach(l=>{const t=m[m.length-1]; if(t&&t.price===l.price){t.cost=(t.cost*t.n+(l.cost||0)*l.n)/(t.n+l.n); t.n+=l.n;} else m.push({n:l.n,price:l.price,cost:l.cost||0});});
+  if(m.length){p.price=m[0].price; p.cost=m[0].cost;}
+  if(m.length>1) p.lots=m; else delete p.lots;
+}
+function takeLots(p,q){
+  const out=[], ls=lotsOf(p); let left=q;
+  for(const l of ls){ if(left<=0) break; const k=Math.min(left,l.n); if(k>0){out.push({n:k,price:l.price,cost:l.cost||0}); left-=k;} }
+  if(left>0){const l=ls[ls.length-1]||p; out.push({n:left,price:l.price,cost:l.cost||0});}
+  return out;
+}
+const priceOf=(p,q)=>takeLots(p,q).reduce((a,l)=>a+l.n*l.price,0);
+const costOf=(p,q)=>takeLots(p,q).reduce((a,l)=>a+l.n*l.cost,0);
+const eachText=(p,q)=>{const t=takeLots(p,q); return t.length<2?`${ksh(t[0]?t[0].price:p.price)} each`:t.map(x=>`${x.n} at ${ksh(x.price)}`).join(' + ');};
+function useLots(p,q){ if(p.lots){let left=q; for(const l of p.lots){const k=Math.min(left,l.n); l.n-=k; left-=k; if(left<=0) break;} tidyLots(p);} p.stock-=q; }
+function putBack(p,q){ p.stock+=q; if(p.lots) p.lots[0].n+=q; }
+/* new stock goes behind what is already on the shelf */
+function addLot(p,n,price,cost){
+  if(!(n>0)) return;
+  delete p.np;
+  if(p.stock<=0&&!p.lots){p.stock=Math.max(0,p.stock)+n; p.price=price; p.cost=cost||0; return;}
+  p.lots=lotsOf(p).map(l=>({...l})).concat({n,price,cost:cost||0}); p.stock+=n; tidyLots(p);
+}
+const newestPrice=p=>p.np??(p.lots?p.lots[p.lots.length-1].price:p.price);
+const laterPrices=p=>(p.lots?p.lots.slice(1).map(l=>l.price):[]).concat(p.np!=null&&p.np!==(p.lots?p.lots[p.lots.length-1].price:p.price)?[p.np]:[]).filter((v,i,a)=>a.indexOf(v)===i);
+/* the shop owner decides to sell everything at one price now */
+function setAllPrice(p,price){ if(p.lots){const n=p.lots.reduce((a,l)=>a+l.n,0); if(n) p.cost=p.lots.reduce((a,l)=>a+l.n*(l.cost||0),0)/n; delete p.lots;} p.price=price; delete p.np; }
+/* a price change for packs that will be made later from bulk */
+function setLaterPrice(p,price,all){ if(all||p.stock<=0) setAllPrice(p,price); else if(price!==p.price) p.np=price; else delete p.np; }
 
 /* ---------- sell ---------- */
 /* How often each product sold in the last 30 days. Sales in the last 7 days count double. */
@@ -690,10 +753,10 @@ function cartAdd(pid,d){
   buzz();
 }
 function vSell(){
-  if(!S.packs.length) return `${sellBanner()}<div class="vh"><h2>Sell</h2></div>`+empty('Your shop is empty','Add the things you sell, one at a time. Start with something you sell every day, like sugar.','+ Add a product','product');
+  if(!S.packs.length) return `${sellBanner()}<div class="vh"><h2>Sell</h2></div>${waitHTML('sell')}`+empty('Your shop is empty','Add the things you sell, one at a time. Start with something you sell every day, like sugar.','+ Add a product','product');
   const td=sod(Date.now()), tdS=S.sales.filter(x=>x.ts>=td), tdT=tdS.reduce((a,x)=>a+x.total,0);
   return `${sellBanner()}<div class="vh"><h2>Sell</h2>${S.sales.length?'<button class="btn line" data-act="sales">Recent sales</button>':''}</div>
-    ${tdS.length?`<p class="today">Today so far <b>${ksh(tdT)}</b> from ${tdS.length} ${tdS.length===1?'sale':'sales'}</p>`:''}
+    ${tdS.length?`<p class="today">Today so far <b>${ksh(tdT)}</b> from ${tdS.length} ${tdS.length===1?'sale':'sales'}</p>`:''}${waitHTML('sell')}
     <div class="find"><input id="find" type="search" placeholder="Search ${S.items.length} products" value="${esc(findQ)}" autocomplete="off" aria-label="Search products"></div>
     <div id="tiles-wrap"></div>`;
 }
@@ -727,7 +790,7 @@ function openPicker(id){const it=item(id); openSheet('picker',itName(it),pickerH
 function pickerHTML(id){
   return `<div class="panel">${packsOf(id).map(p=>{const n=cartQty(p.id);
     const out=p.stock<=0;
-    return `<div class="prow${out?' soldout':''}"><div class="pl"><b>${esc(plab(p))}</b><small>${ksh(p.price)} · ${out?'<span class="down">sold out</span>':p.stock+' left'}</small></div>
+    return `<div class="prow${out?' soldout':''}"><div class="pl"><b>${esc(plab(p))}</b><small>${ksh(p.price)} · ${out?'<span class="down">sold out</span>':p.stock+' left'}${p.lots?`, then ${ksh(p.lots[1].price)}`:''}</small></div>
       ${n?`<div class="step"><button data-act="pk" data-d="-1" data-id="${p.id}" aria-label="One less ${esc(plab(p))}">−</button><span>${n}</span><button data-act="pk" data-d="1" data-id="${p.id}" aria-label="One more ${esc(plab(p))}" ${n>=p.stock?'disabled':''}>+</button></div>`
          :out?'<span class="muted" style="font-size:.88rem">Sold out</span>':`<button class="btn soft addb" data-act="pk" data-d="1" data-id="${p.id}">Add</button>`}</div>`;}).join('')}</div>
     <button class="btn primary wide" data-act="close">Done</button>`;
@@ -739,13 +802,14 @@ function stockStates(){
   S.items.forEach(it=>{const ps=packsOf(it.id); const allOut=ps.length&&ps.every(p=>p.stock<=0)&&!(it.mode==='bulk'&&it.bulk>0); st.set(it.id,allOut?'out':low.has(it.id)?'low':'ok');});
   return st;
 }
-const itemWorth=it=>(it.mode==='bulk'?Math.max(0,it.bulk)*(it.cost||0):0)+packsOf(it.id).reduce((a,p)=>a+Math.max(0,p.stock)*(p.cost||0),0);
+const itemWorth=it=>(it.mode==='bulk'?Math.max(0,it.bulk)*(it.cost||0):0)+packsOf(it.id).reduce((a,p)=>a+lotsOf(p).reduce((b,l)=>b+Math.max(0,l.n)*(l.cost||0),0),0);
 const initials=n=>{const w=n.replace(/\(.*?\)/g,'').trim().split(/\s+/);return (w.length>1?w[0][0]+w[1][0]:w[0].slice(0,2)).toUpperCase();};
 function vStock(){
   let h=`<div class="vh"><h2>Stock</h2>${S.items.length?'<button class="btn soft" data-act="delivery">Delivery</button>':''}<button class="btn primary" data-act="product">+ Add</button></div>`;
   if(!S.items.length) return h+empty('Nothing here yet','Add each product once with its sizes and prices. After that, record deliveries as they come in.','+ Add a product','product');
   const st=stockStates(); let nOut=0,nLow=0; st.forEach(v=>{if(v==='out')nOut++;else if(v==='low')nLow++;});
   const worth=S.items.reduce((a,i)=>a+itemWorth(i),0);
+  h+=waitHTML('stock');
   h+=`<div class="stats"><div><span class="l">Products</span><b>${S.items.length.toLocaleString('en-KE')}</b></div><div><span class="l">Stock worth</span><b>${ksh(worth)}</b></div><div><span class="l">Need attention</span><b class="${nOut+nLow?'wrn':''}">${nOut+nLow}</b></div></div>`;
   if(S.items.length>6) h+=`<div class="find" style="margin:12px 0 0"><input id="sfind" type="search" placeholder="Search stock" value="${esc(stockQ)}" autocomplete="off" aria-label="Search stock"></div>`;
   if(nOut+nLow) h+=`<div class="seg" style="margin:12px 0 0" role="group" aria-label="Show">${[['all','All'],['low','Running low ('+nLow+')'],['out','Out ('+nOut+')']].map(([k,l])=>`<button data-act="sfilter" data-f="${k}" aria-pressed="${stockFilter===k}">${l}</button>`).join('')}</div>`;
@@ -768,7 +832,7 @@ function drawCards(){
     const pk=ps.reduce((a,p)=>a+Math.max(0,p.stock),0);
     const side=it.mode==='bulk'?`${pk} packed`:`${pk} in stock`;
     return `<button class="card" data-act="item" data-id="${it.id}">
-      <div class="c-top">${ico(it,'av')}<span class="c-name"><b>${esc(it.name)}${s2==='out'?' <span class="flag out">Out</span>':s2==='low'?' <span class="flag">Low</span>':''}</b><small>${it.brand?`<span class="c-brand">${esc(it.brand)}</span> · `:''}${it.mode==='bulk'?'Needs repackaging · '+esc(uName(it.unit)):'Ready to sell'}</small></span>
+      <div class="c-top">${ico(it,'av')}<span class="c-name"><b>${esc(it.name)}${it.mode==='bulk'&&!ps.length?' <span class="flag">Set pack sizes</span>':s2==='out'?' <span class="flag out">Out</span>':s2==='low'?' <span class="flag">Low</span>':''}</b><small>${it.brand?`<span class="c-brand">${esc(it.brand)}</span> · `:''}${it.mode==='bulk'?'Needs repackaging · '+esc(uName(it.unit)):'Ready to sell'}</small></span>
         <span class="c-side"><b>${ksh(itemWorth(it))}</b><small>${side}</small></span><span class="chev">›</span></div>
       <div class="szs">${it.mode==='bulk'?`<span class="sz bulkc ${it.bulk<=0?'out':''}"><span>Bulk</span><b>${qty(it.bulk,it.unit)}</b></span>`:''}${ps.map(p=>`<span class="sz ${p.stock<=0?'out':''}"><span>${esc(p.label||'In stock')}</span><b>${p.stock}</b></span>`).join('')}</div>
     </button>`;}).join('')+`</div>`+
@@ -846,8 +910,9 @@ function lowList(){
 }
 
 /* ---------- cart ---------- */
-const cartTotal=()=>cart.reduce((a,c)=>a+(c.k==='pack'?(pack(c.packId)?.price||0)*c.qty:c.amount),0);
+const cartTotal=()=>cart.reduce((a,c)=>a+(c.k==='pack'?(pack(c.packId)?priceOf(pack(c.packId),c.qty):0):c.amount),0);
 function cartBar(){
+  saveCart();
   const n=cart.reduce((a,c)=>a+(c.k==='pack'?c.qty:1),0);
   $('#cartbar').hidden=!(n&&tab==='sell'); document.body.classList.toggle('has-cart',!!(n&&tab==='sell'));
   $('#cb-n').textContent=n+(n===1?' item':' items')+' · Finish sale';
@@ -861,7 +926,7 @@ function cartBar(){
 function cartHTML(){
   const lines=cart.map((c,i)=>{
     if(c.k==='pack'){const p=pack(c.packId),it=p&&item(p.itemId); if(!it) return '';
-      return `<div class="line"><div><b>${esc(fullName(it,p))}</b><small>${ksh(p.price)} each</small><button class="linkbtn" data-act="del" data-i="${i}">Remove</button></div><div class="step"><button data-act="dec" data-i="${i}" aria-label="One less">−</button><span>${c.qty}</span><button data-act="inc" data-i="${i}" aria-label="One more">+</button></div><span class="amt">${ksh(p.price*c.qty)}</span></div>`;}
+      return `<div class="line"><div><b>${esc(fullName(it,p))}</b><small>${eachText(p,c.qty)}</small><button class="linkbtn" data-act="del" data-i="${i}">Remove</button></div><div class="step"><button data-act="dec" data-i="${i}" aria-label="One less">−</button><span>${c.qty}</span><button data-act="inc" data-i="${i}" aria-label="One more">+</button></div><span class="amt">${ksh(priceOf(p,c.qty))}</span></div>`;}
     const it=item(c.itemId);
     return `<div class="line"><div><b>${esc(it?.name||'')}, loose</b><small>About ${qty(c.units,it?.unit)}</small></div><div class="step"><button data-act="del" data-i="${i}" aria-label="Remove">×</button></div><span class="amt">${ksh(c.amount)}</span></div>`;
   }).join('');
@@ -877,10 +942,10 @@ function cartHTML(){
 }
 function openCart(){openSheet('cart','This sale',cartHTML(),b=>suggest(b.querySelector('#deni-name'),customers));}
 function refreshCart(){if(!cart.length){closeSheet();render();return;} const b=sheetBody(); if(b&&sheetKind==='cart'){b.innerHTML=cartHTML(); suggest(b.querySelector('#deni-name'),customers);} render();}
-function applySale(s,sign){s.lines.forEach(l=>{if(l.k==='pack'){const p=pack(l.packId); if(p)p.stock+=sign*l.qty;}else{const it=item(l.itemId); if(it)it.bulk=r3(it.bulk+sign*l.units);}});}
+function applySale(s,sign){s.lines.forEach(l=>{if(l.k==='pack'){const p=pack(l.packId); if(p){ if(sign<0) useLots(p,l.qty); else putBack(p,l.qty); }}else{const it=item(l.itemId); if(it)it.bulk=r3(it.bulk+sign*l.units);}});}
 function sell(pay,customer){
   const lines=cart.map(c=>{
-    if(c.k==='pack'){const p=pack(c.packId),it=item(p.itemId);return {k:'pack',packId:p.id,itemId:it.id,name:fullName(it,p),qty:c.qty,units:r3(p.size*c.qty),price:p.price*c.qty,cost:(p.cost||0)*c.qty};}
+    if(c.k==='pack'){const p=pack(c.packId),it=item(p.itemId);return {k:'pack',packId:p.id,itemId:it.id,name:fullName(it,p),qty:c.qty,units:r3(p.size*c.qty),price:priceOf(p,c.qty),cost:costOf(p,c.qty)};}
     const it=item(c.itemId);return {k:'loose',itemId:it.id,name:it.name+' (loose)',qty:1,units:c.units,price:c.amount,cost:(it.cost||0)*c.units};
   });
   const s={id:uid(),ts:Date.now(),lines,total:lines.reduce((a,l)=>a+l.price,0),cost:lines.reduce((a,l)=>a+l.cost,0),pay,customer:customer||''};
@@ -898,7 +963,7 @@ function openSheet(kind,title,html,mount){
   sc.addEventListener('click',e=>{if(e.target===sc) closeSheet();});
   document.body.appendChild(sc); sheet=sc; if(mount) mount(sc.querySelector('.sb'));
 }
-function closeSheet(){if(sheet){sheet.remove();sheet=null;sheetKind='';} armed=null;}
+function closeSheet(){if(sheet){sheet.remove();sheet=null;sheetKind='';} armed=null; if(!restoring) dropDraft();}
 const sheetBody=()=>sheet&&sheet.querySelector('.sb');
 
 /* item details */
@@ -909,9 +974,9 @@ function openItem(id){
   openSheet('item',itName(it),`
     <div class="panel">
       ${it.mode==='bulk'?`<div class="kv"><span>Bulk, not yet packed</span><span>${qty(it.bulk,it.unit)}</span></div>`:''}
-      ${packsOf(id).map(p=>`<div class="kv"><span>${esc(plab(p))} <span style="color:var(--muted);font-weight:600">at ${ksh(p.price)}</span></span><span class="${p.stock<=0?'down':''}">${p.stock} on shelf</span></div>`).join('')}
+      ${packsOf(id).map(p=>`<div class="kv"><span>${esc(plab(p))} <span style="color:var(--muted);font-weight:600">at ${ksh(p.price)}</span></span><span class="${p.stock<=0?'down':''}">${p.stock} on shelf</span></div>${p.lots?`<div class="kv lots"><span>${p.lots.map(l=>`${l.n} at ${ksh(l.price)}`).join(', then ')}. The oldest sell first.</span></div>`:''}${laterPrices(p).length?`<div class="kv lots"><span>New price waiting: ${laterPrices(p).map(ksh).join(', ')}</span><button class="btn soft" data-act="all-new" data-id="${p.id}">Sell all at ${ksh(newestPrice(p))} now</button></div>`:''}`).join('')}
     </div>
-    <div class="btns"><button class="btn primary" data-act="delivery" data-id="${id}">Delivery</button>${it.mode==='bulk'?`<button class="btn soft" data-act="repack" data-id="${id}">Repack</button>`:''}<button class="btn soft" data-act="product" data-id="${id}">Edit</button></div>
+    <div class="btns"><button class="btn primary" data-act="delivery" data-id="${id}">Delivery</button>${it.mode==='bulk'?(packsOf(id).length?`<button class="btn soft" data-act="repack" data-id="${id}">Repack</button>`:`<button class="btn soft" data-act="packsizes" data-id="${id}">Set pack sizes</button>`):''}<button class="btn soft" data-act="product" data-id="${id}">Edit</button></div>
     ${moves.length?`<p class="hint" style="font-weight:700">Recent</p><div class="panel">${moves.map(m=>`<div class="kv"><span>${esc(m.t)} <span style="color:var(--muted);font-weight:600">· ${day(m.ts)}</span></span><span>${esc(m.a)}</span></div>`).join('')}</div>`:''}`);
 }
 
@@ -933,13 +998,13 @@ function lastBuy(it){
   if(d) return {q:d.qty,paid:d.paid};
   return it.ref&&it.cost?{q:it.ref,paid:Math.round(it.cost*it.ref)}:{q:'',paid:''};
 }
-function openProduct(id){
+function openProduct(id,packNow){
   const it=id?item(id):null, unit=it&&it.unit!=='pc'?it.unit:'kg';
   const ps=it?packsOf(it.id):[];
   const mode=!it?'bulk':it.mode==='bulk'?'bulk':(ps.length===1&&!ps[0].label?'single':'sizes');
   const known=UNITS.some(u=>u[0]===unit), lb=it&&it.mode==='bulk'?lastBuy(it):{q:'',paid:''};
   const single=mode==='single'?ps[0]:null;
-  openSheet('product',it?'Edit '+itName(it):'Add a product',`<form id="pf" class="sb ${mode} ${mode==='bulk'?'':'ready'}" data-unit="${it?esc(unit):''}" data-new="${it?'':'1'}" novalidate>
+  openSheet('product',packNow?'How will you pack '+itName(it)+'?':it?'Edit '+itName(it):'Add a product',`<form id="pf" class="sb ${mode} ${mode==='bulk'?'':'ready'}${packNow?' packnow':''}" data-pack="${packNow?1:''}" data-unit="${it?esc(unit):''}" data-new="${it?'':'1'}" novalidate>
     <div class="namerow"><span class="pico" id="pf-ico" aria-hidden="true">${iconFor(it||{name:''})}</span><label class="fld"><span>Product name</span><input id="pf-name" value="${esc(it?.name||'')}" placeholder="e.g. Sugar" autocomplete="off"></label></div>
     <label class="fld"><span>Brand <span class="muted">(optional)</span></span><input id="pf-brand" value="${esc(it?.brand||'')}" placeholder="e.g. Mumias" autocomplete="off"></label>
     ${it?`<fieldset class="fld"><legend>Picture</legend><div class="icons" role="radiogroup" aria-label="Picture"><label class="ichip auto"><input type="radio" name="pf-icon" value="" ${it.icon?'':'checked'}><span>Auto</span></label>${ICON_SET.map(e=>`<label class="ichip"><input type="radio" name="pf-icon" value="${e}" ${it.icon===e?'checked':''}><span>${e}</span></label>`).join('')}</div></fieldset>`:''}
@@ -974,7 +1039,7 @@ function openProduct(id){
     <p class="calc" id="pf-pack" hidden></p>
     <p class="err" id="pf-err" hidden></p>
     <button class="btn primary wide" type="submit">${it?'Save':'Add to my shop'}</button>
-    ${it?`<button type="button" class="btn danger wide" data-act="product-del" data-id="${it.id}">Delete ${esc(it.name)}</button>`:''}
+    ${it&&!packNow?`<button type="button" class="btn danger wide" data-act="product-del" data-id="${it.id}">Delete ${esc(it.name)}</button>`:''}
   </form>`,b=>{
     const f=b.querySelector('#pf'), name=f.querySelector('#pf-name'), other=f.querySelector('#pf-unit-other');
     suggest(f.querySelector('#pf-brand'),()=>allBrands(name.value));
@@ -988,6 +1053,7 @@ function openProduct(id){
     pfMode();
     if(!it) setTimeout(()=>name.focus(),60);
   });
+  sheet.dataset.pid=id||'';
 }
 function pfModeVal(){const f=$('#pf'); const r=f.querySelector('input[name="pf-mode"]:checked'); return r?r.value:(f.classList.contains('bulk')?'bulk':f.classList.contains('single')?'single':'sizes');}
 const pfKind=()=>pfModeVal()==='bulk'?'bulk':'ready';
@@ -1087,11 +1153,13 @@ function pfSave(it){
   rows.forEach(r=>{
     const size=mode==='bulk'?r.size:1; let p=r.pid&&pack(r.pid);
     if(!p){p={id:uid(),itemId:t.id,label:'',size,price:0,stock:0,cost:0};S.packs.push(p);}
+    if((p.lots||p.np!=null)&&(r.price!==p.price||(r.stock>=0&&Math.floor(r.stock)!==p.stock))) setAllPrice(p,r.price);
     p.label=r.label; p.size=size; p.price=r.price; if(r.stock>=0) p.stock=Math.floor(r.stock);
     if(mode==='bulk'){ if(t.cost>0&&(costChanged||!p.cost||!r.pid)) p.cost=t.cost*size; } else if(r.cost>=0) p.cost=r.cost;
     keep.add(p.id);
   });
   S.packs=S.packs.filter(p=>p.itemId!==t.id||keep.has(p.id));
+  if(f.dataset.pack&&t.bulk>0){ commit(); openRepack(t.id); toast('Pack sizes saved. Now write how many you packed.'); return; }
   closeSheet(); commit(); toast(it?`Saved ${itName(t)}`:`${itName(t)} added`);
 }
 
@@ -1202,6 +1270,7 @@ function awStep2(){
     <p class="calc" id="pf-pack" hidden></p>
     <p class="err" id="pf-err" hidden></p>
     <button class="btn primary wide" type="submit" ${AW.how?'':'disabled'}>Add to my shop</button>
+    <button type="button" class="btn soft wide bulk-only" data-act="aw-later">Add it now, set pack sizes later</button>
     <button type="button" class="btn line wide" data-act="aw-back">Back</button>
   </form>`,b=>{
     const f=b.querySelector('#pf');
@@ -1240,7 +1309,7 @@ function awCheck(){
     pk.innerHTML=`<b>${n}</b> of ${nf(AW.amt,0)} pieces listed.`+(AW.paid?' The price you paid is shared across the sizes by their selling price.':'');
   }
 }
-function awSave(){
+function awSave(later){
   const f=$('#pf'), err=f.querySelector('#pf-err'), fail=m=>{err.textContent=m;err.hidden=false;err.scrollIntoView({block:'nearest'});};
   const u=AW.unit, amt=AW.amt, paid=AW.paid>0?AW.paid:0, per=paid?paid/amt:0, now=Date.now();
   if(!AW.how) return fail('Choose how you sell it.');
@@ -1253,8 +1322,10 @@ function awSave(){
     else { t={id:uid(),name:AW.name,mode:'bulk',unit:u,bulk:r3(amt-n),cost:per,ref:amt,added:now}; packs.push({label:canon(1,u),size:1,price,stock:n,cost:per}); }
   } else {
     const kind=AW.how==='sizes'?'ready':'bulk';
+    if(later&&kind==='bulk'){ t={id:uid(),name:AW.name,mode:'bulk',unit:u,bulk:r3(amt),cost:per,ref:amt,added:now}; }
+    else {
     const rows=[...f.querySelectorAll('.size')].map(r=>({label:tidySize(r.querySelector('.s-label').value,kind,u),price:toNum(r.querySelector('.s-price').value),n:Math.max(0,Math.floor(toNum(r.querySelector('.s-stock').value)||0)),size:toNum(r.querySelector('.s-size').value)})).filter(r=>r.label||r.price>0);
-    if(!rows.length) return fail('Add at least one size you sell.');
+    if(!rows.length) return fail(kind==='bulk'?'Add at least one pack size, or tap "Add it now, set pack sizes later".':'Add at least one size you sell.');
     const seen=new Set();
     for(const r of rows){
       if(!r.label) return fail('Every size needs a name, like ¼ kg or 500 ml.');
@@ -1273,11 +1344,12 @@ function awSave(){
       t={id:uid(),name:AW.name,mode:'ready',unit:'pc',bulk:0,cost:0,added:now};
       rows.forEach(r=>packs.push({label:r.label,size:1,price:r.price,stock:r.n,cost:paid&&value?r.price*paid/value:0}));
     }
+    }
   }
   if(AW.brand) t.brand=AW.brand;
   S.items.push(t); packs.forEach(p=>S.packs.push(Object.assign({id:uid(),itemId:t.id},p)));
   S.deliveries.push({id:uid(),ts:now,itemId:t.id,packId:null,qty:amt,paid});
-  AW=null; closeSheet(); commit(); toast(`${itName(t)} added`);
+  AW=null; closeSheet(); commit(); toast(packs.length?`${itName(t)} added`:`${itName(t)} added. Set its pack sizes in Stock when you are ready.`);
 }
 
 /* delivery */
@@ -1292,6 +1364,7 @@ function openDelivery(id){
       suggest(n,allNames,()=>dlDraw());
       n.addEventListener('input',dlDraw); dlDraw(); if(!it) setTimeout(()=>n.focus(),60);
     });
+  sheet.dataset.pid=id||'';
 }
 function dlDraw(){
   const b=sheetBody(), name=b.querySelector('#dl-name').value, it=byName(name), box=b.querySelector('#dl-rest');
@@ -1308,7 +1381,8 @@ function dlDraw(){
       </div>
       <p class="calc" id="dl-calc">Fill both to see the new buying price.</p>
       ${ps.length?`<p class="hint" style="font-weight:700;margin-bottom:-6px">Selling prices <span class="muted">(change them if the market moved)</span></p>
-      <div class="panel">${ps.map(p=>`<div class="dl-row" data-pid="${p.id}"><span class="dl-l"><b>${esc(plab(p))}</b><small>${p.stock} on shelf</small></span><label class="fld"><span>Price</span><input class="dl-price" type="number" inputmode="decimal" min="0" step="any" value="${p.price}"></label></div>`).join('')}</div>`:''}
+      <div class="panel">${ps.map(p=>`<div class="dl-row" data-pid="${p.id}"><span class="dl-l"><b>${esc(plab(p))}</b><small>${p.stock} on shelf at ${ksh(p.price)}</small></span><label class="fld"><span>New price</span><input class="dl-price" type="number" inputmode="decimal" min="0" step="any" value="${newestPrice(p)}"></label></div>`).join('')}</div>
+      <label class="tick" id="dl-all-f" hidden><input type="checkbox" id="dl-all"><span>Also sell the ones already on the shelf at the new price. <small>If you leave this off, the old ones keep their old price until they sell out.</small></span></label>`:''}
       <p class="err" id="dl-err" hidden></p>
       <button class="btn primary wide" data-act="delivery-save">Add to stock</button>`;
   } else {
@@ -1316,6 +1390,7 @@ function dlDraw(){
     box.innerHTML=`<p class="hint" style="font-weight:700;margin-bottom:-6px">How many of each came?</p>
       <div class="panel" id="dl-rows">${ps.map(p=>dlRow(p)).join('')}</div>
       <button class="btn line" data-act="dl-newsize">+ A new size came</button>
+      <label class="tick" id="dl-all-f" hidden><input type="checkbox" id="dl-all"><span>Also sell the ones already on the shelf at the new price. <small>If you leave this off, the old ones keep their old price until they sell out.</small></span></label>
       <label class="fld"><span>Total paid for all of it (Ksh)</span><input id="dl-paid" type="number" inputmode="decimal" min="0" step="any" placeholder="e.g. 1200"></label>
       <p class="calc" id="dl-calc">Fill in how many came and the total paid.</p>
       <p class="err" id="dl-err" hidden></p>
@@ -1327,8 +1402,8 @@ function dlDraw(){
 function dlRow(p){
   const isNew=!p, unl=p&&!p.label;
   return `<div class="dl-row${isNew?' new':''}" data-pid="${p?p.id:''}">
-    ${isNew||unl?`<label class="fld dl-lab"><span>${isNew?'New size':'Size'}</span><input class="dl-label" placeholder="${isNew?'e.g. 800 g':'e.g. 400 g'}" autocomplete="off" value=""></label>`:`<span class="dl-l"><b>${esc(p.label)}</b><small>${p.stock} on shelf</small></span>`}
-    <label class="fld"><span>Price</span><input class="dl-price" type="number" inputmode="decimal" min="0" step="any" value="${p?p.price:''}" placeholder="Ksh"></label>
+    ${isNew||unl?`<label class="fld dl-lab"><span>${isNew?'New size':'Size'}</span><input class="dl-label" placeholder="${isNew?'e.g. 800 g':'e.g. 400 g'}" autocomplete="off" value=""></label>`:`<span class="dl-l"><b>${esc(p.label)}</b><small>${p.stock} on shelf at ${ksh(p.price)}</small></span>`}
+    <label class="fld"><span>Selling price</span><input class="dl-price" type="number" inputmode="decimal" min="0" step="any" value="${p?newestPrice(p):''}" placeholder="Ksh"></label>
     <label class="fld"><span>Came</span><input class="dl-n" type="number" inputmode="numeric" min="0" step="1" placeholder="0"></label>
     ${isNew?'<button type="button" class="x" data-act="dl-delrow" aria-label="Remove this size">×</button>':''}
   </div>`;
@@ -1338,6 +1413,7 @@ function dlReadRows(){
 }
 function dlCalc(){
   const b=sheetBody(), it=byName(b.querySelector('#dl-name').value); if(!it) return; const c=b.querySelector('#dl-calc'), paid=toNum(b.querySelector('#dl-paid')?.value);
+  const af=b.querySelector('#dl-all-f'); if(af) af.hidden=![...b.querySelectorAll('.dl-row[data-pid]')].some(r=>{const p=r.dataset.pid&&pack(r.dataset.pid), v=toNum(r.querySelector('.dl-price').value); return p&&p.stock>0&&v>0&&v!==p.price;});
   if(it.mode==='bulk'){
     const q=toNum(b.querySelector('#dl-qty').value);
     if(!(q>0&&paid>=0)){c.textContent='Fill both to see the new buying price.';return;}
@@ -1362,7 +1438,7 @@ function dlSave(){
     const prices=[...b.querySelectorAll('.dl-row')].map(r=>({p:pack(r.dataset.pid),price:toNum(r.querySelector('.dl-price').value)}));
     for(const x of prices) if(!(x.price>0)) return fail(`Set a selling price for ${plab(x.p)}.`);
     const h=Math.max(0,it.bulk); it.cost=h>0&&it.cost?(it.cost*h+paid)/(h+q):paid/q; it.bulk=r3(it.bulk+q);
-    prices.forEach(x=>{x.p.price=x.price;});
+    const all=!!b.querySelector('#dl-all:checked'); prices.forEach(x=>setLaterPrice(x.p,x.price,all));
     S.deliveries.push({id:uid(),ts:now,itemId:it.id,packId:null,qty:q,paid});
     closeSheet(); commit(); toast(`Added ${qty(q,it.unit)} of ${itName(it)}`); return;
   }
@@ -1376,15 +1452,16 @@ function dlSave(){
   }
   if(unl&&anyNew&&!unl.label) return fail(`Write the size of the ${it.name} you already have (e.g. 400 g), so the sizes don't mix up.`);
   const got=rows.filter(x=>x.n>0&&(x.pid||x.label)); if(!got.length) return fail('Write how many came of at least one size.');
-  const val=got.reduce((a,x)=>a+x.n*x.price,0);
+  const val=got.reduce((a,x)=>a+x.n*x.price,0), all=!!b.querySelector('#dl-all:checked');
   rows.forEach(x=>{
     if(!x.pid&&!x.label) return;
     let p=x.pid?pack(x.pid):null;
     if(!p){p={id:uid(),itemId:it.id,label:x.label,size:1,price:x.price,stock:0,cost:0};S.packs.push(p);}
     if(x.pid&&x.label) p.label=x.label;
-    p.price=x.price;
-    if(x.n>0){ const each=paid>0&&val?x.price*paid/val:0, hv=Math.max(0,p.stock); p.cost=hv>0&&p.cost?(p.cost*hv+each*x.n)/(hv+x.n):each; p.stock+=x.n;
+    if(x.n>0){ const each=paid>0&&val?x.price*paid/val:0; addLot(p,x.n,x.price,each);
       S.deliveries.push({id:uid(),ts:now,itemId:it.id,packId:p.id,qty:x.n,paid:paid>0&&val?paid*x.n*x.price/val:0}); }
+    else setLaterPrice(p,x.price,false);
+    if(all) setAllPrice(p,x.price);
   });
   closeSheet(); commit(); toast(`Added ${got.reduce((a,x)=>a+x.n,0)} ${itName(it)} to stock`);
 }
@@ -1394,6 +1471,11 @@ function dlSave(){
    Excel, CSV and Word files are opened on the phone first, so their columns can still be read if the server is busy.
    Nothing is added until the shopkeeper has checked every line. */
 let IMP=null;
+function addToPack(p,n,paid,now,price){
+  const each=paid>0?paid/n:(lotsOf(p).slice(-1)[0].cost||0);
+  addLot(p,n,price>0?price:newestPrice(p),each);
+  S.deliveries.push({id:uid(),ts:now,itemId:p.itemId,packId:p.id,qty:n,paid:paid>0?paid:0,from:'sheet'});
+}
 const IMP_ACCEPT='image/*,.pdf,.xlsx,.xlsm,.csv,.ods,.docx,.odt,.txt,application/pdf,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.spreadsheet';
 function pickSheetFile(){
   const i=document.createElement('input'); i.type='file'; i.accept=IMP_ACCEPT; i.hidden=true; document.body.appendChild(i);
@@ -1464,13 +1546,13 @@ const rowsText=rows=>rows.slice(0,800).map(r=>r.join(' | ')).join('\n').slice(0,
 function shrinkPhoto(file,max){
   return new Promise((ok,no)=>{const im=new Image(), u=URL.createObjectURL(file);
     im.onload=()=>{const k=Math.min(1,max/Math.max(im.naturalWidth,im.naturalHeight)), c=document.createElement('canvas'); c.width=Math.round(im.naturalWidth*k); c.height=Math.round(im.naturalHeight*k);
-      const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(im,0,0,c.width,c.height); URL.revokeObjectURL(u); ok(c.toDataURL('image/jpeg',.82));};
+      const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(im,0,0,c.width,c.height); URL.revokeObjectURL(u); ok(c.toDataURL('image/jpeg',.86));};
     im.onerror=()=>{URL.revokeObjectURL(u); no(new Error('heic'));}; im.src=u;});
 }
 const asDataUrl=f=>new Promise((ok,no)=>{const r=new FileReader(); r.onload=()=>ok(String(r.result).replace(/^data:[^;,]*/,'data:application/pdf')); r.onerror=()=>no(new Error('read')); r.readAsDataURL(f);});
 async function impPrepare(file){
   const n=(file.name||'').toLowerCase(), ext=n.includes('.')?n.split('.').pop():'', t=file.type||'';
-  if(t.startsWith('image/')||['jpg','jpeg','png','webp','heic','heif','gif'].includes(ext)) return {send:{image:await shrinkPhoto(file,1600)}};
+  if(t.startsWith('image/')||['jpg','jpeg','png','webp','heic','heif','gif'].includes(ext)) return {send:{image:await shrinkPhoto(file,2200)}};
   if(ext==='pdf'||t==='application/pdf'){ if(file.size>9e6) throw new Error('big'); return {send:{pdf:await asDataUrl(file)}}; }
   if(ext==='xls'||ext==='doc') throw new Error('old');
   if(ext==='xlsx'||ext==='xlsm'){ const rows=await xlsxRows(await file.arrayBuffer()); return {rows,send:{text:rowsText(rows)}}; }
@@ -1497,9 +1579,9 @@ function sheetFromRows(rows){
 }
 const impKnown=()=>S.items.slice(0,400).map(i=>itName(i)+': '+(packsOf(i.id).map(plab).join(', ')||'-')+(i.mode==='bulk'?' (bulk, in '+uName(i.unit)+')':''));
 async function impStart(file){
-  openSheet('import','Reading the delivery note',`<p class="calc" id="imp-msg">Opening <b>${esc(file.name||'the file')}</b>…</p>`);
+  openSheet('import','Reading the delivery note',`<p class="calc" id="imp-msg">Opening <b>${esc(file.name||'the file')}</b>…</p>`); draftNow();
   const msg=t=>{const m=$('#imp-msg'); if(m) m.innerHTML=t;};
-  const fail=t=>{ if(sheetKind!=='import') return; sheetBody().innerHTML=`<p class="calc bad">${t}</p><button class="btn primary wide" data-act="dl-file">Try another file</button><button class="btn line wide" data-act="delivery">Type the delivery in instead</button>`; };
+  const fail=t=>{ if(sheetKind!=='import') return; dropDraft(); sheetBody().innerHTML=`<p class="calc bad">${t}</p><button class="btn primary wide" data-act="dl-file">Try another file</button><button class="btn line wide" data-act="delivery">Type the delivery in instead</button>`; };
   let prep;
   try{ prep=await impPrepare(file); }catch(e){ return fail(e.message==='heic'?'This photo cannot be opened here. Take the photo again, or send it as a JPG.':e.message==='old'?'This is an old Word or Excel file. Save it as .xlsx, .docx or PDF, or take a photo of the paper.':e.message==='big'?'This PDF is too big. Take a photo of the paper instead.':e.message==='type'?'This kind of file cannot be read. Use a photo, PDF, Excel, CSV or Word file.':'Could not open this file.'); }
   const fromCols=note=>{ if(!prep.rows) return false; const r=sheetFromRows(prep.rows); if(!r.lines.length) return false; impReview(r,note); return true; };
@@ -1514,46 +1596,66 @@ async function impStart(file){
   if(fromCols('Read from the columns of the sheet. Check each line.')) return;
   fail(j.ok?'No products were found on it. Try a clearer photo with the whole sheet in view.':j.error==='limit'?`This shop has read ${j.limit} sheets today. Try again tomorrow, or type the delivery in.`:j.error==='scanned'?'This PDF is a scanned picture. Take a photo of the paper instead.':j.error==='no-ai'?'Reading delivery notes is not switched on yet. Ask Doppler Shop.':j.error==='expired'?'Your free month has ended.':'Could not read it just now. Check the internet and try again.'+(j.detail?`<br><small>${esc(j.detail)}</small>`:''));
 }
+let impN=0;
+const UNIT_OF={g:'kg',kg:'kg',ml:'L',L:'L',cm:'m',m:'m',pcs:'pcs'};
+const guessUnit=size=>{const q=parseQty(size); return q&&q.u&&UNIT_OF[q.u]||'pcs';};
+function impAutoAmt(size,unit,n){ if(!(n>0)) return ''; if(!size) return n; const v=sizeIn(size,unit); return v?r3(v*n):''; }
 function impReview(j,note){
-  const lines=j.lines.map(l=>{
+  const lines=j.restored?j.lines:j.lines.map(l=>{
     const g=(l.match&&byName(l.match))||byName(l.brand?l.name+' · '+l.brand:l.name)||(!l.brand?byName(l.name):null);
-    return {prod:g?itName(g):l.name,brand:g?'':(l.brand||''),size:l.size||'',qty:l.qty??'',paid:l.total??(l.qty&&l.unit_cost?l.qty*l.unit_cost:''),sell:l.sell_price||''};
+    const t=!g&&templates().get(String(l.name).toLowerCase()), how=t&&t.how==='bulk'?'bulk':'as', unit=t&&t.how==='bulk'?t.unit:guessUnit(l.size);
+    return {prod:g?itName(g):l.name,brand:g?'':(l.brand||''),size:l.size||'',qty:l.qty??'',paid:l.total??(l.qty&&l.unit_cost?l.qty*l.unit_cost:''),sell:l.sell_price||'',how,unit,amt:'',all:false};
   });
-  IMP={total:j.total||null};
-  const head=[j.supplier?esc(j.supplier):'',j.date?esc(j.date):'',j.total?'Total on the sheet <b>'+ksh(j.total)+'</b>':''].filter(Boolean).join(' · ');
+  IMP={total:j.total||null,count:j.count||null,supplier:j.supplier||null,date:j.date||null,note:note||''};
+  const miss=IMP.count&&IMP.count>lines.length?IMP.count-lines.length:0;
+  const head=[IMP.supplier?esc(IMP.supplier):'',IMP.date?esc(IMP.date):'',IMP.total?'Total on the sheet <b>'+ksh(IMP.total)+'</b>':''].filter(Boolean).join(' · ');
   openSheet('import','Check what came in',`
     ${note?`<p class="hint sm" style="margin:0">${esc(note)}</p>`:''}${head?`<p class="calc">${head}</p>`:''}
+    ${miss?`<p class="calc bad">The sheet seems to have <b>${IMP.count}</b> lines, but <b>${lines.length}</b> were read. Check it for the missing ${miss===1?'one':miss}, and add ${miss===1?'it':'them'} at the bottom.</p>`:''}
     <p class="hint sm" style="margin:0">Fix anything that was read wrong. Tap × to leave a line out.</p>
     <div class="sb" id="imp-lines">${lines.map(impRow).join('')}</div>
+    <button type="button" class="btn line wide" data-act="imp-add">+ Add a line that was missed</button>
     <p class="calc" id="imp-sum"></p>
     <p class="err" id="imp-err" hidden></p>
     <button class="btn primary wide" data-act="imp-save">Add to stock</button>
-    <button class="btn line wide" data-act="close">Cancel</button>`,b=>{b.querySelectorAll('.imp').forEach(impWire); impSum();});
+    <button class="btn line wide" data-act="close">Cancel</button>`,b=>{b.querySelectorAll('.imp').forEach(impWire); impSum(); draftSoon();});
 }
 function impRow(l){
-  const it=byName(l.prod)||{name:l.prod};
-  return `<div class="imp">
+  const it=byName(l.prod)||{name:l.prod}, k=++impN, U=[['pcs','Pieces'],['kg','Kilograms'],['L','Litres'],['m','Metres']];
+  return `<div class="imp"${l.amt!==''&&l.amt!=null?' data-amt-set="1"':''}>
     <div class="imp-top">${ico(it)}<label class="fld"><span>Product</span><input class="i-prod" value="${esc(l.prod)}" autocomplete="off"></label><button type="button" class="x" data-act="imp-del" aria-label="Leave this line out">×</button></div>
     <p class="imp-st"></p>
     <div class="imp-grid">
       <label class="fld"><span>Size</span><input class="i-size" value="${esc(l.size)}" placeholder="e.g. 2 kg" autocomplete="off"></label>
-      <label class="fld"><span>How many</span><input class="i-qty" type="number" inputmode="decimal" min="0" step="any" value="${l.qty}"></label>
-      <label class="fld"><span>Paid (Ksh)</span><input class="i-paid" type="number" inputmode="decimal" min="0" step="any" value="${l.paid===''?'':Math.round(l.paid*100)/100}" placeholder="for all"></label>
+      <label class="fld"><span>How many</span><input class="i-qty" type="number" inputmode="decimal" min="0" step="any" value="${l.qty??''}"></label>
+      <label class="fld"><span>Paid (Ksh)</span><input class="i-paid" type="number" inputmode="decimal" min="0" step="any" value="${l.paid===''||l.paid==null?'':Math.round(l.paid*100)/100}" placeholder="for all"></label>
+    </div>
+    <div class="imp-how">
+      <div class="chips" role="radiogroup" aria-label="How you sell it"><label class="chip"><input type="radio" class="i-how" name="ih${k}" value="as" ${l.how!=='bulk'?'checked':''}>Sell as is</label><label class="chip"><input type="radio" class="i-how" name="ih${k}" value="bulk" ${l.how==='bulk'?'checked':''}>Repackage</label></div>
+      <div class="imp-bulk"><p class="hint sm" style="margin:0">Counted in</p><div class="chips" role="radiogroup" aria-label="Counted in">${U.map(([v,t])=>`<label class="chip"><input type="radio" class="i-unit" name="iu${k}" value="${v}" ${(l.unit||'pcs')===v?'checked':''}>${t}</label>`).join('')}</div>
+        <label class="fld"><span>All of it together (<span class="u">${esc(uName(l.unit||'pcs'))}</span>)</span><input class="i-amt" type="number" inputmode="decimal" min="0" step="any" value="${l.amt??''}" placeholder="e.g. 50"></label></div>
     </div>
     <div class="imp-new two">
-      <label class="fld i-brand-f"><span>Brand</span><input class="i-brand" value="${esc(l.brand)}" autocomplete="off" placeholder="optional"></label>
-      <label class="fld"><span>Selling price, each</span><input class="i-sell" type="number" inputmode="decimal" min="0" step="any" value="${l.sell||''}" placeholder="Ksh"></label>
-    </div></div>`;
+      <label class="fld i-brand-f"><span>Brand</span><input class="i-brand" value="${esc(l.brand||'')}" autocomplete="off" placeholder="optional"></label>
+      <label class="fld i-sell-f"><span class="i-sell-l">Selling price, each</span><input class="i-sell" type="number" inputmode="decimal" min="0" step="any" value="${l.sell||''}" placeholder="Ksh"></label>
+    </div>
+    <div class="imp-pp"${l.pp&&l.pp.length?` data-saved='${esc(JSON.stringify(l.pp))}'`:''}></div>
+    <p class="imp-cost" hidden></p>
+    <label class="tick i-all-f" hidden><input type="checkbox" class="i-all" ${l.all?'checked':''}><span class="i-all-t"></span></label>
+  </div>`;
 }
-const impRead=r=>({prod:r.querySelector('.i-prod').value.trim(),brand:r.querySelector('.i-brand').value.trim(),size:r.querySelector('.i-size').value.trim(),qty:toNum(r.querySelector('.i-qty').value),paid:toNum(r.querySelector('.i-paid').value),sell:toNum(r.querySelector('.i-sell').value)});
+const impRead=r=>({prod:r.querySelector('.i-prod').value.trim(),brand:r.querySelector('.i-brand').value.trim(),size:r.querySelector('.i-size').value.trim(),qty:toNum(r.querySelector('.i-qty').value),paid:toNum(r.querySelector('.i-paid').value),sell:toNum(r.querySelector('.i-sell').value),
+  how:(r.querySelector('.i-how:checked')||{}).value||'as',unit:(r.querySelector('.i-unit:checked')||{}).value||'pcs',amt:toNum(r.querySelector('.i-amt').value),all:r.querySelector('.i-all').checked,
+  pp:[...r.querySelectorAll('.i-pp')].map(i=>({pid:i.dataset.pid,price:toNum(i.value)}))});
 /* what a line will do: add to a size on the shelf, add to the bulk, add a new size, or add a new product */
 function impResolve(x){
   const it=x.prod?byName(x.prod):null;
   if(!it){
     if(!x.prod) return {kind:'bad',note:'Write the product name.'};
-    const bs=brandsOf(x.prod);
-    if(bs.length&&!x.brand) return {kind:'new',need:true,label:x.size?tidyReady(x.size):'',note:`You have ${bs.map(itName).join(', ')}. Tap the name to pick one, or write the brand of this new one.`};
-    return {kind:'new',label:x.size?tidyReady(x.size):'',note:'New product. It is added as ready to sell.'};
+    const bs=brandsOf(x.prod), need=bs.length&&!x.brand;
+    const pre=need?`You have ${bs.map(itName).join(', ')}. Tap the name to pick one, or write the brand of this new one. `:'';
+    if(x.how==='bulk') return {kind:'newbulk',need,unit:x.unit,amt:x.amt,note:pre+(x.amt>0?`New product. ${qty(x.amt,x.unit)} goes into the bulk; you set the pack sizes later.`:`New product to repackage. Write how many ${uName(x.unit)} came in all.`)};
+    return {kind:'new',need,label:x.size?tidyReady(x.size):'',note:pre+'New product, sold as it came.'};
   }
   const ps=packsOf(it.id), lab=x.size?tidySize(x.size,it.mode,it.unit):'';
   const same=p=>!!p.label&&(p.label.toLowerCase()===lab.toLowerCase()||tidyReady(p.label).toLowerCase()===tidyReady(x.size).toLowerCase());
@@ -1565,21 +1667,51 @@ function impResolve(x){
     const amt=r3(per*(x.qty>0?x.qty:0));
     return {kind:'bulk',it,amt,note:`Adds ${amt>0?qty(amt,it.unit):'it'} to the ${itName(it)} bulk, to pack later.`};
   }
-  const p=lab?ps.find(same):(ps.length===1?ps[0]:null);
+  const p=lab?(ps.find(same)||(ps.length===1&&!ps[0].label?ps[0]:null)):(ps.length===1?ps[0]:null);
   if(p) return {kind:'pack',it,p,note:`Adds to ${fullName(it,p)} (${p.stock} on the shelf now).`};
   if(!lab) return {kind:'bad',it,note:`${itName(it)} comes in ${ps.length} sizes. Write which size came.`};
   return {kind:'newsize',it,label:lab,note:`New size of ${itName(it)}. Set its selling price.`};
 }
 function impWire(r){
   const pi=r.querySelector('.i-prod'); suggest(pi,allNames,()=>impUpd(r));
-  r.addEventListener('input',()=>impUpd(r)); impUpd(r);
+  r.addEventListener('input',e=>{ if(e.target.classList.contains('i-amt')) r.dataset.amtSet=e.target.value?'1':''; impUpd(r); });
+  r.addEventListener('change',()=>impUpd(r)); impUpd(r);
 }
 function impUpd(r){
-  const x=impRead(r), v=impResolve(x), st=r.querySelector('.imp-st');
+  const x=impRead(r), v=impResolve(x), st=r.querySelector('.imp-st'), isNew=v.kind==='new'||v.kind==='newbulk';
   st.textContent=v.note; st.className='imp-st '+v.kind+(v.need?' need':'');
-  r.querySelector('.imp-new').hidden=!(v.kind==='new'||v.kind==='newsize');
-  r.querySelector('.i-brand-f').hidden=v.kind!=='new';
-  const pic=r.querySelector('.pic'), it=v.it||{name:x.prod}; pic.textContent=iconFor(it); pic.style.background=tintFor(it.name);
+  /* new products: sell as it came, or repackage in kg, litres, pieces or metres */
+  r.querySelector('.imp-how').hidden=!isNew;
+  r.querySelector('.imp-bulk').hidden=v.kind!=='newbulk';
+  if(v.kind==='newbulk'){ r.querySelector('.imp-bulk .u').textContent=uName(x.unit); if(!r.dataset.amtSet) r.querySelector('.i-amt').value=impAutoAmt(x.size,x.unit,x.qty); }
+  /* selling price: for new things, and for sizes already on the shelf (a new price for the new stock) */
+  const p=v.kind==='pack'?v.p:null, showSell=v.kind==='new'||v.kind==='newsize'||!!p;
+  r.querySelector('.imp-new').hidden=!(showSell||isNew);
+  r.querySelector('.i-brand-f').hidden=!isNew;
+  r.querySelector('.i-sell-f').hidden=!showSell;
+  const si=r.querySelector('.i-sell');
+  if(p){ r.querySelector('.i-sell-l').textContent='Selling price for these'; if(r.dataset.pfor!==p.id){ r.dataset.pfor=p.id; if(!si.value) si.value=newestPrice(p); } }
+  else { r.querySelector('.i-sell-l').textContent='Selling price, each'; delete r.dataset.pfor; }
+  /* bulk already in the shop: the prices of the packs made from it can change too */
+  const pp=r.querySelector('.imp-pp');
+  if(v.kind==='bulk'&&packsOf(v.it.id).length){
+    if(pp.dataset.for!==v.it.id){ pp.dataset.for=v.it.id; let old=x.pp; try{ if(pp.dataset.saved) old=JSON.parse(pp.dataset.saved); }catch(e){} delete pp.dataset.saved;
+      pp.innerHTML=`<p class="hint sm" style="margin:0 0 4px">Selling prices for the packs you make from it</p><div class="ppr">${packsOf(v.it.id).map(q=>`<label class="fld"><span>${esc(plab(q))}</span><input class="i-pp" data-pid="${q.id}" type="number" inputmode="decimal" min="0" step="any" value="${(old.find(o=>o.pid===q.id)||{}).price||newestPrice(q)}"></label>`).join('')}</div>`; }
+  } else if(pp.dataset.for){ delete pp.dataset.for; pp.innerHTML=''; }
+  const y=impRead(r);
+  /* what each one cost, so the selling price is easy to set */
+  const cost=r.querySelector('.imp-cost'), units=v.kind==='bulk'?v.amt:v.kind==='newbulk'?y.amt:y.qty, unitName=v.kind==='bulk'?v.it.unit:v.kind==='newbulk'?y.unit:'';
+  if(y.paid>0&&units>0){
+    const each=y.paid/units, before=p?(lotsOf(p).slice(-1)[0].cost||0):v.kind==='bulk'?(v.it.cost||0):0;
+    let t=`That is <b>${ksh(each)}</b> ${unitName?'per '+esc(uOne(unitName)):'each'}`+(before&&Math.abs(before-each)>=0.5?` (before: ${ksh(before)})`:'')+'.';
+    if(showSell&&y.sell>0&&!unitName){ const m=y.sell-each; t+=m>=0?` You make <b>${ksh(m)}</b> on each.`:` <span class="down">That is ${ksh(-m)} less than it cost.</span>`; }
+    cost.innerHTML=t; cost.hidden=false;
+  } else cost.hidden=true;
+  /* old stock keeps its old price unless the owner says otherwise */
+  const af=r.querySelector('.i-all-f'), changed=p?(y.sell>0&&y.sell!==p.price&&p.stock>0):v.kind==='bulk'?y.pp.some(o=>{const q=pack(o.pid); return q&&q.stock>0&&o.price>0&&o.price!==q.price;}):false;
+  af.hidden=!changed;
+  if(changed) r.querySelector('.i-all-t').innerHTML=p?`Also sell the ${p.stock} on the shelf at ${ksh(y.sell)}. <small>If you leave this off, they keep ${ksh(p.price)} until they sell out.</small>`:`Also sell the packs on the shelf at the new prices. <small>If you leave this off, they keep their old prices until they sell out.</small>`;
+  const pic=r.querySelector('.pic'), it=v.it||{name:y.prod}; pic.textContent=iconFor(it); pic.style.background=tintFor(it.name);
   impSum();
 }
 function impSum(){
@@ -1588,39 +1720,45 @@ function impSum(){
   el.innerHTML=`<b>${rows.length}</b> ${rows.length===1?'line':'lines'} · paid <b>${ksh(paid)}</b>`+(IMP&&IMP.total&&Math.abs(IMP.total-paid)>1?` <span class="wrn">(the sheet says ${ksh(IMP.total)})</span>`:'');
   b.querySelector('[data-act="imp-save"]').disabled=!rows.length;
 }
-function addToPack(p,n,paid,now){
-  const each=paid>0?paid/n:0, h=Math.max(0,p.stock);
-  if(each) p.cost=h>0&&p.cost?(p.cost*h+each*n)/(h+n):each;
-  p.stock+=n; S.deliveries.push({id:uid(),ts:now,itemId:p.itemId,packId:p.id,qty:n,paid:paid>0?paid:0,from:'sheet'});
-}
 function impSave(){
   const b=sheetBody(), err=b.querySelector('#imp-err'), fail=m=>{err.textContent=m;err.hidden=false;err.scrollIntoView({block:'nearest'});};
   const rows=[...b.querySelectorAll('.imp')]; if(!rows.length) return fail('There is nothing left to add.');
-  const plan=[];
+  const plan=[], ways=new Map();
   for(const row of rows){
     const x=impRead(row), v=impResolve(x), nm=x.prod||'a line';
     if(v.kind==='bad') return fail(v.note);
     if(v.need) return fail(`Write the brand of the new ${x.prod}, or tap its name to pick the one you have.`);
-    if(v.kind==='bulk'?!(v.amt>0):!(x.qty>0)) return fail(`Write how many ${nm} came.`);
-    if(v.kind!=='bulk'&&Math.floor(x.qty)!==x.qty) return fail(`How many ${nm}: write a whole number.`);
-    if((v.kind==='new'||v.kind==='newsize')&&!(x.sell>0)) return fail(`Set the selling price for ${nm}.`);
+    if(v.kind==='bulk'?!(v.amt>0):v.kind==='newbulk'?!(x.amt>0):!(x.qty>0)) return fail(v.kind==='newbulk'?`Write how many ${uName(x.unit)} of ${nm} came in all.`:`Write how many ${nm} came.`);
+    if(v.kind!=='bulk'&&v.kind!=='newbulk'&&Math.floor(x.qty)!==x.qty) return fail(`How many ${nm}: write a whole number.`);
+    if((v.kind==='new'||v.kind==='newsize'||v.kind==='pack')&&!(x.sell>0)) return fail(`Set the selling price for ${nm}.`);
+    if(v.kind==='bulk'&&x.pp.some(o=>!(o.price>0))) return fail(`Set the pack prices for ${nm}.`);
+    if(v.kind==='new'||v.kind==='newbulk'){ const k=keyOf(x.prod,x.brand), w=ways.get(k); if(w&&w!==v.kind) return fail(`${nm} is on two lines: choose the same way of selling for both.`); ways.set(k,v.kind); }
     plan.push({x,v});
   }
   const now=Date.now(), made=new Map();
   for(const {x,v} of plan){
     const paid=x.paid>0?x.paid:0;
-    if(v.kind==='bulk'){ const it=v.it, h=Math.max(0,it.bulk); if(paid) it.cost=h>0&&it.cost?(it.cost*h+paid)/(h+v.amt):paid/v.amt; it.bulk=r3(it.bulk+v.amt); S.deliveries.push({id:uid(),ts:now,itemId:it.id,packId:null,qty:v.amt,paid,from:'sheet'}); }
-    else if(v.kind==='pack') addToPack(v.p,x.qty,paid,now);
-    else if(v.kind==='newsize'){ const p={id:uid(),itemId:v.it.id,label:v.label,size:v.it.mode==='bulk'?(sizeIn(v.label,v.it.unit)||1):1,price:x.sell,stock:0,cost:0}; S.packs.push(p); addToPack(p,x.qty,paid,now); }
+    if(v.kind==='bulk'){ const it=v.it, h=Math.max(0,it.bulk); if(paid) it.cost=h>0&&it.cost?(it.cost*h+paid)/(h+v.amt):paid/v.amt; it.bulk=r3(it.bulk+v.amt);
+      x.pp.forEach(o=>{const q=pack(o.pid); if(q) setLaterPrice(q,o.price,x.all);});
+      S.deliveries.push({id:uid(),ts:now,itemId:it.id,packId:null,qty:v.amt,paid,from:'sheet'}); }
+    else if(v.kind==='pack'){ addToPack(v.p,x.qty,paid,now,x.sell); if(x.all) setAllPrice(v.p,x.sell); }
+    else if(v.kind==='newsize'){ const p={id:uid(),itemId:v.it.id,label:v.label,size:v.it.mode==='bulk'?(sizeIn(v.label,v.it.unit)||1):1,price:x.sell,stock:0,cost:0}; S.packs.push(p); addToPack(p,x.qty,paid,now,x.sell); }
+    else if(v.kind==='newbulk'){
+      const k=keyOf(x.prod,x.brand); let it=made.get(k);
+      if(!it){ it={id:uid(),name:x.prod,mode:'bulk',unit:x.unit,bulk:0,cost:0,ref:x.amt,added:now}; if(x.brand) it.brand=x.brand; S.items.push(it); made.set(k,it); }
+      const h=it.bulk; if(paid) it.cost=h>0&&it.cost?(it.cost*h+paid)/(h+x.amt):paid/x.amt; it.bulk=r3(it.bulk+x.amt);
+      S.deliveries.push({id:uid(),ts:now,itemId:it.id,packId:null,qty:x.amt,paid,from:'sheet'});
+    }
     else {
       const k=keyOf(x.prod,x.brand); let it=made.get(k)||findItem(x.prod,x.brand);
       if(!it){ it={id:uid(),name:x.prod,mode:'ready',unit:'pc',bulk:0,cost:0,added:now}; if(x.brand) it.brand=x.brand; S.items.push(it); made.set(k,it); }
       let p=S.packs.find(q=>q.itemId===it.id&&(q.label||'').toLowerCase()===(v.label||'').toLowerCase());
       if(!p){ p={id:uid(),itemId:it.id,label:v.label,size:1,price:x.sell,stock:0,cost:0}; S.packs.push(p); }
-      addToPack(p,x.qty,paid,now);
+      addToPack(p,x.qty,paid,now,x.sell);
     }
   }
-  IMP=null; closeSheet(); commit(); toast(`Added ${plan.length} ${plan.length===1?'line':'lines'} to stock`);
+  const nb=plan.filter(z=>z.v.kind==='newbulk').length;
+  IMP=null; closeSheet(); commit(); toast(`Added ${plan.length} ${plan.length===1?'line':'lines'} to stock`+(nb?`. Set the pack sizes for ${nb===1?'the one':'the '+nb} to repackage in Stock.`:''));
 }
 
 /* repack */
@@ -1654,7 +1792,7 @@ function rpSave(id){
   const {it,used,made,packed}=rpRead(id); if(!(packed>0)) return;
   const u=used>0?used:packed, loss=r3(u-packed); if(loss<0||u>it.bulk+1e-9) return;
   const cpu=(it.cost||0)*u/packed;
-  made.filter(m=>m.n>0).forEach(({p,n})=>{const nc=cpu*p.size, h=Math.max(0,p.stock); p.cost=h>0&&p.cost?(p.cost*h+nc*n)/(h+n):nc; p.stock+=n;});
+  made.filter(m=>m.n>0).forEach(({p,n})=>{addLot(p,n,newestPrice(p),cpu*p.size); delete p.np;});
   it.bulk=r3(it.bulk-u);
   S.repacks.push({id:uid(),ts:Date.now(),itemId:id,used:u,made:made.filter(m=>m.n>0).map(m=>({packId:m.p.id,count:m.n})),packed,loss});
   closeSheet(); commit(); toast(`Packed ${qty(packed,it.unit)} of ${it.name}`);
@@ -1699,8 +1837,8 @@ function dbDraw(){
   const b=sheetBody(), box=b.querySelector('#db-lines'), amt=b.querySelector('#db-amt');
   box.hidden=!dbLines.length; b.querySelector('#db-amt-note').hidden=!dbLines.length; amt.readOnly=!!dbLines.length;
   box.innerHTML=dbLines.map(l=>{const p=pack(l.packId), it=item(p.itemId);
-    return `<div class="line"><div><b>${esc(fullName(it,p))}</b><small>${ksh(p.price)} each</small></div><div class="step"><button type="button" data-act="db-q" data-d="-1" data-id="${p.id}" aria-label="One less">−</button><span>${l.qty}</span><button type="button" data-act="db-q" data-d="1" data-id="${p.id}" aria-label="One more">+</button></div><span class="amt">${ksh(p.price*l.qty)}</span></div>`;}).join('');
-  if(dbLines.length) amt.value=Math.round(dbLines.reduce((a,l)=>a+pack(l.packId).price*l.qty,0));
+    return `<div class="line"><div><b>${esc(fullName(it,p))}</b><small>${eachText(p,l.qty)}</small></div><div class="step"><button type="button" data-act="db-q" data-d="-1" data-id="${p.id}" aria-label="One less">−</button><span>${l.qty}</span><button type="button" data-act="db-q" data-d="1" data-id="${p.id}" aria-label="One more">+</button></div><span class="amt">${ksh(priceOf(p,l.qty))}</span></div>`;}).join('');
+  if(dbLines.length) amt.value=Math.round(dbLines.reduce((a,l)=>a+priceOf(pack(l.packId),l.qty),0));
 }
 function openPaid(c){
   const owed=Math.max(0,(balances()[c]||{owed:0}).owed), o=Math.round(owed);
@@ -1812,7 +1950,7 @@ function openSale(id){
 function returnOne(id,i){
   const x=S.sales.find(z=>z.id===id); if(!x) return; const l=x.lines[i]; if(!l) return;
   const pp=l.price/l.qty, pc=l.cost/l.qty, pu=l.units/l.qty;
-  if(l.k==='pack'){const p=pack(l.packId); if(p)p.stock+=1;} else {const it=item(l.itemId); if(it)it.bulk=r3(it.bulk+pu);}
+  if(l.k==='pack'){const p=pack(l.packId); if(p)putBack(p,1);} else {const it=item(l.itemId); if(it)it.bulk=r3(it.bulk+pu);}
   l.qty-=1; l.price-=pp; l.cost-=pc; l.units=r3(l.units-pu);
   if(l.qty<=0) x.lines.splice(i,1);
   x.total=x.lines.reduce((a,z)=>a+z.price,0); x.cost=x.lines.reduce((a,z)=>a+z.cost,0);
@@ -1986,6 +2124,50 @@ function driveReturn(){
   else toast(r==='cancelled'?'Google Drive was not connected.':'Could not connect Google Drive. Try again.');
 }
 
+/* ---------- unfinished work is kept ----------
+   If a call comes in or the phone switches apps and the page gets closed, the open form
+   (checking a delivery note, adding a product, a delivery, a debt, editing) and the sale in progress
+   come back the next time the app opens. Closing a form yourself throws its draft away. */
+const DRAFT_KEY='duka-ledger.draft', CART_KEY='duka-ledger.cart';
+let draftT=null, restoring=false;
+const fEls=root=>[...root.querySelectorAll('input,textarea')].filter(i=>i.type!=='file');
+const fv=root=>fEls(root).map(i=>i.type==='radio'||i.type==='checkbox'?i.checked:i.value);
+function setFv(root,vals){ const els=fEls(root); if(!vals||els.length!==vals.length) return false; els.forEach((i,k)=>{ if(i.type==='radio'||i.type==='checkbox') i.checked=!!vals[k]; else i.value=vals[k]??''; }); return true; }
+function draftNow(){
+  if(restoring||!sheet) return; const b=sheetBody(); let d=null;
+  if(sheetKind==='import'){
+    if(b.querySelector('#imp-lines')) d={k:'import',meta:IMP,lines:[...b.querySelectorAll('.imp')].map(r=>{const x=impRead(r); return Object.assign(x,{amt:r.dataset.amtSet?x.amt:'',qty:isNaN(x.qty)?'':x.qty,paid:isNaN(x.paid)?'':x.paid,sell:isNaN(x.sell)?'':x.sell});})};
+    else if(b.querySelector('#imp-msg')) d={k:'import-wait'};
+  }
+  else if(sheetKind==='add'&&AW) d={k:'add',AW,step:b.querySelector('#aw1')?1:2,sizes:[...b.querySelectorAll('#pf-sizes .s-label')].map(i=>i.value),vals:fv(b)};
+  else if(sheetKind==='product') d={k:'product',id:sheet.dataset.pid,pack:(b.querySelector('#pf')||{dataset:{}}).dataset.pack||'',rows:b.querySelectorAll('#pf-sizes .size').length,vals:fv(b)};
+  else if(sheetKind==='delivery') d={k:'delivery',id:sheet.dataset.pid||'',name:(b.querySelector('#dl-name')||{}).value||'',newRows:b.querySelectorAll('.dl-row.new').length,vals:fv(b)};
+  else if(sheetKind==='debt') d={k:'debt',lines:dbLines,vals:fv(b)};
+  if(d){ d.ts=Date.now(); try{localStorage.setItem(DRAFT_KEY,JSON.stringify(d));}catch(e){} }
+}
+const draftSoon=()=>{clearTimeout(draftT); draftT=setTimeout(draftNow,400);};
+function dropDraft(){ clearTimeout(draftT); try{localStorage.removeItem(DRAFT_KEY);}catch(e){} }
+function saveCart(){ try{localStorage.setItem(CART_KEY,JSON.stringify(cart));}catch(e){} }
+function loadCart(){ try{const c=JSON.parse(localStorage.getItem(CART_KEY)||'[]'); cart=(Array.isArray(c)?c:[]).filter(x=>x&&x.k==='pack'&&pack(x.packId)&&x.qty>0&&x.qty<=pack(x.packId).stock);}catch(e){cart=[];} }
+function restoreDraft(){
+  let d=null; try{d=JSON.parse(localStorage.getItem(DRAFT_KEY));}catch(e){}
+  if(!d) return; if(Date.now()-(d.ts||0)>3*DAY||locked()){ dropDraft(); return; }
+  restoring=true;
+  try{
+    if(d.k==='import'&&d.lines&&d.lines.length){ const m=d.meta||{}; impReview({restored:true,lines:d.lines,total:m.total,count:m.count,supplier:m.supplier,date:m.date},m.note); }
+    else if(d.k==='import-wait') openSheet('import','Reading the delivery note',`<p class="calc bad">You left the app while the delivery note was being read. Choose it again to finish.</p><button class="btn primary wide" data-act="dl-file">Choose the file again</button><button class="btn line wide" data-act="close">Not now</button>`);
+    else if(d.k==='add'&&d.AW){ AW=d.AW; if(d.step===1){ awStep1(); setFv(sheetBody(),d.vals); awUnits(); awKnown(); } else { if(d.sizes&&d.sizes.length) AW.sizes=d.sizes; awStep2(); setFv(sheetBody(),d.vals); pfMode(); } }
+    else if(d.k==='product'&&item(d.id)){ openProduct(d.id,!!d.pack); const b=sheetBody(); let n=b.querySelectorAll('#pf-sizes .size').length; while(n<d.rows){ b.querySelector('[data-act="size-add"]').click(); n++; } setFv(b,d.vals); pfMode(); }
+    else if(d.k==='delivery'){ openDelivery(d.id&&item(d.id)?d.id:undefined); const b=sheetBody(); b.querySelector('#dl-name').value=d.name; dlDraw(); for(let i=0;i<d.newRows;i++){const nb=b.querySelector('[data-act="dl-newsize"]'); if(nb) nb.click();} setFv(b,d.vals); dlCalc(); }
+    else if(d.k==='debt'){ openAddDebt(); dbLines=(d.lines||[]).filter(l=>pack(l.packId)); dbDraw(); setFv(sheetBody(),d.vals); }
+    else { restoring=false; dropDraft(); return; }
+    restoring=false; draftNow(); toast('Picked up where you left off');
+  }catch(e){ restoring=false; dropDraft(); closeSheet(); }
+}
+document.addEventListener('input',draftSoon,true); document.addEventListener('change',draftSoon,true);
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') draftNow(); });
+addEventListener('pagehide',draftNow);
+
 /* settings */
 function openSettings(){
   const standalone=(()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;}catch(e){return false;}})();
@@ -2010,7 +2192,7 @@ function arm(btn,key,text,fn){
 
 /* ---------- events ---------- */
 const VIEW_ONLY_BLOCK=new Set(['pick','pk','cart','pay','deni-open','deni-save','undo','product','delivery','delivery-save','dl-newsize','repack','repack-save','rp',
-  'add-debt','debt-save','db-size','db-q','paid','paid-save','ret','sale-cancel','de-save','de-del','pr-rename-save','size-add','product-del','dl-file','imp-save']);
+  'add-debt','debt-save','db-size','db-q','paid','paid-save','ret','sale-cancel','de-save','de-del','pr-rename-save','size-add','product-del','dl-file','imp-save','aw-later','packsizes','all-new']);
 document.addEventListener('click',e=>{
   const a=e.target.closest('[data-act]'); if(!a) return;
   const b=sheetBody(), act=a.dataset.act;
@@ -2039,6 +2221,7 @@ document.addEventListener('click',e=>{
     case 'item': openItem(a.dataset.id); break;
     case 'product': {const pre=sheetKind==='delivery'&&!a.dataset.id?b.querySelector('#dl-name').value.trim():(tab==='sell'&&!a.dataset.id&&!sheet?findQ.trim():''); if(!a.dataset.id){openAdd(pre);break;} openProduct(a.dataset.id); break;}
     case 'aw-back': {const f=$('#pf'); if(f&&f.classList.contains('wiz')){const r=[...f.querySelectorAll('.s-label')].map(i=>i.value.trim()).filter(Boolean); if(r.length) AW.sizes=r;} awStep1(); break;}
+    case 'aw-later': awSave(true); break;
     case 'aw-change': {const f=$('#pf'); f.querySelector('.choice').classList.remove('picked'); a.hidden=true; break;}
     case 'size-add': {const box=$('#pf-sizes'); box.insertAdjacentHTML('beforeend',sizeRow({},pfKind(),pfUnitVal(),!!$('#pf').dataset.new)); wireSize(box.lastElementChild); box.lastElementChild.querySelector('.s-label').focus(); break;}
     case 'size-del': {const rows=document.querySelectorAll('#pf-sizes .size'); if(rows.length>1) a.closest('.size').remove(); else {a.closest('.size').querySelectorAll('input').forEach(i=>i.value='');} pfCheck(); break;}
@@ -2050,9 +2233,12 @@ document.addEventListener('click',e=>{
     case 'dl-delrow': a.closest('.dl-row').remove(); dlCalc(); break;
     case 'dl-pick': b.querySelector('#dl-name').value=a.dataset.v; dlDraw(); break;
     case 'dl-file': pickSheetFile(); break;
+    case 'all-new': {const p=pack(a.dataset.id); if(!p) break; const it=item(p.itemId); setAllPrice(p,newestPrice(p)); commit(); openItem(it.id); toast(`${fullName(it,p)} now sells at ${ksh(p.price)}`); break;}
     case 'imp-del': a.closest('.imp').remove(); impSum(); break;
+    case 'imp-add': {const box=b.querySelector('#imp-lines'); box.insertAdjacentHTML('beforeend',impRow({prod:'',brand:'',size:'',qty:'',paid:'',sell:'',how:'as',unit:'pcs',amt:'',all:false})); const r=box.lastElementChild; impWire(r); r.querySelector('.i-prod').focus(); break;}
     case 'imp-save': impSave(); break;
     case 'repack': openRepack(a.dataset.id); break;
+    case 'packsizes': openProduct(a.dataset.id,true); break;
     case 'rp': {const i=b.querySelector('#rp-'+a.dataset.id); i.value=Math.max(0,(parseInt(i.value)||0)+(+a.dataset.d)); rpCalc(b.querySelector('#rp-save').dataset.id); break;}
     case 'repack-save': rpSave(a.dataset.id); break;
     case 'add-debt': openAddDebt(); break;
@@ -2061,7 +2247,7 @@ document.addEventListener('click',e=>{
       const ts=tsFromIso(b.querySelector('#db-date').value); if(!ts){err.textContent='Pick a date that is today or earlier.';err.hidden=false;return;}
       const ex=customers().find(k=>k.toLowerCase()===n.toLowerCase()), who=ex||n, note=b.querySelector('#db-note').value.trim();
       if(dbLines.length){
-        const lines=dbLines.map(l=>{const p=pack(l.packId),it=item(p.itemId);return {k:'pack',packId:p.id,itemId:it.id,name:fullName(it,p),qty:l.qty,units:r3(p.size*l.qty),price:p.price*l.qty,cost:(p.cost||0)*l.qty};});
+        const lines=dbLines.map(l=>{const p=pack(l.packId),it=item(p.itemId);return {k:'pack',packId:p.id,itemId:it.id,name:fullName(it,p),qty:l.qty,units:r3(p.size*l.qty),price:priceOf(p,l.qty),cost:costOf(p,l.qty)};});
         const sale={id:uid(),ts,lines,total:lines.reduce((a,l)=>a+l.price,0),cost:lines.reduce((a,l)=>a+l.cost,0),pay:'deni',customer:who,note};
         applySale(sale,-1); S.sales.push(sale); dbLines=[]; closeSheet(); commit(); toast(`${who} owes ${ksh(sale.total)} more. Stock updated.`); break;
       }
@@ -2111,7 +2297,7 @@ addEventListener('online',()=>{render();refreshStatus();scheduleBackup(3000);});
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e;});
 addEventListener('appinstalled',()=>{installEvt=null;toast('Done. Open Doppler Shop from your home screen.');});
 
-load(); render(); driveReturn(); setTimeout(refreshStatus,1500); scheduleBackup(5000); setInterval(()=>scheduleBackup(1000),15*60000); setInterval(refreshStatus,6*3600000);
+load(); loadCart(); render(); restoreDraft(); driveReturn(); setTimeout(refreshStatus,1500); scheduleBackup(5000); setInterval(()=>scheduleBackup(1000),15*60000); setInterval(refreshStatus,6*3600000);
 if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
 })();
