@@ -115,6 +115,7 @@ body.has-cart #toast{bottom:calc(196px + env(safe-area-inset-bottom,0px))}
 .banner{display:flex;align-items:center;gap:12px;background:var(--brand-soft);border-radius:16px;padding:12px 14px;margin:4px 0 6px}
 .banner>div{flex:1;min-width:0}.banner b{display:block;font-weight:800}.banner small{color:var(--muted);font-size:.82rem}
 .banner.bad{background:var(--bad-soft)}.banner .btn{min-height:40px;padding:8px 14px;flex:none}
+.banner .stack{display:flex;flex-direction:column;gap:6px;flex:none}.banner .stack .btn{min-height:36px;padding:6px 14px}
 .pin{font-size:2.2rem;font-weight:800;letter-spacing:.2em;text-align:center;color:var(--brand);margin:0}
 .cchip{display:inline-flex;align-items:center;gap:4px;flex:none;background:var(--surface);border-radius:999px;padding:3px 3px 3px 12px;font-weight:700;font-size:.85rem;white-space:nowrap;box-shadow:0 2px 8px -4px rgba(39,43,34,.35)}
 .cchip button{width:32px;height:32px;border:0;border-radius:50%;background:var(--bad-soft);color:var(--bad);font-size:1.1rem;font-weight:800;line-height:1}
@@ -306,6 +307,18 @@ header{background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:s
 .t-brand{font-size:.78rem;font-weight:800;color:var(--brand-2);line-height:1.2}
 .t-price{color:var(--brand-deep);font-weight:800}
 .t-n{top:9px;right:9px;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--sun);color:#3B2A00;font-size:.75rem;box-shadow:0 2px 6px -2px rgba(107,78,0,.6)}
+/* the picture sits beside the words, so each tile is short and more fit on the screen */
+.tiles{gap:8px}
+.tile{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:8px;align-content:center;align-items:center;padding:9px 8px;border-radius:16px}
+.tile .pic{grid-row:1/span 4;grid-column:1;width:34px;height:34px;margin:0;font-size:1.15rem;align-self:center}
+.tile .t-meta{line-height:1.25}.tile .t-meta .t-sub{display:inline}
+.tile .from{font-size:.7rem;font-weight:700;color:var(--muted)}
+.tile .t-brand{font-size:.74rem}.tile .t-sub{font-size:.76rem}
+.tile .t-flag{font-size:.68rem}
+.tile>:not(.pic):not(.t-n){grid-column:2;min-width:0}
+.tile .t-name{font-size:.98rem;padding-right:0}
+.tile .t-foot{margin-top:0;padding-top:0;flex-wrap:wrap;gap:0 6px;justify-content:flex-start}
+.tile .t-price{font-size:.88rem}
 /* the finish-sale bar */
 #cartbar .finish{background:linear-gradient(100deg,var(--brand),var(--brand-2));box-shadow:0 14px 28px -14px rgba(11,61,145,.85)}
 .cchip{box-shadow:var(--lift)}
@@ -773,15 +786,14 @@ function drawTiles(){
     (list.length>shown.length?`<button class="btn line wide more" data-act="more" data-w="sell">Show more <span class="muted">(${list.length-shown.length} more)</span></button>`:'');
 }
 /* "Ksh 40–160" fits on one line; very wide ranges become "From Ksh 1,200" */
-function priceRange(lo,hi){ if(lo===hi) return ksh(lo); const r=ksh(lo)+'–'+Math.round(hi).toLocaleString('en-KE'); return r.length>13?'From '+ksh(lo):r; }
+function priceRange(lo,hi){ if(lo===hi) return ksh(lo); const r=ksh(lo)+'–'+Math.round(hi).toLocaleString('en-KE'); return r.length>13?'<small class="from">from</small> '+ksh(lo):r; }
 function tileHTML(it,n){
   const ps=packsOf(it.id), pr=ps.map(p=>p.price), lo=Math.min(...pr), hi=Math.max(...pr);
   const out=ps.every(p=>p.stock<=0), one=ps.length===1, few=!out&&one&&ps[0].stock<=3;
   return `<button class="tile${n?' picked':''}${out?' soldout':''}" data-act="pick" data-id="${it.id}" aria-label="${esc(itName(it))}${out?', sold out':''}${n?', '+n+' in this sale':''}">
     ${ico(it)}
     <span class="t-name">${esc(it.name)}</span>
-    ${it.brand?`<span class="t-brand">${esc(it.brand)}</span>`:''}
-    <span class="t-sub">${one?esc(ps[0].label):ps.length+' sizes'}</span>
+    <span class="t-meta">${it.brand?`<span class="t-brand">${esc(it.brand)}</span> · `:''}<span class="t-sub">${one?esc(ps[0].label):ps.length+' sizes'}</span></span>
     <span class="t-foot"><span class="t-price">${priceRange(lo,hi)}</span>${out?'<span class="t-flag out">Sold out</span>':few?`<span class="t-flag">${ps[0].stock} left</span>`:''}</span>
     ${n?`<span class="t-n">${n}</span>`:''}</button>`;
 }
@@ -1974,6 +1986,8 @@ const API=SERVER.replace(/\/+$/,'');
 const ACCT_KEY='duka-ledger.acct', GRACE=3*DAY;
 let acct=(()=>{try{return JSON.parse(localStorage.getItem(ACCT_KEY))||{};}catch(e){return {};}})(), bkTimer=null, bkBusy=false;
 const saveAcct=()=>{try{localStorage.setItem(ACCT_KEY,JSON.stringify(acct));}catch(e){}};
+/* the owner's phone: signed in to the shop only to watch it. Sees everything, changes nothing, never backs up. */
+const viewer=()=>!!(acct.token&&acct.role==='viewer');
 if(!acct.firstOpen){acct.firstOpen=Date.now(); saveAcct();}
 const hhmm=t=>new Date(t).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
 const dmy=t=>new Date(t).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
@@ -2003,10 +2017,14 @@ function acctLine(){
   return 'Your free month has ended.';
 }
 function payHTML(){ return `${acct.price?`<p class="calc">The service costs <b>${esc(acct.price)}</b>.<br>${esc(acct.pay||'')}</p>`:''}<p class="hint">After you pay, tap <b>Check again</b>. It opens as soon as your payment is recorded.</p>`; }
+function watchBanner(){
+  return `<div class="banner"><div><b>Watching ${esc(acct.name||S.shop||'the shop')}</b><small>${acct.watchErr?esc(acct.watchErr):acct.watchAt?'Updated '+day(acct.watchAt)+' at '+hhmm(acct.watchAt)+'. View only.':'Getting the latest…'}</small></div><button class="btn line" data-act="watch-refresh">Refresh</button></div>`;
+}
 function sellBanner(){
   if(!serverOn) return '';
+  if(viewer()) return watchBanner();
   if(!acct.token){ const left=Math.max(0,Math.ceil((acct.firstOpen+GRACE-Date.now())/DAY));
-    return `<div class="banner"><div><b>Start your free month</b><small>${locked()?'Sign up to keep selling. Your records are safe.':'Needs internet once. '+left+' day'+(left===1?'':'s')+' to do it.'}</small></div><button class="btn primary" data-act="acct-start">Start</button></div>`; }
+    return `<div class="banner"><div><b>Start your free month</b><small>${locked()?'Sign up to keep selling. Your records are safe.':'Needs internet once. '+left+' day'+(left===1?'':'s')+' to do it.'}</small></div><div class="stack"><button class="btn primary" data-act="acct-start">Start</button><button class="btn line" data-act="acct-login-open">Sign in</button></div></div>`; }
   if(locked()) return `<div class="banner bad"><div><b>Your free month has ended</b><small>You can still see everything. Pay to keep selling.</small></div><button class="btn primary" data-act="paywall">How to pay</button></div>`;
   if(acct.status==='trial'&&acct.daysLeft<=5) return `<div class="banner"><div><b>${acct.daysLeft} day${acct.daysLeft===1?'':'s'} left of your free month</b><small>${esc(acct.price||'')}</small></div><button class="btn line" data-act="paywall">How to pay</button></div>`;
   if(acct.token&&acct.drive&&!acct.drive.connected) return `<div class="banner"><div><b>Back up to Google Drive</b><small>So a lost phone never loses your records.</small></div><button class="btn line" data-act="drive-connect">Connect</button></div>`;
@@ -2028,15 +2046,15 @@ function openStart(){
     <label class="fld"><span>Phone number</span><input id="ac-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="e.g. 0712 345 678"></label>
     <p class="err" id="ac-err" hidden></p>
     <button class="btn primary wide" data-act="acct-register">Start my free month</button>
-    <button class="btn line wide" data-act="acct-login-open">I already have a shop</button>`);
+    <button class="btn line wide" data-act="acct-login-open">Sign in (I already have a shop)</button>`);
 }
 function openLogin(){
-  openSheet('acct','Open my shop on this phone',`
-    <p class="hint">Use the phone number you signed up with and your 6-digit shop PIN.</p>
+  openSheet('acct','Sign in to your shop',`
+    <p class="hint">For the shop owner or anyone who runs the shop. Use the phone number the shop was started with and its 6-digit shop PIN.</p>
     <label class="fld"><span>Phone number</span><input id="ac-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="e.g. 0712 345 678"></label>
     <label class="fld"><span>Shop PIN</span><input id="ac-pin" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="6 digits"></label>
     <p class="err" id="ac-err" hidden></p>
-    <button class="btn primary wide" data-act="acct-login">Open my shop</button>
+    <button class="btn primary wide" data-act="acct-login">Sign in</button>
     <p class="hint sm">Forgot the PIN? Ask Doppler Shop for a new one.</p>`);
 }
 async function doRegister(){
@@ -2061,18 +2079,23 @@ async function doLogin(){
   try{
     const j=await api('/api/login',{method:'POST',json:{phone,pin}});
     if(!j.ok) return fail(j.error==='wrong-pin'?'That PIN is not right.':j.error==='no-shop'?'No shop has that phone number.':j.error==='locked'?'Too many wrong PINs. Try again in an hour, or ask for a new PIN.':'Could not open the shop. Try again.');
-    acct.token=j.token; takeStatus(j); if(j.name&&!S.shop){S.shop=j.name; save();}
+    acct.token=j.token; acct.role=''; takeStatus(j); if(j.name&&!S.shop){S.shop=j.name; save();}
     if(j.drive&&j.drive.connected){
-      openSheet('acct','Welcome back',`<p>Your shop is open on this phone.</p><p class="calc">Your records are backed up in Google Drive${j.drive.email?' ('+esc(j.drive.email)+')':''}. Bring them to this phone?</p>
-        <button class="btn primary wide" data-act="drive-restore-now">Bring back my records</button><button class="btn line wide" data-act="close">Not now</button>`);
-    } else { closeSheet(); toast('Your shop is open on this phone'); }
+      openSheet('acct','Signed in',`<p><b>${esc(j.name||'Your shop')}</b> is open. How will you use this phone?</p>
+        <button class="btn primary wide" data-act="drive-restore-now">Run the shop here</button>
+        <p class="hint sm" style="margin:-4px 0 4px">Brings the records from Google Drive. You can sell and add stock.</p>
+        <button class="btn soft wide" data-act="watch-start">Just watch the shop</button>
+        <p class="hint sm" style="margin:-4px 0 4px">For the owner. You see sales, stock and debts. Nothing can be changed.</p>
+        ${S.items.length?'<p class="calc">Records already on this phone will be replaced.</p>':''}
+        <button class="btn line wide" data-act="close">Not now</button>`);
+    } else { openSheet('acct','Signed in',`<p><b>${esc(j.name||'Your shop')}</b> is open on this phone.</p><p class="calc">Google Drive is not connected on the shop's phone yet, so there are no records to bring here or to watch. Once it is connected, sign in again.</p><button class="btn primary wide" data-act="close">OK</button>`); }
     render();
   }catch(e){ fail('Could not reach the server. Check the internet and try again.'); }
 }
 /* backups go through the server into the shop's own Google Drive */
-function scheduleBackup(ms){ if(!serverOn||!acct.token||!(acct.drive&&acct.drive.connected)) return; clearTimeout(bkTimer); bkTimer=setTimeout(()=>backupNow(false),ms); }
+function scheduleBackup(ms){ if(!serverOn||!acct.token||viewer()||!(acct.drive&&acct.drive.connected)) return; clearTimeout(bkTimer); bkTimer=setTimeout(()=>backupNow(false),ms); }
 async function backupNow(manual){
-  if(!serverOn||!acct.token||bkBusy) return false;
+  if(!serverOn||!acct.token||bkBusy||viewer()) return false;
   if(!(acct.drive&&acct.drive.connected)){ if(manual) toast('Connect Google Drive first.'); return false; }
   if(!S.items.length){ if(manual) toast('Nothing to back up yet. Add your products first.'); return false; }
   if(!navigator.onLine){ if(manual) toast('No internet. It will back up by itself when you are online.'); return false; }
@@ -2098,6 +2121,38 @@ async function restoreFromDrive(){
     closeSheet(); render(); toast('Your records are back from Google Drive');
   }catch(e){ toast(e.message==='no-backup'?'There is no backup in Drive yet.':e.message==='drive-disconnected'?'Google Drive was disconnected. Connect it again first.':'Could not get the backup. Check the internet and try again.'); }
 }
+/* watching: bring the shop's latest records from its Google Drive; never sends anything back */
+let watchBusy=false;
+async function pullWatch(manual){
+  try{
+    const j=await api('/api/restore');
+    if(!j.ok) throw new Error(j.error||'failed');
+    if(!j.data||!Array.isArray(j.data.items)) throw new Error('bad');
+    S=Object.assign(blank(),j.data); cart=[]; save(); acct.watchAt=Date.now(); acct.watchErr=''; saveAcct();
+    return true;
+  }catch(e){
+    acct.watchErr=e.message==='no-backup'?'The shop phone has not backed up yet.':e.message==='no-drive'||e.message==='drive-disconnected'?'Google Drive is not connected on the shop phone.':'Could not update just now. Check the internet.';
+    saveAcct(); if(manual) toast(acct.watchErr); return false;
+  }
+}
+async function watchRefresh(manual){
+  if(!viewer()||watchBusy) return;
+  if(!navigator.onLine){ if(manual) toast('No internet. Showing what you saw last.'); return; }
+  if(!manual&&(sheet||/^(INPUT|TEXTAREA)$/.test((document.activeElement||{}).tagName||''))) return;
+  watchBusy=true; if(manual) toast('Updating…');
+  try{ const ok=await pullWatch(manual); const y=scrollY; render(); scrollTo(0,y); refreshAcctBox(); if(ok&&manual) toast('Up to date'); }
+  finally{ watchBusy=false; }
+}
+async function startWatching(){
+  if(!navigator.onLine){ toast('This needs internet.'); return; }
+  acct.role='viewer'; saveAcct();
+  const ok=await pullWatch(true);
+  if(!ok){ acct.role=''; saveAcct(); return; }
+  closeSheet(); tab='sell'; findQ=''; render(); scrollTo(0,0); toast('You are watching your shop');
+}
+function stopWatching(){
+  acct={firstOpen:Date.now()}; saveAcct(); S=blank(); cart=[]; save(); closeSheet(); tab='sell'; render(); toast('You stopped watching');
+}
 function driveConnect(){
   if(!acct.token){ openStart(); return; }
   if(!navigator.onLine){ toast('Connecting Google Drive needs internet.'); return; }
@@ -2105,7 +2160,9 @@ function driveConnect(){
 }
 function acctBoxHTML(){
   if(!acct.token) return `<p class="hint">Start your free month to use Doppler Shop and back up to Google Drive.</p>
-    <div class="btns"><button class="btn primary" data-act="acct-start">Start my free month</button><button class="btn line" data-act="acct-login-open">I already have a shop</button></div>`;
+    <div class="btns"><button class="btn primary" data-act="acct-start">Start my free month</button><button class="btn line" data-act="acct-login-open">Sign in</button></div>`;
+  if(viewer()) return `<p class="calc"><b>Watching ${esc(acct.name||S.shop||'the shop')}</b> · view only<br>${acct.watchErr?esc(acct.watchErr):acct.watchAt?'Updated '+day(acct.watchAt)+' at '+hhmm(acct.watchAt)+'.':''}</p>
+    <div class="btns"><button class="btn primary" data-act="watch-refresh">Refresh now</button><button class="btn soft" data-act="watch-stop">Stop watching</button></div>`;
   const d=acct.drive||{};
   const ph=String(acct.phone||''), phs=/^254\d{9}$/.test(ph)?('0'+ph.slice(3)).replace(/^(\d{4})(\d{3})(\d{3})$/,'$1 $2 $3'):ph;
   return `<p class="calc">${esc(acct.name||S.shop||'')} · ${esc(phs)}<br>${acctLine()}</p>
@@ -2196,7 +2253,10 @@ const VIEW_ONLY_BLOCK=new Set(['pick','pk','cart','pay','deni-open','deni-save',
 document.addEventListener('click',e=>{
   const a=e.target.closest('[data-act]'); if(!a) return;
   const b=sheetBody(), act=a.dataset.act;
-  if(VIEW_ONLY_BLOCK.has(act)&&locked()){ openPaywall(); return; }
+  if(VIEW_ONLY_BLOCK.has(act)){
+    if(viewer()){ toast('You are only watching. Changes are made on the shop’s phone.'); return; }
+    if(locked()){ openPaywall(); return; }
+  }
   switch(act){
     case 'tab': tab=a.dataset.tab; closeSheet(); $('#toast').hidden=true; render(); scrollTo(0,0); break;
     case 'period': period=a.dataset.p; render(); break;
@@ -2281,6 +2341,9 @@ document.addEventListener('click',e=>{
     case 'drive-backup': backupNow(true); break;
     case 'drive-restore': arm(a,'drr','Tap again: this replaces everything on this phone',()=>restoreFromDrive()); break;
     case 'drive-restore-now': restoreFromDrive(); break;
+    case 'watch-start': startWatching(); break;
+    case 'watch-refresh': watchRefresh(true); break;
+    case 'watch-stop': arm(a,'wst','Tap again to stop watching',()=>stopWatching()); break;
     case 'st-name': S.shop=b.querySelector('#st-name').value.trim(); closeSheet(); commit(); break;
     case 'install': if(installEvt){installEvt.prompt(); installEvt.userChoice.finally(()=>{installEvt=null;closeSheet();});} break;
     case 'st-copy': {const txt=JSON.stringify(S), ta=b.querySelector('#st-backup'), fb=()=>{ta.value=txt;ta.select();toast('Select all the text in the box and copy it.');};
@@ -2297,7 +2360,9 @@ addEventListener('online',()=>{render();refreshStatus();scheduleBackup(3000);});
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e;});
 addEventListener('appinstalled',()=>{installEvt=null;toast('Done. Open Doppler Shop from your home screen.');});
 
-load(); loadCart(); render(); restoreDraft(); driveReturn(); setTimeout(refreshStatus,1500); scheduleBackup(5000); setInterval(()=>scheduleBackup(1000),15*60000); setInterval(refreshStatus,6*3600000);
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&viewer()&&Date.now()-(acct.watchAt||0)>60000) watchRefresh(false); });
+setInterval(()=>{ if(document.visibilityState==='visible') watchRefresh(false); },120000);
+load(); loadCart(); render(); restoreDraft(); driveReturn(); setTimeout(()=>watchRefresh(false),800); setTimeout(refreshStatus,1500); scheduleBackup(5000); setInterval(()=>scheduleBackup(1000),15*60000); setInterval(refreshStatus,6*3600000);
 if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
 })();
